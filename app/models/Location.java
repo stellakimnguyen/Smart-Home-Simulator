@@ -1,5 +1,7 @@
 package models;
 
+import controllers.HomeController;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,9 +17,9 @@ public class Location {
     Outside // Not in the house
   }
 
-  public Location(String name, int temperature, LocationType locationType) {
+  public Location(String name, LocationType locationType) {
     this.name = name;
-    this.temperature = temperature;
+    this.temperature = HomeController.defaultTemperature;
     this.locationType = locationType;
     this.deviceMap = new HashMap<>();
   }
@@ -45,7 +47,7 @@ public class Location {
   public void setLocationType(LocationType locationType) {
     if (locationType == LocationType.Outside) {
       this.locationType = LocationType.Outdoor;
-    } else {
+    } else if (locationType != null) {
       this.locationType = locationType;
     }
   }
@@ -55,6 +57,8 @@ public class Location {
   }
 
   public void setDeviceMap(Map<String, Device> deviceMap) {
-    this.deviceMap = deviceMap;
+    if (deviceMap != null) {
+      this.deviceMap = deviceMap;
+    }
   }
 }

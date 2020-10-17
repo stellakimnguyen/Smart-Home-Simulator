@@ -1,6 +1,6 @@
 package models;
 
-public class Module {
+public abstract class Module {
   private String name;
 
   public Module(String name) {

@@ -15,7 +15,7 @@ public class SHS extends Module {
   private Map<String, Location> home;
 
   private static final SHS instance = new SHS("SHS");
-  private static final Location outside = new Location("Outside",20, Location.LocationType.Outside);
+  private static final Location outside = new Location("Outside", Location.LocationType.Outside);
   public static SHS getInstance(){
     return instance;
   }
@@ -30,6 +30,7 @@ public class SHS extends Module {
     this.home = new HashMap<>();
     this.isRunning = false;
     this.home.put(outside.getName(), outside);
+    this.currentTime = LocalDateTime.now();
   }
 
   public LocalDateTime getCurrentTime() {
@@ -37,7 +38,9 @@ public class SHS extends Module {
   }
 
   public void setCurrentTime(LocalDateTime currentTime) {
-    this.currentTime = currentTime;
+    if (currentTime != null) {
+      this.currentTime = currentTime;
+    }
   }
 
   public boolean isRunning() {
@@ -63,7 +66,9 @@ public class SHS extends Module {
   }
 
   public void setUserMap(Map<String, User> userMap) {
-    this.userMap = userMap;
+    if (userMap != null) {
+      this.userMap = userMap;
+    }
   }
 
   public List<Module> getModuleList() {
@@ -71,7 +76,9 @@ public class SHS extends Module {
   }
 
   public void setModuleList(List<Module> moduleList) {
-    this.moduleList = moduleList;
+    if (moduleList != null) {
+      this.moduleList = moduleList;
+    }
   }
 
   public Map<String, Location> getHome() {
@@ -79,8 +86,10 @@ public class SHS extends Module {
   }
 
   public void setHome(Map<String, Location> home) {
-    this.home = home;
-    this.home.put(outside.getName(), outside);
+    if (home != null) {
+      this.home = home;
+      this.home.put(outside.getName(), outside);
+    }
   }
 
   public void setOutsideTemperature(int temperature) {

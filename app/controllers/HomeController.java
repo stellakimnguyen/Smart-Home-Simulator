@@ -23,6 +23,8 @@ public class HomeController extends Controller {
   private final FormFactory formFactory;
   private final SHS shs = SHS.getInstance();
 
+  public static final int defaultTemperature = 20;
+
   @Inject
   public HomeController(FormFactory formFactory) {
     this.formFactory = formFactory;
@@ -192,5 +194,14 @@ public class HomeController extends Controller {
 
   }
 
-
+  public Result toggleSimulationStatus(Http.Request request) {
+    if (shs.getActiveUser() == null) {
+      return badRequest().flashing("error","You need to log in to perform this action");//TODO insert webpage that the user will see on failure
+    }
+    if (shs.getHome().size() <= 1) {
+      return badRequest().flashing("error","You need to load a house layout to perform this action");//TODO insert webpage that the user will see on failure
+    }
+    shs.setRunning(!shs.isRunning());
+    return ok();//TODO insert webpage that the user will see after the action was performed successfully
+  }
 }
