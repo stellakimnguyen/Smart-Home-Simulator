@@ -8,6 +8,11 @@ import play.data.FormFactory;
 import play.mvc.*;
 
 import javax.inject.Inject;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 /**
  * This controller contains an action to handle HTTP requests
@@ -20,6 +25,26 @@ public class HomeController extends Controller {
   @Inject
   public HomeController(FormFactory formFactory) {
     this.formFactory = formFactory;
+  }
+
+  private int parseTemperature(String toParse) throws NumberFormatException{
+    String[] temperatureSections = toParse.split("[.]");
+    int temperature;
+    if (temperatureSections.length != 2) {
+      throw new NumberFormatException();
+    }
+    temperature = Integer.parseInt(temperatureSections[0]) * 100;
+    switch (temperatureSections[1].length()) {
+      case 1:
+        temperature += Integer.parseInt(temperatureSections[1]) * 10;
+        break;
+      case 2:
+        temperature += Integer.parseInt(temperatureSections[1]);
+        break;
+      default:
+        throw new NumberFormatException();
+    }
+    return temperature;
   }
 
   /**
@@ -39,12 +64,12 @@ public class HomeController extends Controller {
     typeString = dynamicForm.get("type");
     // 2nd error check. Web page should already have stopped these errors from occurring
     if (name == null || name.trim().equals("")) {
-      // to pass to the wepage: dynamicForm.withError("name","The value must not be empty");
+      // to pass to the webpage: dynamicForm.withError("name","The value must not be empty");
       return badRequest(views.html.index.render());//TODO insert webpage that handles user creation
     }
 
     if (!User.isTypeStringValid(typeString)) {
-      // to pass to the wepage: dynamicForm.withError("type","The value entered is invalid.");
+      // to pass to the webpage: dynamicForm.withError("type","The value entered is invalid.");
       return badRequest(views.html.index.render());//TODO insert webpage that handles user creation
     }
 
@@ -82,12 +107,12 @@ public class HomeController extends Controller {
     if (User.isTypeStringValid(newTypeString)) {
       toEdit.setType(User.userType.valueOf(newTypeString));
     } else {
-      // to pass to the wepage: dynamicForm.withError("type","The value entered is invalid.");
+      // to pass to the webpage: dynamicForm.withError("type","The value entered is invalid.");
       return badRequest(views.html.index.render());//TODO insert webpage that handles user edition
     }
 
     if (name == null || name.trim().equals("")) {
-      // to pass to the wepage: dynamicForm.withError("name","The value must not be empty");
+      // to pass to the webpage: dynamicForm.withError("name","The value must not be empty");
       return badRequest(views.html.index.render());//TODO insert webpage that handles user edition
     } else if (!newName.equals(name)) {
       toEdit.setName(newName);
@@ -117,32 +142,34 @@ public class HomeController extends Controller {
   public Result editSimulationParameters(Http.Request request) {
     DynamicForm dynamicForm = formFactory.form().bindFromRequest(request);
     String newTemperatureString = dynamicForm.get("temperature");
-    String[] temperatureSections = newTemperatureString.split("[.]");
+    String dateString = dynamicForm.get("date");
+    String timeString = dynamicForm.get("time");
     int newTemperature;
     try {
-      if (temperatureSections.length != 2) {
-        throw new NumberFormatException();
-      }
-      newTemperature = Integer.parseInt(temperatureSections[0]) * 100;
-      switch (temperatureSections[1].length()) {
-        case 1:
-          newTemperature += Integer.parseInt(temperatureSections[1]) * 10;
-          break;
-        case 2:
-          newTemperature += Integer.parseInt(temperatureSections[1]);
-          break;
-        default:
-          throw new NumberFormatException();
-      }
+      newTemperature = parseTemperature(newTemperatureString);
     } catch (NumberFormatException e) {
-      // to pass to the wepage: dynamicForm.withError("temperature","The value entered is invalid");
+      // to pass to the webpage: dynamicForm.withError("temperature","The value entered is invalid");
       return badRequest(views.html.index.render());//TODO insert webpage that handles simulation parameter edition
     }
+    LocalDate newDate;
+    try {
+      newDate = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    } catch (Exception e) {
+      // to pass to the webpage: dynamicForm.withError("date","The value entered is invalid");
+      return badRequest(views.html.index.render());//TODO insert webpage that handles simulation parameter edition
+    }
+    LocalTime newTime;
+    try {
+      newTime = LocalTime.parse(dateString, DateTimeFormatter.ofPattern("HH:mm:ss"));
+    } catch (Exception e) {
+      // to pass to the webpage: dynamicForm.withError("time","The value entered is invalid");
+      return badRequest(views.html.index.render());//TODO insert webpage that handles simulation parameter edition
+    }
+    LocalDateTime newCurrentTime = LocalDateTime.of(newDate, newTime);
+
 
     shs.setOutsideTemperature(newTemperature);
-
-
-
+    shs.setCurrentTime(newCurrentTime);
     return ok();//TODO insert webpage that the user will see after a successful simulation parameter edition
   }
 }
