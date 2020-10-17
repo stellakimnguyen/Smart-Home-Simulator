@@ -1,5 +1,6 @@
 package controllers;
 
+import models.Location;
 import models.SHS;
 import models.User;
 import play.data.DynamicForm;
@@ -36,7 +37,6 @@ public class HomeController extends Controller {
     String name, typeString, locationString;
     name = dynamicForm.get("name");
     typeString = dynamicForm.get("type");
-//    locationString = dynamicForm.get("location");
     // 2nd error check. Web page should already have stopped these errors from occurring
     if (name == null || name.trim().equals("")) {
       // to pass to the wepage: dynamicForm.withError("name","The value must not be empty");
@@ -47,11 +47,6 @@ public class HomeController extends Controller {
       // to pass to the wepage: dynamicForm.withError("type","The value entered is invalid.");
       return badRequest(views.html.index.render());//TODO insert webpage that handles user creation
     }
-
-//    if (locationString == null || locationString.trim().equals("") || !shs.getHome().containsKey(locationString)) {
-//      // to pass to the wepage: dynamicForm.withError("location","The value must not be empty");
-//      return badRequest(views.html.index.render());//TODO insert webpage that handles user creation
-//    }
 
     User toCreate = new User(name, User.userType.valueOf(typeString));
     shs.getUserMap().put(name,toCreate);
@@ -100,5 +95,22 @@ public class HomeController extends Controller {
       shs.getUserMap().put(newName, toEdit);
     }
     return ok();//TODO insert webpage that the user will see after a successful user edition
+  }
+
+  public Result placeUser(Http.Request request, String name, String locationString) {
+    User toPlace = shs.getUserMap().get(name);
+    Location location = shs.getHome().get(locationString);
+    String errorString = null;
+    if (toPlace == null) {
+      errorString = "The user you have selected does not exist";
+    } else if (location == null) {
+      errorString = "The location you have selected does not exist";
+    }
+    if (errorString != null) {
+      return badRequest().flashing("error", errorString);//TODO insert webpage that handles user placement
+    }
+
+    toPlace.setLocation(location);
+    return ok();//TODO insert webpage that the user will see after a successful user placement
   }
 }

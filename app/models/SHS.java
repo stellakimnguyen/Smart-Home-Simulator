@@ -15,8 +15,12 @@ public class SHS extends Module {
   private Map<String, Location> home;
 
   private static final SHS instance = new SHS("SHS");
+  private static final Location outside = new Location("Outside",20, Location.LocationType.Outside);
   public static SHS getInstance(){
     return instance;
+  }
+  public static Location getOutside() {
+    return outside;
   }
 
   private SHS(String name) {
@@ -25,6 +29,7 @@ public class SHS extends Module {
     this.moduleList = new LinkedList<>();
     this.home = new HashMap<>();
     this.isRunning = false;
+    this.home.put(outside.getName(), outside);
   }
 
   public LocalDateTime getCurrentTime() {
@@ -75,5 +80,6 @@ public class SHS extends Module {
 
   public void setHome(Map<String, Location> home) {
     this.home = home;
+    this.home.put(outside.getName(), outside);
   }
 }

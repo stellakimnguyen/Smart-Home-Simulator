@@ -27,6 +27,7 @@ public class User {
   public User(String name, userType type) {
     this.name = name;
     this.type = type;
+    this.location = SHS.getOutside();
   }
 
   public String getName() {
@@ -50,6 +51,9 @@ public class User {
   }
 
   public void setLocation(Location location) {
+    if (location == null) {
+      location = SHS.getOutside();
+    }
     this.location = location;
   }
 }
