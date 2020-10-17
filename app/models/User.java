@@ -7,7 +7,9 @@ public class User {
 
   public enum userType {
     Parent,
-    Child,
+    Child_Underage,
+    Child_Teenager,
+    Child_Adult,
     Guest,
     Stranger
   }

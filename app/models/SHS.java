@@ -71,6 +71,16 @@ public class SHS extends Module {
     }
   }
 
+  public int getParentAmount(){
+    int amount = 0;
+    for (User toCheck : userMap.values()) {
+      if (toCheck.getType() == User.userType.Parent) {
+        amount++;
+      }
+    }
+    return amount;
+  }
+
   public List<Module> getModuleList() {
     return moduleList;
   }

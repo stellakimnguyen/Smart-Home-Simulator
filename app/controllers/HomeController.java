@@ -13,7 +13,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 
 /**
  * This controller contains an action to handle HTTP requests
@@ -75,8 +74,12 @@ public class HomeController extends Controller {
       // to pass to the webpage: dynamicForm.withError("type","The value entered is invalid.");
       return badRequest(views.html.index.render());//TODO insert webpage that handles user creation
     }
-
     User toCreate = new User(name, User.userType.valueOf(typeString));
+    if (toCreate.getType() == User.userType.Parent) {
+      if (shs.getParentAmount() >= 2 ) {
+        return badRequest().flashing("error","You can only have a maximum of 2 parents per home.");//TODO insert webpage that the user will see on failure
+      }
+    }
     shs.getUserMap().put(name,toCreate);
     return ok();//TODO insert webpage that the user will see after a successful user creation
   }
@@ -108,7 +111,13 @@ public class HomeController extends Controller {
     }
 
     if (User.isTypeStringValid(newTypeString)) {
-      toEdit.setType(User.userType.valueOf(newTypeString));
+      User.userType newType = User.userType.valueOf(newTypeString);
+      if (newType == User.userType.Parent) {
+        if (shs.getParentAmount() >= 2 ) {
+          return badRequest().flashing("error","You can only have a maximum of 2 parents per home.");//TODO insert webpage that the user will see on failure
+        }
+      }
+      toEdit.setType(newType);
     } else {
       // to pass to the webpage: dynamicForm.withError("type","The value entered is invalid.");
       return badRequest(views.html.index.render());//TODO insert webpage that handles user edition
