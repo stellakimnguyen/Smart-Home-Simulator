@@ -1,9 +1,13 @@
 package models;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Location {
   private String name;
   private int temperature;
   private LocationType locationType;
+  private Map<String, Device> deviceMap;
 
   public enum LocationType {
     Outdoor, // A room that is still part of the house, but is not enclosed.
@@ -15,6 +19,7 @@ public class Location {
     this.name = name;
     this.temperature = temperature;
     this.locationType = locationType;
+    this.deviceMap = new HashMap<>();
   }
 
   public String getName() {
@@ -43,5 +48,13 @@ public class Location {
     } else {
       this.locationType = locationType;
     }
+  }
+
+  public Map<String, Device> getDeviceMap() {
+    return deviceMap;
+  }
+
+  public void setDeviceMap(Map<String, Device> deviceMap) {
+    this.deviceMap = deviceMap;
   }
 }

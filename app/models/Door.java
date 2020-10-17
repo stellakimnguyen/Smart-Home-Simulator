@@ -6,11 +6,11 @@ public class Door extends Connection {
   public static final String actionLock = "lock";
   public static final String actionUnlock = "unlock";
   public static final String statusLocked = "locked";
-  public static final String statusUnlocked = "unlocked";
+  public static final String statusNotLocked = "not locked";
 
-  public Door(String name, Location location, Location secondLocation, boolean isLocked) {
-    super(name, location, secondLocation);
-    this.isLocked = isLocked;
+  public Door(String name) {
+    super(name);
+    this.isLocked = false;
     super.setStatus(Device.statusClosed);
   }
 
@@ -24,11 +24,7 @@ public class Door extends Connection {
 
   @Override
   public String getStatus() {
-    String status = super.getStatus();
-    if (isLocked) {
-      return status + "," + statusLocked;
-    }
-    return status + "," + statusUnlocked;
+    return super.getStatus() + "," + (isLocked?statusLocked:statusNotLocked);
   }
 
   @Override

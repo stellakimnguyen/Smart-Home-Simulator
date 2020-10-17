@@ -1,8 +1,8 @@
 package models;
 
 public class Light extends Device {
-  public Light(String name, Location location) {
-    super(name, location);
+  public Light(String name) {
+    super(name);
     setStatus(Device.statusOff);
   }
 

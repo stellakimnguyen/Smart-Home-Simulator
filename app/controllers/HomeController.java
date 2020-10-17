@@ -1,5 +1,6 @@
 package controllers;
 
+import models.Device;
 import models.Location;
 import models.SHS;
 import models.User;
@@ -172,4 +173,24 @@ public class HomeController extends Controller {
     shs.setCurrentTime(newCurrentTime);
     return ok();//TODO insert webpage that the user will see after a successful simulation parameter edition
   }
+
+  public Result performDeviceAction(Http.Request request, String locationString, String name, String action) {
+    Location location = shs.getHome().get(locationString);
+    if (location == null) {
+      return badRequest().flashing("error","The location for that device does not exist");//TODO insert webpage that the user will see on failure
+    }
+    Device device = location.getDeviceMap().get(name);
+    if (device == null) {
+      return badRequest().flashing("error","That device does not exist in the specified location");//TODO insert webpage that the user will see on failure
+    }
+    boolean result = device.doAction(action);
+    if (result) {
+      return ok();//TODO insert webpage that the user will see after the action was performed successfully
+    } else {
+      return badRequest().flashing("error","That action could not be performed");//TODO insert webpage that the user will see on failure
+    }
+
+  }
+
+
 }

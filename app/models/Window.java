@@ -6,10 +6,11 @@ public class Window extends Device {
   public static final String actionBlock = "block";
   public static final String actionUnblock = "unblock";
   public static final String statusBlocked = "blocked";
+  public static final String statusNotBlocked = "not blocked";
 
-  public Window(String name, Location location, boolean isBlocked) {
-    super(name, location);
-    this.isBlocked = isBlocked;
+  public Window(String name) {
+    super(name);
+    this.isBlocked = false;
     super.setStatus(Device.statusClosed);
   }
 
@@ -23,11 +24,7 @@ public class Window extends Device {
 
   @Override
   public String getStatus() {
-    String status = super.getStatus();
-    if (isBlocked) {
-      status = status + "," + statusBlocked;
-    }
-    return status;
+    return super.getStatus() + "," + (isBlocked?statusBlocked:statusNotBlocked);
   }
 
   @Override
