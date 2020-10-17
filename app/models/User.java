@@ -12,6 +12,18 @@ public class User {
     Stranger
   }
 
+  public static boolean isTypeStringValid(String typeString){
+    if (typeString == null || typeString.trim().equals("")) {
+      return false;
+    }
+    try {
+      userType.valueOf(typeString);
+      return true;
+    } catch (IllegalArgumentException e) {
+      return false;
+    }
+  }
+
   public User(String name, userType type) {
     this.name = name;
     this.type = type;

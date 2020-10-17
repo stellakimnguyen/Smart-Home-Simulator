@@ -37,21 +37,14 @@ public class HomeController extends Controller {
     name = dynamicForm.get("name");
     typeString = dynamicForm.get("type");
 //    locationString = dynamicForm.get("location");
-    User.userType type;
     // 2nd error check. Web page should already have stopped these errors from occurring
     if (name == null || name.trim().equals("")) {
       // to pass to the wepage: dynamicForm.withError("name","The value must not be empty");
       return badRequest(views.html.index.render());//TODO insert webpage that handles user creation
     }
 
-    if (typeString == null || typeString.trim().equals("")) {
-      // to pass to the wepage: dynamicForm.withError("type","The value must not be empty");
-      return badRequest(views.html.index.render());//TODO insert webpage that handles user creation
-    }
-    try {
-      type = User.userType.valueOf(typeString);
-    } catch (IllegalArgumentException e) {
-      // to pass to the wepage: dynamicForm.withError("type","The value selected does not exist");
+    if (!User.isTypeStringValid(typeString)) {
+      // to pass to the wepage: dynamicForm.withError("type","The value entered is invalid.");
       return badRequest(views.html.index.render());//TODO insert webpage that handles user creation
     }
 
@@ -60,7 +53,7 @@ public class HomeController extends Controller {
 //      return badRequest(views.html.index.render());//TODO insert webpage that handles user creation
 //    }
 
-    User toCreate = new User(name, type);
+    User toCreate = new User(name, User.userType.valueOf(typeString));
     shs.getUserMap().put(name,toCreate);
     return ok();//TODO insert webpage that the user will see after a successful user creation
   }
@@ -81,5 +74,31 @@ public class HomeController extends Controller {
     return ok();//TODO insert webpage that the user will see after a successful user deletion
   }
 
+  public Result editUser(Http.Request request, String name) {
+    DynamicForm dynamicForm = formFactory.form().bindFromRequest(request);
+    String newName, newTypeString;
+    newName = dynamicForm.get("name");
+    newTypeString = dynamicForm.get("type");
+    User toEdit = shs.getUserMap().get(name);
+    if (toEdit == null) {
+      return badRequest().flashing("error","The user you're trying to edit does not exist.");//TODO insert webpage that the user will see on failure
+    }
 
+    if (User.isTypeStringValid(newTypeString)) {
+      toEdit.setType(User.userType.valueOf(newTypeString));
+    } else {
+      // to pass to the wepage: dynamicForm.withError("type","The value entered is invalid.");
+      return badRequest(views.html.index.render());//TODO insert webpage that handles user edition
+    }
+
+    if (name == null || name.trim().equals("")) {
+      // to pass to the wepage: dynamicForm.withError("name","The value must not be empty");
+      return badRequest(views.html.index.render());//TODO insert webpage that handles user edition
+    } else if (!newName.equals(name)) {
+      toEdit.setName(newName);
+      shs.getUserMap().remove(name);
+      shs.getUserMap().put(newName, toEdit);
+    }
+    return ok();//TODO insert webpage that the user will see after a successful user edition
+  }
 }
