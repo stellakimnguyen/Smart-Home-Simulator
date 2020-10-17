@@ -82,4 +82,12 @@ public class SHS extends Module {
     this.home = home;
     this.home.put(outside.getName(), outside);
   }
+
+  public void setOutsideTemperature(int temperature) {
+    for (Location location : home.values()) {
+      if (location.getLocationType() == Location.LocationType.Outdoor || location.getLocationType() == Location.LocationType.Outside) {
+        location.setTemperature(temperature);
+      }
+    }
+  }
 }

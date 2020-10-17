@@ -113,4 +113,36 @@ public class HomeController extends Controller {
     toPlace.setLocation(location);
     return ok();//TODO insert webpage that the user will see after a successful user placement
   }
+
+  public Result editSimulationParameters(Http.Request request) {
+    DynamicForm dynamicForm = formFactory.form().bindFromRequest(request);
+    String newTemperatureString = dynamicForm.get("temperature");
+    String[] temperatureSections = newTemperatureString.split("[.]");
+    int newTemperature;
+    try {
+      if (temperatureSections.length != 2) {
+        throw new NumberFormatException();
+      }
+      newTemperature = Integer.parseInt(temperatureSections[0]) * 100;
+      switch (temperatureSections[1].length()) {
+        case 1:
+          newTemperature += Integer.parseInt(temperatureSections[1]) * 10;
+          break;
+        case 2:
+          newTemperature += Integer.parseInt(temperatureSections[1]);
+          break;
+        default:
+          throw new NumberFormatException();
+      }
+    } catch (NumberFormatException e) {
+      // to pass to the wepage: dynamicForm.withError("temperature","The value entered is invalid");
+      return badRequest(views.html.index.render());//TODO insert webpage that handles simulation parameter edition
+    }
+
+    shs.setOutsideTemperature(newTemperature);
+
+
+
+    return ok();//TODO insert webpage that the user will see after a successful simulation parameter edition
+  }
 }
