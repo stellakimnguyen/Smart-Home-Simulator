@@ -1,6 +1,5 @@
 package controllers;
 
-import models.Location;
 import models.SHS;
 import models.User;
 import play.data.DynamicForm;
@@ -62,8 +61,24 @@ public class HomeController extends Controller {
 //    }
 
     User toCreate = new User(name, type);
-    shs.getUserList().add(toCreate);
+    shs.getUserMap().put(name,toCreate);
     return ok();//TODO insert webpage that the user will see after a successful user creation
+  }
+
+  public Result deleteUser(Http.Request request, String name) {
+    User toDelete = shs.getUserMap().get(name);
+    String errorMessage = null;
+    if (toDelete == null) {
+      errorMessage = "The user you're trying to delete does not exist.";
+    } else if (shs.getActiveUser().equals(toDelete)) {
+      errorMessage = "You can not delete the active user. Please switch user accounts first.";
+    }
+    if (errorMessage != null) {
+      return badRequest().flashing("error",errorMessage);//TODO insert webpage that the user will see on failure
+    }
+
+    shs.getUserMap().remove(name);
+    return ok();//TODO insert webpage that the user will see after a successful user deletion
   }
 
 

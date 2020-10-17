@@ -10,7 +10,7 @@ public class SHS extends Module {
   private boolean isRunning;
   private User activeUser;
 
-  private List<User> userList;
+  private Map<String, User> userMap;
   private List<Module> moduleList;
   private Map<String, Location> home;
 
@@ -21,7 +21,7 @@ public class SHS extends Module {
 
   private SHS(String name) {
     super(name);
-    this.userList = new LinkedList<>();
+    this.userMap = new HashMap<>();
     this.moduleList = new LinkedList<>();
     this.home = new HashMap<>();
     this.isRunning = false;
@@ -47,18 +47,18 @@ public class SHS extends Module {
     return activeUser;
   }
 
-  public void setActiveUser(User activeUser) {
-    if (userList.contains(activeUser)) {
-      this.activeUser = activeUser;
+  public void setActiveUser(String activeUserName) {
+    if (userMap.containsKey(activeUserName)) {
+      this.activeUser = userMap.get(activeUserName);
     }
   }
 
-  public List<User> getUserList() {
-    return userList;
+  public Map<String, User> getUserMap() {
+    return userMap;
   }
 
-  public void setUserList(List<User> userList) {
-    this.userList = userList;
+  public void setUserMap(Map<String, User> userMap) {
+    this.userMap = userMap;
   }
 
   public List<Module> getModuleList() {
