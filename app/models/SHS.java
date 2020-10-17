@@ -1,67 +1,79 @@
 package models;
 
+import javax.inject.Singleton;
 import java.time.LocalDateTime;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
+@Singleton
 public class SHS extends Module {
-	private LocalDateTime currentTime;
-	private boolean isRunning;
-	private User activeUser;
+  private LocalDateTime currentTime;
+  private boolean isRunning;
+  private User activeUser;
 
-	private List<User> userList;
-	private List<Module> moduleList;
-	private List<Location> home;
+  private List<User> userList;
+  private List<Module> moduleList;
+  private Map<String, Location> home;
 
-	public SHS(String name) {
-		super(name);
-		this.userList = new LinkedList<>();
-		this.moduleList = new LinkedList<>();
-		this.home = new LinkedList<>();
-		this.isRunning = false;
-	}
+  private static final SHS instance = new SHS("SHS");
+  public static SHS getInstance(){
+    return instance;
+  }
 
-	public LocalDateTime getCurrentTime() {
-		return currentTime;
-	}
-	public void setCurrentTime(LocalDateTime currentTime) {
-		this.currentTime = currentTime;
-	}
+  private SHS(String name) {
+    super(name);
+    this.userList = new LinkedList<>();
+    this.moduleList = new LinkedList<>();
+    this.home = new HashMap<>();
+    this.isRunning = false;
+  }
 
-	public boolean isRunning() {
-		return isRunning;
-	}
-	public void setRunning(boolean running) {
-		isRunning = running;
-	}
+  public LocalDateTime getCurrentTime() {
+    return currentTime;
+  }
 
-	public User getActiveUser() {
-		return activeUser;
-	}
-	public void setActiveUser(User activeUser) {
-		if (userList.contains(activeUser)) {
-			this.activeUser = activeUser;
-		}
-	}
+  public void setCurrentTime(LocalDateTime currentTime) {
+    this.currentTime = currentTime;
+  }
 
-	public List<User> getUserList() {
-		return userList;
-	}
-	public void setUserList(List<User> userList) {
-		this.userList = userList;
-	}
+  public boolean isRunning() {
+    return isRunning;
+  }
 
-	public List<Module> getModuleList() {
-		return moduleList;
-	}
-	public void setModuleList(List<Module> moduleList) {
-		this.moduleList = moduleList;
-	}
+  public void setRunning(boolean running) {
+    isRunning = running;
+  }
 
-	public List<Location> getHome() {
-		return home;
-	}
-	public void setHome(List<Location> home) {
-		this.home = home;
-	}
+  public User getActiveUser() {
+    return activeUser;
+  }
+
+  public void setActiveUser(User activeUser) {
+    if (userList.contains(activeUser)) {
+      this.activeUser = activeUser;
+    }
+  }
+
+  public List<User> getUserList() {
+    return userList;
+  }
+
+  public void setUserList(List<User> userList) {
+    this.userList = userList;
+  }
+
+  public List<Module> getModuleList() {
+    return moduleList;
+  }
+
+  public void setModuleList(List<Module> moduleList) {
+    this.moduleList = moduleList;
+  }
+
+  public Map<String, Location> getHome() {
+    return home;
+  }
+
+  public void setHome(Map<String, Location> home) {
+    this.home = home;
+  }
 }
