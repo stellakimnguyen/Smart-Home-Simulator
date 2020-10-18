@@ -1,0 +1,97 @@
+@()
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"/>
+
+<script>
+    $(document).ready(function(){
+        let date_input=$('input[name="date"]'); //our date input has the name "date"
+        let container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
+        let options={
+            format: 'dd/mm/yyyy',
+            container: container,
+            todayHighlight: true,
+            autoclose: true,
+        };
+        date_input.datepicker(options);
+    })
+</script>
+
+<style>
+    input[type="time"]::-webkit-calendar-picker-indicator {
+        background: none;
+        background: transparent;
+        bottom: 0;
+        color: transparent;
+        cursor: pointer;
+        height: auto;
+        left: -10px;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: auto;
+    }
+
+    .paramsTitle {
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        font-size: small;
+    }
+
+    .paramBackground {
+        background-color: #F5F5F5;
+        border-radius: 5px;
+        padding: 15px;
+        width: 100%;
+        margin: 10px 0 20px;
+    }
+
+    .temperatureParam {
+        display: flex;
+        align-items: center;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        max-width: 250px;
+    }
+
+    .temperatureParam > input {
+        right: 0;
+    }
+</style>
+
+<div>
+    <div class="paramsTitle">Date and Time</div>
+    <div class="paramBackground">
+        <div class="input-group mb-3">
+            <input class="form-control" id="date" name="date" placeholder="dd/mm/yyyy" type="text"/>
+            <div class="input-group-append">
+                <span class="input-group-text" id="basic-addon2">📅</span>
+            </div>
+        </div>
+        <div class="input-group clockpicker">
+            <input class="form-control" id="time" name="time" placeholder="hh:mm:ss" type="time">
+            <span class="input-group-append">
+                <span class="input-group-text" id="basic-addon2">🕑</span>
+            </span>
+        </div>
+    </div>
+
+    <div class="paramsTitle">Temperature</div>
+    <div class="paramBackground">
+        <div class="input-group mb-3 temperatureParam">
+            Internal:
+            <input type="text" class="form-control" aria-label="Internal Temperature" aria-describedby="basic-addon2" style="margin-left: 20px;">
+            <div class="input-group-append">
+                <span class="input-group-text" id="basic-addon2">°C</span>
+            </div>
+        </div>
+        <div class="input-group mb-3 temperatureParam">
+            External:
+            <input type="text" class="form-control" aria-label="Internal Temperature" aria-describedby="basic-addon2" style="margin: 0 0 0 18px;">
+            <div class="input-group-append">
+                <span class="input-group-text" id="basic-addon2">°C</span>
+            </div>
+        </div>
+    </div>
+</div>
