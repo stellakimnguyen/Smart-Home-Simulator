@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <title>User</title>
+    <style>
+        [class*="col"] {
+            padding: 1rem;
+            border: 2px solid transparent;
+            color: black;
+            text-align: -webkit-left;
+        }
+
+        .roundedCorner {
+            border-radius: 25px;
+            border: 2px solid #73AD21;
+            padding: 2px;
+            width: 100%;
+            height: auto;
+        }
+
+        .footer-left {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 24.85999%;
+            background-color: white;
+            text-align: center;
+            image-rendering: auto;
+        }
+
+        .footer-right {
+            position: fixed;
+            left: 50%;
+            bottom: 0;
+            width: auto;
+            background-color: white;
+            text-align: center;
+            image-rendering: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3" style="background-color:white;"><h6><strong>CURRENT USER</strong></h6>
+            <div class="flex-container roundedCorner" onmouseout="this.style.background='white';" onmouseover="this.style.background='skyblue';
+               " style="background:white">
+                <img alt="Current User Picture" class="rounded-circle" src="logos/userPicture.jpg"
+                     style="float:left;width:100px;height:100px;padding:12px">
+                <div class="col">
+                    <input alt="configuration button" src="logos/config.png" style="float:right ;width:7%;height:20%;"
+                           type="image">
+                    <p><strong>TYPE:</strong> Parent<br><strong>LOCATION: </strong>Montreal</p>
+                </div>
+            </div>
+            <br>
+            <br>
+            <div><h6 style="color: darkgray"><strong>OTHER USERS</strong></h6>
+                <div class="flex-container roundedCorner" onmouseout="this.style.background='white';" onmouseover="this.style.background='lightgray';
+                        " style="background:white">
+                    <img alt="Other User Picture" class="rounded-circle"
+                         src="logos/otherUser1.png"
+                         style="float:left;width:100px;height:100px;padding:12px">
+                    <div class="col">
+                        <input alt="configuration button" src="logos/config.png" style="float:right ;width:7%;height:20%;"
+                               type="image">
+                        <p><strong>TYPE:</strong> Parent<br><strong>LOCATION: </strong>Ottawa</p>
+                    </div>
+                </div>
+                <br>
+                <div class="flex-container roundedCorner" onmouseout="this.style.background='white';" onmouseover="this.style.background='lightgray';
+                    " style="background:white">
+                    <img alt="Other User Picture" class="rounded-circle" src="logos/otherUser2.png"
+                         style="float:left;width:100px;height:100px;padding:12px">
+                    <div class="col">
+                        <input alt="configuration button" src="logos/config.png" style="float:right ;width:7%;height:20%;"
+                               type="image">
+                        <p><strong>TYPE:</strong> Guest <br><strong>LOCATION: </strong>Toronto</p>
+                    </div>
+                </div>
+                <br>
+                <div class="flex-container roundedCorner" onmouseout="this.style.background='white';" onmouseover="this.style.background='lightgray';
+                    " style="background:white">
+                    <img alt="stranger picture" class="rounded-circle" src="logos/strangerConfig.png"
+                         style="float:left;width:100px;height:100px;padding:12px">
+                    <div class="col">
+                        <input alt="stranger picture" src="logos/stranger.jpg" style="float:right ;width:7%;height:20%;"
+                               type="image">
+                        <p><strong>TYPE:</strong> Stranger <br><strong>LOCATION: </strong>Unkown</p>
+                    </div>
+                </div>
+                <div class="footer-left">
+                    <button class="btn btn btn-outline-light" type="button">
+                        <img alt="Add Button Picture" class="rounded-circle" src="logos/add.png"
+                             style=" width:15%;height:15%;padding:0px">
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-9" style="background-color:white;text-align: center"><strong>HOME LAYOUT</strong> <br>
+            <img alt="House Layout Picture" src="logos/houselayout.png">
+            <div class=footer-right>
+                <p>DISPLAY ----> DATE : TIME : TEMPERATURE</p>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="js/bootstrap.js"></script>
+</body>
+</html>
