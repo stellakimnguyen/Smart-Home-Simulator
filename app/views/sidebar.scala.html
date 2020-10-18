@@ -12,14 +12,17 @@
                     e.style.fill = '#fff';
                     document.getElementById("sidebar").classList.add("expanded");
                     document.getElementById("expandedSettings").classList.add("settings");
+                    document.getElementById(e.id.substr(4).toLowerCase() + "Settings").style.display = "block";
                 } else {
                     e.style.fill = "#849FFF";
                     document.getElementById("sidebar").classList.remove("expanded");
                     document.getElementById("expandedSettings").classList.remove("settings");
+                    document.getElementById(e.id.substr(4).toLowerCase() + "Settings").style.display = "none";
                 }
             } else {
                 document.getElementById(elements[i].id).style.fill = '#849FFF';
                 elements[i].isSelected = false;
+                document.getElementById(elements[i].id.substr(4).toLowerCase() + "Settings").style.display = "none";
             }
         }
     }
@@ -110,6 +113,14 @@
         <div>SHH</div>
     </div>
     <div id="expandedSettings">
-        @parameters();
+        <div id="playSettings"style="display: none">
+        </div>
+        <div id="userSettings"style="display: none">
+        </div>
+        <div id="houseSettings"style="display: none">
+        </div>
+        <div id="paramSettings"style="display: none">
+            @parameters()
+        </div>
     </div>
 </div>
