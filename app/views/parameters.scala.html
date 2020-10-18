@@ -15,11 +15,6 @@
         };
         date_input.datepicker(options);
     })
-
-    $('.input-group').find('.fa-calendar').on('click', function(){
-        $('#time').trigger('focus');
-    });
-
 </script>
 
 <style>
@@ -35,7 +30,6 @@
         right: 0;
         top: 0;
         width: auto;
-        border-radius: 10px;
     }
 
     .paramsTitle {
@@ -50,7 +44,19 @@
         border-radius: 5px;
         padding: 15px;
         width: 100%;
-        margin-top: 10px;
+        margin: 10px 0 20px;
+    }
+
+    .temperatureParam {
+        display: flex;
+        align-items: center;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        max-width: 250px;
+    }
+
+    .temperatureParam > input {
+        right: 0;
     }
 </style>
 
@@ -68,6 +74,24 @@
             <span class="input-group-append">
                 <span class="input-group-text" id="basic-addon2">🕑</span>
             </span>
+        </div>
+    </div>
+
+    <div class="paramsTitle">Temperature</div>
+    <div class="paramBackground">
+        <div class="input-group mb-3 temperatureParam">
+            Internal:
+            <input type="text" class="form-control" aria-label="Internal Temperature" aria-describedby="basic-addon2" style="margin-left: 20px;">
+            <div class="input-group-append">
+                <span class="input-group-text" id="basic-addon2">°C</span>
+            </div>
+        </div>
+        <div class="input-group mb-3 temperatureParam">
+            External:
+            <input type="text" class="form-control" aria-label="Internal Temperature" aria-describedby="basic-addon2" style="margin: 0 0 0 18px;">
+            <div class="input-group-append">
+                <span class="input-group-text" id="basic-addon2">°C</span>
+            </div>
         </div>
     </div>
 </div>
