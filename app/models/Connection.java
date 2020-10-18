@@ -1,5 +1,14 @@
 package models;
 
+/**
+ * Extends a [[models.Device Device]]: joins two [[models.Location Locations]] together, without any barriers.
+ * ===Attributes===
+ * `secondLocation (private [[models.Location Location]]):` Location to be joined to the one this [[models.Device Device]] is located at.
+ *
+ * @version 1
+ * @author Rodrigo M. Zanini (40077727)
+ * @author Pierre-Alexis Barras (40022016)
+ */
 public class Connection extends Device {
   private Location secondLocation;
 
@@ -8,10 +17,15 @@ public class Connection extends Device {
     super.setStatus(Device.statusOpen);
   }
 
+  /**
+   * Get the [[models.Location location]] to be joined.
+   */
   public Location getSecondLocation() {
     return secondLocation;
   }
-
+  /**
+   * Set the [[models.Location location]] to be joined.
+   */
   public boolean setSecondLocation(Location secondLocation) {
     // null check for new location
     if (secondLocation == null) {
@@ -34,10 +48,19 @@ public class Connection extends Device {
     return true;
   }
 
+  /**
+   * Overrides the default method, so as to do nothing instead.
+   * @param status ignored
+   */
   @Override
   public void setStatus(String status) {
   } // do nothing
 
+  /**
+   * Overrides the default method, so as to do nothing instead.
+   * @param action ignored
+   * @return false
+   */
   @Override
   public boolean doAction(String action) {
     return false; // By default, no action is performed

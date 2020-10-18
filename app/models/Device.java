@@ -1,5 +1,24 @@
 package models;
 
+/**
+ * Template for all devices existing in a [[models.Location Location]]. Contains common attributes and a basic set of actions and statuses.
+ * ===Attributes===
+ * `name (private [[java.lang.String String]]):` Identifier for the device. Unique within the [[models.Location Location]] that contains it.
+ *
+ * `status (private [[java.lang.String String]]):` Current condition of the device.
+ *
+ * `location (private [[models.Location Location]]):` [[models.Location Location]] this Device is in.
+ *
+ * ===Common Actions `(public)`===
+ * `actionOn, actionOff, actionOpen, actionClose`
+ *
+ * ===Common Statuses `(public)`===
+ * `statusOn, statusOff, statusOpen, statusClose`
+ *
+ * @version 1
+ * @author Rodrigo M. Zanini (40077727)
+ * @author Pierre-Alexis Barras (40022016)
+ */
 public abstract class Device {
   private String name;
   private String status;
@@ -21,26 +40,45 @@ public abstract class Device {
     this.status = "";
   }
 
+  /**
+   * Get the Device name.
+   */
   public String getName() {
     return name;
   }
 
+  /**
+   * Set the Device name.
+   */
   public void setName(String name) {
     this.name = name;
   }
 
+  /**
+   * Get the Device status.
+   */
   public String getStatus() {
     return status;
   }
 
+  /**
+   * Set the Device status.
+   */
   public void setStatus(String status) {
     this.status = status;
   }
 
+  /**
+   * Get the [[models.Location Location]] the Device is in.
+   */
   public Location getLocation() {
     return location;
   }
 
+  /**
+   * Set the [[models.Location Location]] the Device is in.
+   * @return true if the [[models.Location Location]] was changed successfully, false otherwise.
+   */
   public boolean setLocation(Location location) {
     // null check for new location
     if (location == null) {
@@ -66,7 +104,7 @@ public abstract class Device {
   /**
    * Default action system.
    *
-   * @param action String with the action code to be performed
+   * @param action String with the action code to be performed.
    * @return true if the action was performed, false otherwise.
    */
   public abstract boolean doAction(String action);

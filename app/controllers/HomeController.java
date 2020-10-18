@@ -15,20 +15,31 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * This controller contains an action to handle HTTP requests
- * to the application's home page.
+ * Contains all actions that handle HTTP requests from the Users and the instance of [[models.SHS SHS]].
+ * ===Attributes===
+ * `formFactory (private final FormFactory):` Helper to create HTML forms.
+ *
+ * `shs (private final [[models.SHS SHS]]):` Singleton instance of SHS.
+ *
+ * @version 1
+ * @author Rodrigo M. Zanini (40077727)
+ * @author Pierre-Alexis Barras (40022016)
  */
 public class HomeController extends Controller {
   private final FormFactory formFactory;
-  private final SHS shs = SHS.getInstance();
-
-  public static final int defaultTemperature = 20;
+  public final SHS shs = SHS.getInstance();
 
   @Inject
   public HomeController(FormFactory formFactory) {
     this.formFactory = formFactory;
   }
 
+  /**
+   * Helper method used to parse a [[java.lang.String String]] containing a 2 digits precision decimal.
+   * @param toParse the string to parse. It must contain a number, followed by a dot and then 1 or 2 digits.
+   * @return the int resulting from multiplying the parsed decimal by 100.
+   * @throws NumberFormatException if the [[java.lang.String String]] being parsed is not a 2 digits precision decimal.
+   */
   private int parseTemperature(String toParse) throws NumberFormatException{
     String[] temperatureSections = toParse.split("[.]");
     int temperature;
@@ -59,6 +70,11 @@ public class HomeController extends Controller {
     return ok(views.html.index.render());
   }
 
+  /**
+   * Creates a [[models.User User]] instance from the information contained in the [[play.mvc.Http.Request Request]] and then adds it to the [[models.SHS `userMap`]].
+   * @param request the http header from the user.
+   * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successful addition of a [[models.User User]] to the [[models.SHS SHS]] or a redirection to another method upon failure.
+   */
   public Result createUser(Http.Request request) {
     DynamicForm dynamicForm = formFactory.form().bindFromRequest(request);
     String name, typeString, locationString;
@@ -74,8 +90,8 @@ public class HomeController extends Controller {
       // to pass to the webpage: dynamicForm.withError("type","The value entered is invalid.");
       return badRequest(views.html.index.render());//TODO insert webpage that handles user creation
     }
-    User toCreate = new User(name, User.userType.valueOf(typeString));
-    if (toCreate.getType() == User.userType.Parent) {
+    User toCreate = new User(name, User.UserType.valueOf(typeString));
+    if (toCreate.getType() == User.UserType.Parent) {
       if (shs.getParentAmount() >= 2 ) {
         return badRequest().flashing("error","You can only have a maximum of 2 parents per home.");//TODO insert webpage that the user will see on failure
       }
@@ -83,7 +99,12 @@ public class HomeController extends Controller {
     shs.getUserMap().put(name,toCreate);
     return ok();//TODO insert webpage that the user will see after a successful user creation
   }
-
+  /**
+   * Removes an existing [[models.User User]] instance from the [[models.SHS `userMap`]].
+   * @param request the http header from the user.
+   * @param name the [[models.User `name`]] of the [[models.User User]] to be deleted.
+   * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successful removal of a [[models.User User]] from the [[models.SHS SHS]] or a redirection to another method upon failure.
+   */
   public Result deleteUser(Http.Request request, String name) {
     User toDelete = shs.getUserMap().get(name);
     String errorMessage = null;
@@ -100,6 +121,12 @@ public class HomeController extends Controller {
     return ok();//TODO insert webpage that the user will see after a successful user deletion
   }
 
+  /**
+   * Modifies the information of an existing [[models.User User]] instance and if necessary updates the [[models.SHS `userMap`]].
+   * @param request the http header from the user.
+   * @param name the [[models.User `name`]] of the [[models.User User]] to be modified.
+   * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successful modification of a [[models.User User]] from the [[models.SHS SHS]] or a redirection to another method upon failure.
+   */
   public Result editUser(Http.Request request, String name) {
     DynamicForm dynamicForm = formFactory.form().bindFromRequest(request);
     String newName, newTypeString;
@@ -111,8 +138,8 @@ public class HomeController extends Controller {
     }
 
     if (User.isTypeStringValid(newTypeString)) {
-      User.userType newType = User.userType.valueOf(newTypeString);
-      if (newType == User.userType.Parent) {
+      User.UserType newType = User.UserType.valueOf(newTypeString);
+      if (newType == User.UserType.Parent) {
         if (shs.getParentAmount() >= 2 ) {
           return badRequest().flashing("error","You can only have a maximum of 2 parents per home.");//TODO insert webpage that the user will see on failure
         }
@@ -134,6 +161,13 @@ public class HomeController extends Controller {
     return ok();//TODO insert webpage that the user will see after a successful user edition
   }
 
+  /**
+   * Modifies the [[models.User `location`]] property of a [[models.User User]] instance within the [[models.SHS `userMap`]].
+   * @param request the http header from the user.
+   * @param name the [[models.User `name`]] of the [[models.User User]] to be modified.
+   * @param locationString the [[models.Location `name`]] of the new [[models.Location Location]].
+   * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successful modification of a [[models.User User]] from the [[models.SHS SHS]] or a redirection to another method upon failure.
+   */
   public Result placeUser(Http.Request request, String name, String locationString) {
     User toPlace = shs.getUserMap().get(name);
     Location location = shs.getHome().get(locationString);
@@ -151,6 +185,11 @@ public class HomeController extends Controller {
     return ok();//TODO insert webpage that the user will see after a successful user placement
   }
 
+  /**
+   * Modifies the [[models.SHS `currentTime`]] simulation attribute and [[models.Location `temperature`]] of [[models.Location Outdoor]] and [[models.Location Outside]] instances in the [[models.SHS `home`]].
+   * @param request the http header from the user.
+   * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successful modification of all attributes or a redirection to another method upon failure.
+   */
   public Result editSimulationParameters(Http.Request request) {
     DynamicForm dynamicForm = formFactory.form().bindFromRequest(request);
     String newTemperatureString = dynamicForm.get("temperature");
@@ -172,7 +211,7 @@ public class HomeController extends Controller {
     }
     LocalTime newTime;
     try {
-      newTime = LocalTime.parse(dateString, DateTimeFormatter.ofPattern("HH:mm:ss"));
+      newTime = LocalTime.parse(timeString, DateTimeFormatter.ofPattern("HH:mm:ss"));
     } catch (Exception e) {
       // to pass to the webpage: dynamicForm.withError("time","The value entered is invalid");
       return badRequest(views.html.index.render());//TODO insert webpage that handles simulation parameter edition
@@ -185,6 +224,14 @@ public class HomeController extends Controller {
     return ok();//TODO insert webpage that the user will see after a successful simulation parameter edition
   }
 
+  /**
+   * Performs the specified action on the [[models.Device Device]].
+   * @param request the http header from the user.
+   * @param locationString the [[models.Location.name name]] of the [[models.Location Location]] where the device is.
+   * @param name the [[models.Device `name`]] of the [[models.Device Device]] that will perform the action.
+   * @param action a [[java.lang.String String]] representation of the action to be performed.
+   * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successful execution of the specified action or a redirection to another method upon failure.
+   */
   public Result performDeviceAction(Http.Request request, String locationString, String name, String action) {
     Location location = shs.getHome().get(locationString);
     if (location == null) {
@@ -203,6 +250,11 @@ public class HomeController extends Controller {
 
   }
 
+  /**
+   * Starts or stops the simulation if the pre-requisites are satisfied.
+   * @param request the http header from the user.
+   * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successfully starting/stopping the simulation or a redirection to another method if the pre-requisites are not satisfied.
+   */
   public Result toggleSimulationStatus(Http.Request request) {
     if (shs.getActiveUser() == null) {
       return badRequest().flashing("error","You need to log in to perform this action");//TODO insert webpage that the user will see on failure
