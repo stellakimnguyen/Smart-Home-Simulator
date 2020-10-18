@@ -1,0 +1,46 @@
+@()
+
+<style>
+    .metricsBackground {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-around;
+        background: white;
+        box-shadow: 0 0 15px rgba(50,83,241,0.2);
+        border-radius: 12px;
+        font-size: medium;
+        letter-spacing: 0.1em;
+        font-weight: bold;
+        text-transform: uppercase;
+        padding: 10px 0;
+    }
+    .metricsBackground > div {
+        margin: 0 15px;
+    }
+
+    .metricsTemperature {
+        display: flex;
+        flex-direction: column;;
+        align-items: center;
+        justify-content: center;
+        color: #3253F1;
+    }
+    .metricsTemperature > div:nth-of-type(2) {
+        color: #C8C8C8;
+        font-size: small;
+    }
+</style>
+
+<div class="metricsBackground">
+    <div id="simDate">Mon, Oct 19</div>
+    <div id="simTime">12:08 PM</div>
+    <div id="simExtTemp" class="metricsTemperature">
+        <div>15°C</div>
+        <div>ext</div>
+    </div>
+    <div id="simIntTemp" class="metricsTemperature">
+        <div>20°C</div>
+        <div>int</div>
+    </div>
+</div>
