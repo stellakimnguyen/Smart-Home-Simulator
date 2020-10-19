@@ -1,0 +1,35 @@
+@()
+
+<style>
+    .windowBackground {
+        border-radius: 12px;
+        background-color: #EEEEEE;
+        padding: 10px 10px 10px 15px;
+        width: 100%;
+        height: auto;
+        transition: 250ms;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+    .windowBackground > .custom-switch {
+        margin-left: 15px;
+    }
+
+    .windowID {
+        text-transform: lowercase;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        font-size: small;
+    }
+</style>
+
+<div class="windowBackground">
+    <div class="windowID">Window ID: </div>
+    <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" id="customSwitch1">
+        <label class="custom-control-label" for="customSwitch1">block</label>
+    </div>
+</div>
