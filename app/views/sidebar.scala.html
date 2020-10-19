@@ -1,7 +1,5 @@
 @()
 
-@*<link rel="stylesheet" href="sidebar.css">*@
-
 <script>
     function triggerSidebarSelection(e) {
         let elements = document.getElementsByClassName("bi");
@@ -116,6 +114,7 @@
         <div id="playSettings"style="display: none">
         </div>
         <div id="userSettings"style="display: none">
+            @userSidebar()
         </div>
         <div id="houseSettings"style="display: none">
             @houseLayout()
