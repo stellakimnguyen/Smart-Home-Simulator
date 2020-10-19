@@ -1,95 +1,60 @@
 @()
 
-<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    function addUser() {
+        document.getElementById('tempUser').classList.toggle('hidden');
+    }
+</script>
 
 <style>
-    [class*="col"] {
-        padding: 1rem;
-        border: 2px solid transparent;
-        color: black;
-        text-align: -webkit-left;
+    .userSidebar {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
     }
 
-    .roundedCorner {
-        border-radius: 25px;
-        border: 2px solid #73AD21;
-        padding: 2px;
-        width: 100%;
-        height: auto;
+    .userSidebarTitle {
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        font-size: small;
+        margin-bottom: 10px;
     }
 
-    .footer-left {
-        left: 0;
+    .userSeparator {
+        height: 2px;
+        background-color: #EEE;
+        width: 75%;
+        margin: 30px 0px;
+        cursor: default;
+    }
+
+    .addUserButton {
+        display: flex;
+        align-items: center;
+        justify-content: center;
         bottom: 0;
-        width: 24.85999%;
-        background-color: white;
-        text-align: center;
-        image-rendering: auto;
-    }
-
-    .userContainer {
-        overflow: scroll;
+        width: 100%;
+        border-radius: 12px;
+        border: 2px dashed #EEE;
+        padding: 20px 0;
+        cursor: pointer;
     }
 </style>
 
-<div class="row userContainer">
-    <div style="background-color:white;"><h6><strong>CURRENT USER</strong></h6>
-        <div class="flex-container roundedCorner" onmouseout="this.style.background='white';" onmouseover="this.style.background='skyblue';
-   " style="background:white">
-            <img alt="Current User Picture" class="rounded-circle" src="userPicture.jpg"
-            style="float:left;width:100px;height:100px;padding:12px">
-            <div class="col">
-                <input alt="configuration button" src="logos/config.png" style="float:right ;width:7%;height:20%;"
-                type="image">
-                <p><strong>TYPE:</strong> Parent<br><strong>LOCATION: </strong>Montreal</p>
-            </div>
-        </div>
-        <br>
-        <br>
-        <div><h6 style="color: darkgray"><strong>OTHER USERS</strong></h6>
-            <div class="flex-container roundedCorner" onmouseout="this.style.background='white';" onmouseover="this.style.background='lightgray';
-            " style="background:white">
-                <img alt="Other User Picture" class="rounded-circle"
-                src="https://bit.ly/3nZL99b"
-                style="float:left;width:100px;height:100px;padding:12px">
-                <div class="col">
-                    <input alt="configuration button" src="logos/config.png" style="float:right ;width:7%;height:20%;"
-                    type="image">
-                    <p><strong>TYPE:</strong> Parent<br><strong>LOCATION: </strong>Ottawa</p>
-                </div>
-            </div>
-            <br>
-            <div class="flex-container roundedCorner" onmouseout="this.style.background='white';" onmouseover="this.style.background='lightgray';
-        " style="background:white">
-                <img alt="Other User Picture" class="rounded-circle" src="https://bit.ly/3nZL99b"
-                style="float:left;width:100px;height:100px;padding:12px">
-                <div class="col">
-                    <input alt="configuration button" src="logos/config.png" style="float:right ;width:7%;height:20%;"
-                    type="image">
-                    <p><strong>TYPE:</strong> Guest <br><strong>LOCATION: </strong>Toronto</p>
-                </div>
-            </div>
-            <br>
-            <div class="flex-container roundedCorner" onmouseout="this.style.background='white';" onmouseover="this.style.background='lightgray';
-        " style="background:white">
-                <img alt="stranger picture" class="rounded-circle" src="logos/strangerConfig.png"
-                style="float:left;width:100px;height:100px;padding:12px">
-                <div class="col">
-                    <input alt="stranger picture" src="https://bit.ly/3nZL99b" style="float:right ;width:7%;height:20%;"
-                    type="image">
-                    <p><strong>TYPE:</strong> Stranger <br><strong>LOCATION: </strong>Unkown</p>
-                </div>
-            </div>
-            <div class="footer-left">
-                <button class="btn btn btn-outline-light" type="button">
-                    <img alt="Add Button Picture" class="rounded-circle" src="logos/add.png"
-                    style=" width:15%;height:15%;padding:0px">
-                </button>
-            </div>
-        </div>
+<div class="userSidebar">
+    <div class="userSidebarTitle">current user</div>
+        @singleUser()
+    <div class="userSeparator"></div>
+    <div class="userSidebarTitle">other users</div>
+    @* load existing users here *@
+    <div id="tempUser" class="tempUser hidden" style="transition: 250ms">
+        @singleUser()
+    </div>
+    <div onclick="addUser()" class="addUserButton">
+        <svg width="2.5em" height="2.5em" viewBox="0 0 16 16" class="bi bi-plus-circle-fill" fill="#3253F1" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"/>
+        </svg>
     </div>
 </div>

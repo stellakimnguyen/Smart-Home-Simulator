@@ -1,0 +1,163 @@
+@()
+
+<script>
+    function toggleUserSettings() {
+        document.getElementById("dropdownToggleType").classList.toggle('disabled');
+        document.getElementById("dropdownToggleLocation").classList.toggle('disabled');
+        document.getElementById("deleteButton").classList.toggle('hidden');
+    }
+
+    function confirmDelete() {
+        document.getElementById('deleteButton').classList.toggle('deleteExpanded');
+        document.getElementById('deleteTitle').classList.toggle('hidden');
+    }
+
+    $(function(){
+        $(".dropdown-menu button").click(function(){
+            $(".btn:first-child").text($(this).text());
+            $(".btn:first-child").val($(this).text());
+        });
+    });
+</script>
+
+<style>
+    [class*="col"] {
+        padding: 1rem;
+        border: 2px solid transparent;
+        color: black;
+        text-align: -webkit-left;
+    }
+
+    .roundedCornerUser {
+        border-radius: 12px;
+        background-color: #EEEEEE;
+        /*border: 2px solid #73AD21;*/
+        padding: 10px;
+        width: 100%;
+        height: auto;
+        transition: 250ms;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+
+    .footer-left {
+        left: 0;
+        bottom: 0;
+        width: 24.85999%;
+        background-color: white;
+        text-align: center;
+        image-rendering: auto;
+    }
+
+    .userContainer {
+        overflow: scroll;
+    }
+
+    .testDP {
+        border-radius: 1000px;
+        height: 50px;
+        width: 50px;
+        background: white;
+    }
+
+    .userGear {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+    .userGear:hover {
+        fill: #fff;
+        transition: 250ms;
+        cursor: pointer;
+    }
+
+    .userTitle {
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        font-size: small;
+    }
+
+    .deleteUserBtn {
+        border-radius: 100px;
+        background: #ff432e;
+        padding: 5px;
+        height: 22px;
+        width: 22px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 250ms;
+        cursor: pointer;
+        position: absolute;
+        right: 0;
+        bottom: 0;
+    }
+    .deleteExpanded {
+        width: 88px;
+    }
+    .deleteTitle {
+        color: white;
+        font-weight: 600;
+        margin-right: 10px;
+    }
+    .hidden {
+        display: none;
+    }
+</style>
+
+<div>
+    <div class="flex-container roundedCornerUser" id="userBackground">
+@*        <img alt="Current User Picture" class="rounded-circle" src="userPicture.jpg"*@
+@*        style="float:left;width:100px;height:100px;padding:12px">*@
+        <div class="testDP"></div>
+        <div class="col" style="display: relative">
+            <svg onclick="toggleUserSettings()" class="userGear" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-gear-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 0 0-5.86 2.929 2.929 0 0 0 0 5.858z"/>
+            </svg>
+            @* READ-ONLY STATE *@
+            <div>
+                <div class="userTitle">
+                    type:
+                    <div class="btn-group">
+                        <button id="dropdownToggleType" type="button" class="btn btn-secondary btn-sm dropdown-toggle disabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Select Type
+                        </button>
+                        <div id="dropdownType" class="dropdown-menu dropdown-menu-right">
+                            <button class="dropdown-item" type="button">Parent</button>
+                            <button class="dropdown-item" type="button">Child</button>
+                            <button class="dropdown-item" type="button">Guest</button>
+                            <button class="dropdown-item" type="button">Stranger</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="userTitle" style="margin-top: 10px;">
+                    location:
+                    <div class="btn-group">
+                        <button id="dropdownToggleLocation" type="button" class="btn btn-secondary btn-sm dropdown-toggle disabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Select Type
+                        </button>
+                        <div id="dropdownLocation" class="dropdown-menu dropdown-menu-right">
+                            <button class="dropdown-item" type="button">Kitchen</button>
+                            <button class="dropdown-item" type="button">Bathroom</button>
+                            <button class="dropdown-item" type="button">Guest</button>
+                            <button class="dropdown-item" type="button">Living Room</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @* EDIT MODE *@
+            <div id="deleteButton" onclick="confirmDelete()" class="deleteUserBtn hidden">
+                <div id="deleteTitle" class="deleteTitle hidden">delete</div>
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash-fill" fill="white" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5a.5.5 0 0 0-1 0v7a.5.5 0 0 0 1 0v-7z"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
