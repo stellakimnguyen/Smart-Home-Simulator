@@ -14,14 +14,14 @@
 
     $(function(){
         $(".dropdown-menu #dropdownToggleType").click(function(){
-            $("#dropdownToggleType:first-child").text($(this).text());
-            $("#dropdownToggleType:first-child").val($(this).text());
+            $("#dropdownToggleType").text($(this).text());
+            $("#dropdownToggleType").val($(this).text());
         });
     });
     $(function(){
         $(".dropdown-menu #dropdownToggleLocation").click(function(){
-            $("#dropdownToggleLocation:first-child").text($(this).text());
-            $("#dropdownToggleLocation:first-child").val($(this).text());
+            $("#dropdownToggleLocation").text($(this).text());
+            $("#dropdownToggleLocation").val($(this).text());
         });
     });
 </script>
@@ -142,6 +142,7 @@
                             <button id="dropdownToggleLocation" class="dropdown-item" type="button">Bathroom</button>
                             <button id="dropdownToggleLocation" class="dropdown-item" type="button">Guest</button>
                             <button id="dropdownToggleLocation" class="dropdown-item" type="button">Living Room</button>
+                            <button id="dropdownToggleLocation" class="dropdown-item" type="button">Outside</button>
                         </div>
                     </div>
                 </div>
