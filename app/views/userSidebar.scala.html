@@ -1,4 +1,4 @@
-@()
+@(activeUser: User, allUsers: java.util.Map[String,User])
 
 <script>
     function addUser() {
@@ -46,10 +46,18 @@
 </style>
 
 <div class="userSidebar">
-    <div class="userSidebarTitle">current user</div>
-        @singleUser()
-    <div class="userSeparator"></div>
-    <div class="userSidebarTitle">other users</div>
+	<div class="userSidebarTitle">current user</div>
+	@singleUser()
+	<div class="userSeparator"></div>
+	<div class="userSidebarTitle">other users</div>
+	@for(entry: (String, User) <- allUsers) {
+		@if(!entry._1.equals(activeUser.getName)) {
+			@singleUser()
+		}
+	}
+
+
+
     @* load existing users here *@
     <div id="tempUser" class="tempUser hidden" style="transition: 250ms">
         @singleUser()
