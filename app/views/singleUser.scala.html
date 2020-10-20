@@ -10,18 +10,28 @@
     function confirmDelete() {
         document.getElementById('deleteButton').classList.toggle('deleteExpanded');
         document.getElementById('deleteTitle').classList.toggle('hidden');
+
+        if (!document.getElementById('deleteButton').classList.contains('deleteExpanded')) {
+            // Delete user from user list here
+            console.log("Deleted user");
+        }
     }
 
     $(function(){
         $(".dropdown-menu #dropdownToggleType").click(function(){
             $("#dropdownToggleType").text($(this).text());
             $("#dropdownToggleType").val($(this).text());
+            window.console&&console.log('Update user type information to: ' + document.getElementById("dropdownToggleType").value);
+            // Update user type information
         });
     });
+
     $(function(){
         $(".dropdown-menu #dropdownToggleLocation").click(function(){
             $("#dropdownToggleLocation").text($(this).text());
             $("#dropdownToggleLocation").val($(this).text());
+            window.console&&console.log('Update user location information to: ' + document.getElementById("dropdownToggleLocation").value);
+            // Update user location information
         });
     });
 </script>

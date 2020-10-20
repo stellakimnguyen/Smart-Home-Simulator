@@ -14,6 +14,14 @@
             pickDate: false
         });
     });
+
+    function updateTemp(e) {
+        if (e.id == "internalTemp") {
+            console.log("Update internal temperature to: " + document.getElementById(e.id).value);
+        } else {
+            console.log("Update external temperature to: " + document.getElementById(e.id).value);
+        }
+    }
 </script>
 
 <style>
@@ -63,13 +71,13 @@
     <div class="paramsTitle">Date and Time</div>
     <div class="paramBackground">
         <div id="datetimepicker4" class="input-group mb-3">
-            <input class="form-control add-on" placeholder="dd/mm/yyyy" data-format="dd/mm/yyyy" type="text"/>
+            <input id="simulatorDate" class="form-control add-on" placeholder="dd/mm/yyyy" data-format="dd/mm/yyyy" type="text"/>
             <div class="input-group-append">
                 <span data-time-icon="icon-time" data-date-icon="icon-calendar" class="input-group-text" id="basic-addon2">📅</span>
             </div>
         </div>
         <div id="datetimepicker3" class="input-group mb-3">
-            <input class="form-control add-on" placeholder="hh:mm:ss" data-format="hh:mm:ss" type="text"/>
+            <input id="simulatorTime" class="form-control add-on" placeholder="hh:mm:ss" data-format="hh:mm:ss" type="text"/>
             <div class="input-group-append">
                 <span data-time-icon="icon-time" data-date-icon="icon-calendar" class="input-group-text" id="basic-addon2">🕑</span>
             </div>
@@ -80,14 +88,14 @@
     <div class="paramBackground">
         <div class="input-group mb-3 temperatureParam">
             Internal:
-            <input type="text" class="form-control" aria-label="Internal Temperature" aria-describedby="basic-addon2" style="margin-left: 20px;">
+            <input id="internalTemp" onchange="updateTemp(this)" type="text" class="form-control" aria-label="Internal Temperature" aria-describedby="basic-addon2" style="margin-left: 20px;">
             <div class="input-group-append">
                 <span class="input-group-text" id="basic-addon2">°C</span>
             </div>
         </div>
         <div class="input-group mb-3 temperatureParam">
             External:
-            <input type="text" class="form-control" aria-label="Internal Temperature" aria-describedby="basic-addon2" style="margin: 0 0 0 18px;">
+            <input id="externalTemp" onchange="updateTemp(this)" type="text" class="form-control" aria-label="Internal Temperature" aria-describedby="basic-addon2" style="margin: 0 0 0 18px;">
             <div class="input-group-append">
                 <span class="input-group-text" id="basic-addon2">°C</span>
             </div>
