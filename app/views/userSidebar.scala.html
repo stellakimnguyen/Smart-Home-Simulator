@@ -1,0 +1,62 @@
+@()
+
+<script>
+    function addUser() {
+        document.getElementById('tempUser').classList.toggle('hidden');
+        // add user to user list here
+        console.log("Added user");
+    }
+</script>
+
+<style>
+    .userSidebar {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+    }
+
+    .userSidebarTitle {
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        font-size: small;
+        margin-bottom: 10px;
+    }
+
+    .userSeparator {
+        height: 2px;
+        background-color: #EEE;
+        width: 75%;
+        margin: 30px 0px;
+        cursor: default;
+    }
+
+    .addUserButton {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        bottom: 0;
+        width: 100%;
+        border-radius: 12px;
+        border: 2px dashed #EEE;
+        padding: 20px 0;
+        cursor: pointer;
+    }
+</style>
+
+<div class="userSidebar">
+    <div class="userSidebarTitle">current user</div>
+        @singleUser()
+    <div class="userSeparator"></div>
+    <div class="userSidebarTitle">other users</div>
+    @* load existing users here *@
+    <div id="tempUser" class="tempUser hidden" style="transition: 250ms">
+        @singleUser()
+    </div>
+    <div onclick="addUser()" class="addUserButton">
+        <svg width="2.5em" height="2.5em" viewBox="0 0 16 16" class="bi bi-plus-circle-fill" fill="#3253F1" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"/>
+        </svg>
+    </div>
+</div>

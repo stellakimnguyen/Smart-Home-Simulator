@@ -1,0 +1,104 @@
+@()
+
+<link rel="stylesheet" media="screen" href="@routes.Assets.versioned("libraries/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css")">
+<script src="@routes.Assets.versioned("libraries/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js")" type="text/javascript"></script>
+
+<script>
+    $(function() {
+        $('#datetimepicker4').datetimepicker({
+            pickTime: false
+        });
+    });
+    $(function() {
+        $('#datetimepicker3').datetimepicker({
+            pickDate: false
+        });
+    });
+
+    function updateTemp(e) {
+        if (e.id == "internalTemp") {
+            console.log("Update internal temperature to: " + document.getElementById(e.id).value);
+        } else {
+            console.log("Update external temperature to: " + document.getElementById(e.id).value);
+        }
+    }
+</script>
+
+<style>
+    input[type="time"]::-webkit-calendar-picker-indicator {
+        background: none;
+        background: transparent;
+        bottom: 0;
+        color: transparent;
+        cursor: pointer;
+        height: auto;
+        left: -10px;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: auto;
+    }
+
+    .paramsTitle {
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        font-size: small;
+    }
+
+    .paramBackground {
+        background-color: #F5F5F5;
+        border-radius: 5px;
+        padding: 15px;
+        width: 100%;
+        margin: 10px 0 20px;
+    }
+
+    .temperatureParam {
+        display: flex;
+        align-items: center;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        max-width: 250px;
+    }
+
+    .temperatureParam > input {
+        right: 0;
+    }
+</style>
+
+<div>
+    <div class="paramsTitle">Date and Time</div>
+    <div class="paramBackground">
+        <div id="datetimepicker4" class="input-group mb-3">
+            <input id="simulatorDate" class="form-control add-on" placeholder="dd/mm/yyyy" data-format="dd/mm/yyyy" type="text"/>
+            <div class="input-group-append">
+                <span data-time-icon="icon-time" data-date-icon="icon-calendar" class="input-group-text" id="basic-addon2">📅</span>
+            </div>
+        </div>
+        <div id="datetimepicker3" class="input-group mb-3">
+            <input id="simulatorTime" class="form-control add-on" placeholder="hh:mm:ss" data-format="hh:mm:ss" type="text"/>
+            <div class="input-group-append">
+                <span data-time-icon="icon-time" data-date-icon="icon-calendar" class="input-group-text" id="basic-addon2">🕑</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="paramsTitle">Temperature</div>
+    <div class="paramBackground">
+        <div class="input-group mb-3 temperatureParam">
+            Internal:
+            <input id="internalTemp" onchange="updateTemp(this)" type="text" class="form-control" aria-label="Internal Temperature" aria-describedby="basic-addon2" style="margin-left: 20px;">
+            <div class="input-group-append">
+                <span class="input-group-text" id="basic-addon2">°C</span>
+            </div>
+        </div>
+        <div class="input-group mb-3 temperatureParam">
+            External:
+            <input id="externalTemp" onchange="updateTemp(this)" type="text" class="form-control" aria-label="Internal Temperature" aria-describedby="basic-addon2" style="margin: 0 0 0 18px;">
+            <div class="input-group-append">
+                <span class="input-group-text" id="basic-addon2">°C</span>
+            </div>
+        </div>
+    </div>
+</div>

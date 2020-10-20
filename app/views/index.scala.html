@@ -1,5 +1,26 @@
 @()
 
-@main("Welcome to Play") {
-  <h1>Welcome to Play!</h1>
+<style>
+  .layout {
+    height: 100%;
+    width: 100%;
+    border-radius: 12px;
+    background-color: #eff5ff;
+    padding: 20px;
+    position: relative;
+  }
+
+  .metricsOverlay {
+    position: absolute;
+    bottom: 20px;
+  }
+</style>
+
+@main {
+  <div class="layout">
+    House Layout
+    <div class="metricsOverlay">
+      @constantMetrics()
+    </div>
+  </div>
 }

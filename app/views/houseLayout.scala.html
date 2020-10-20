@@ -1,0 +1,33 @@
+@()
+
+<script>
+    $(function(){
+        $(document ).on('change','#layoutFile' , function(){
+            $('#upload-file-info').val(document.getElementById('layoutFile').files[0].name)
+            window.console&&console.log('Display house layout');
+            // Display house layout
+        });
+    });
+</script>
+
+<style>
+    .layoutTitle {
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        font-size: small;
+        margin-bottom: 10px;
+    }
+</style>
+
+<div>
+    <div class="layoutTitle">Upload House Layout</div>
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" id="upload-file-info" readonly>
+        <label class="input-group-btn input-group-append">
+            <span class="btn btn-primary">
+                browse<input id="layoutFile" type="file" style="display:none;" onchange="$('#upload-file-info').val(document.getElementById('layoutFile').files[0].name);">
+            </span>
+        </label>
+    </div>
+</div>
