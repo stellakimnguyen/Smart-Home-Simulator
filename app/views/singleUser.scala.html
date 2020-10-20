@@ -1,53 +1,43 @@
-@()
+@(user: User)
 
 <script>
     function toggleUserSettings() {
-        document.getElementById("dropdownToggleType").classList.toggle('disabled');
-        document.getElementById("dropdownToggleLocation").classList.toggle('disabled');
-        document.getElementById("deleteButton").classList.toggle('hidden');
+        document.getElementById(user_@user.getName + "NameInput").disabled = !document.getElementById(user_@user.getName + "NameInput").disabled;
+        document.getElementById(user_@user.getName + "TypeInput").disabled = !document.getElementById(user_@user.getName + "TypeInput").disabled;
+        document.getElementById(user_@user.getName + "LocationInput").disabled = !document.getElementById(user_@user.getName + "LocationInput").disabled;
+        document.getElementById(user_@user.getName + "DeleteButton").classList.toggle('hidden');
+        document.getElementById(user_@user.getName + "SubmitInfo").classList.toggle('hidden');
+    }
+
+    function updateCurrentUser() {
+        console.log('Update current user');
+        // Update current user
     }
 
     function confirmDelete() {
-        document.getElementById('deleteButton').classList.toggle('deleteExpanded');
+        document.getElementById(user_@user.getName + "DeleteButton").classList.toggle('deleteExpanded');
         document.getElementById('deleteTitle').classList.toggle('hidden');
 
-        if (!document.getElementById('deleteButton').classList.contains('deleteExpanded')) {
+        // Confirm User Removal
+        if (!document.getElementById(user_@user.getName + "DeleteButton").classList.contains('deleteExpanded')) {
             // Delete user from user list here
             console.log("Deleted user");
         }
     }
 
-    $(function(){
-        $(".dropdown-menu #dropdownToggleType").click(function(){
-            $("#dropdownToggleType").text($(this).text());
-            $("#dropdownToggleType").val($(this).text());
-            window.console&&console.log('Update user type information to: ' + document.getElementById("dropdownToggleType").value);
-            // Update user type information
-        });
-    });
-
-    $(function(){
-        $(".dropdown-menu #dropdownToggleLocation").click(function(){
-            $("#dropdownToggleLocation").text($(this).text());
-            $("#dropdownToggleLocation").val($(this).text());
-            window.console&&console.log('Update user location information to: ' + document.getElementById("dropdownToggleLocation").value);
-            // Update user location information
-        });
-    });
+    function submitUserInformation() {
+        let name = document.getElementById(user_@user.getName + "NameInput");
+        let type = document.getElementById(user_@user.getName + "TypeInput");
+        let location = document.getElementById(user_@user.getName + "LocationInput");
+        console.log('Update user information to: ' + name + ', ' + type + ', ' + location);
+    }
 </script>
 
 <style>
-    [class*="col"] {
-        padding: 1rem;
-        border: 2px solid transparent;
-        color: black;
-        text-align: -webkit-left;
-    }
-
     .roundedCornerUser {
         border-radius: 12px;
         background-color: #EEEEEE;
-        padding: 10px 10px 10px 15px;
+        padding: 10px 10px 0px 15px;
         width: 100%;
         height: auto;
         transition: 250ms;
@@ -67,6 +57,9 @@
         height: 60px;
         width: 60px;
         background: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .userGear {
@@ -74,10 +67,16 @@
         top: 0;
         right: 0;
     }
-    .userGear:hover {
+    .userGear:hover, .userMakeCurrent:hover {
         fill: #fff;
         transition: 250ms;
         cursor: pointer;
+    }
+
+    .userMakeCurrent {
+        position: absolute;
+        top: 0;
+        right: 20px;
     }
 
     .userTitle {
@@ -85,6 +84,13 @@
         font-weight: 700;
         letter-spacing: 0.2em;
         font-size: small;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .form-control-sm {
+        float: right;
+        margin-top: 10px;
     }
 
     .deleteUserBtn {
@@ -99,8 +105,8 @@
         justify-content: center;
         transition: 250ms;
         cursor: pointer;
-        margin: 10px -16px -16px 0;
         float: right;
+        margin: 0 15px 15px 0;
     }
     .deleteExpanded {
         width: 88px;
@@ -117,48 +123,41 @@
 
 <div>
     <div class="flex-container roundedCornerUser" id="userBackground">
-@*        <img alt="Current User Picture" class="rounded-circle" src="userPicture.jpg"*@
-@*        style="float:left;width:100px;height:100px;padding:12px">*@
-        <div class="testDP"></div>
+        <div class="testDP">
+            <svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-person" fill="#849FFF" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M10 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm6 5c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+            </svg>
+        </div>
         <div class="col" style="position: relative">
             <svg onclick="toggleUserSettings()" height="1em" viewBox="0 0 16 16" class="bi bi-gear-fill userGear" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 0 0-5.86 2.929 2.929 0 0 0 0 5.858z"/>
             </svg>
+            <svg onclick="updateCurrentUser()" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-lightning-fill userMakeCurrent" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09z"/>
+            </svg>
             @* READ-ONLY STATE *@
-            <div>
-                <div class="userTitle">
-                    type:
-                    <div class="btn-group">
-                        <button id="dropdownToggleType" type="button" class="btn btn-secondary btn-sm dropdown-toggle disabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Select Type
-                        </button>
-                        <div id="dropdownType" class="dropdown-menu dropdown-menu-right">
-                            <button id="dropdownToggleType" class="dropdown-item dropdownTypeItem" type="button">Parent</button>
-                            <button id="dropdownToggleType" class="dropdown-item dropdownTypeItem" type="button">Child</button>
-                            <button id="dropdownToggleType" class="dropdown-item dropdownTypeItem" type="button">Guest</button>
-                            <button id="dropdownToggleType" class="dropdown-item dropdownTypeItem" type="button">Stranger</button>
-                        </div>
-                    </div>
+            <form class="form-group" id='@("user_" + user.getName + "Form")' style='margin-top: 15px'>
+                <div class="userTitle form-inline">
+                    <div>name:</div>
+                    <input type="text" class="form-control form-control-sm" id='@(user.getName) + "NameInput' placeholder="user's name" disabled>
                 </div>
-                <div class="userTitle" style="margin-top: 10px;">
-                    location:
-                    <div class="btn-group">
-                        <button id="dropdownToggleLocation" type="button" class="btn btn-secondary btn-sm dropdown-toggle disabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Select Type
-                        </button>
-                        <div id="dropdownLocation" class="dropdown-menu dropdown-menu-right">
-                            <button id="dropdownToggleLocation" class="dropdown-item" type="button">Kitchen</button>
-                            <button id="dropdownToggleLocation" class="dropdown-item" type="button">Bathroom</button>
-                            <button id="dropdownToggleLocation" class="dropdown-item" type="button">Deck</button>
-                            <button id="dropdownToggleLocation" class="dropdown-item" type="button">Living Room</button>
-                            <button id="dropdownToggleLocation" class="dropdown-item" type="button">Outside</button>
-                        </div>
-                    </div>
+                <div class="userTitle form-inline">
+                    <div>type:</div>
+                    <select class="form-control-sm" id="@("user_" + user.getName "TypeInput")" disabled>
+                        <option>Underage Teenager</option>
+                    </select>
                 </div>
-            </div>
+                <div class='userTitle form-inline'>
+                    <div>location:</div>
+                    <select class='form-control-sm' id="@("user_" + user.getName + "LocationInput")" disabled>
+                        <option>Kitchen</option>
+                    </select>
+                </div>
+                <button id="@("user_" + user.getName + "SubmitInfo")" class="btn btn-primary btn-sm hidden" style="float: right; margin-top: 10px;">submit</button>
+            </form>
 
             @* EDIT MODE *@
-            <div id="deleteButton" onclick="confirmDelete()" class="deleteUserBtn hidden">
+            <div id="@("user_" + user.getName + "DeleteButton")" onclick="confirmDelete()" class="deleteUserBtn hidden">
                 <div id="deleteTitle" class="deleteTitle hidden">delete</div>
                 <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash-fill" fill="white" xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5a.5.5 0 0 0-1 0v7a.5.5 0 0 0 1 0v-7z"/>
