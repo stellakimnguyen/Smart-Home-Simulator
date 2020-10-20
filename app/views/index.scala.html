@@ -1,4 +1,4 @@
-@()
+@(home: java.util.Map[String, models.Location])
 
 <style>
   .layout {
@@ -18,7 +18,11 @@
 
 @layouts.main {
   <div class="layout">
-    House Layout
+	  @if(home.size > 1) {
+		  House layout was loaded!
+	  } else {
+		  House Layout is missing!
+	  }
     <div class="metricsOverlay">
       @constantMetrics()
     </div>

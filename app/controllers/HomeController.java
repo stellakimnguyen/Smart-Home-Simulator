@@ -1,18 +1,21 @@
 package controllers;
 
-import models.Device;
-import models.Location;
-import models.SHS;
-import models.User;
+import models.*;
 import play.data.DynamicForm;
 import play.data.FormFactory;
+import play.libs.Files.TemporaryFile;
 import play.mvc.*;
 
 import javax.inject.Inject;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
 
 /**
  * Contains all actions that handle HTTP requests from the Users and the instance of [[models.SHS SHS]].
@@ -61,16 +64,130 @@ public class HomeController extends Controller {
   }
 
   /**
+   * Reads a house layout formatted text file and parses the information into a [[java.util.Map Map]] of [[models.Location Locations]]. The [[java.util.Map Map]] is then set as the [[models.SHS SHS]] `home` value.
+   * File content must respect the following format for success:
+   * {{{
+   * Locations {
+   * <Location Name>,<Indoor/Outdoor/Outside>
+   * ...
+   * }
+   * Devices {
+   * <Device Class Type>,<Device Name>,<Device Location Name>,<Device Subclass Properties>
+   * ...
+   * }
+   * }}}
+   * Location names must be unique. Device names must be unique for that location. No location may have devices of the same name.
+   * For each [[models.Device Device]] subclass, extra properties may need to be specified. refer to the list below for each subclass format:
+   *  - `[[models.Light Light]],<Light Name>,<Light Location Name>`
+   *  - `[[models.Connection Connection]],<Connection Name>,<Connection Location Name>,<Connection secondLocation Name>`
+   *  - `[[models.Door Door]],<Door Name>,<Door Location Name>,<Door secondLocation Name>`
+   *  - `[[models.Window Window]],<Window Name>,<Window Location Name>,<Window secondLocation Name>`
+   *
+   * @example {{{
+   *     Locations {
+   *     Kitchen,Indoor
+   *     LivingRoom,Indoor
+   *     Bedroom,Indoor
+   *     Patio,Outdoor
+   *     }
+   *     Devices {
+   *     Light,KitchenLights,Kitchen
+   *     Window,KitchenWindow,Kitchen
+   *     Door,KitchenPatioDoor,Kitchen,Outside
+   *     Connection,KitchenLivingRoomConnection,Kitchen,LivingRoom
+   *     Light,LivingRoomLights,LivingRoom
+   *     Door,EntryLivingRoomDoor,LivingRoom,Outside
+   *     Door,LivingRoomBedroomDoor,LivingRoom,Bedroom
+   *     Window,BedroomWindow,Bedroom
+   *     Light,BedroomLights,Bedroom
+   *     }
+   * }}}
+   * @param request the http header from the user.
+   * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successfully loading the file data into the SHS or a redirection to another method if there was an error while reading the file.
+   */
+  public Result loadHouseFromFile(Http.Request request){
+    Http.MultipartFormData<TemporaryFile> body = request.body().asMultipartFormData();
+    Http.MultipartFormData.FilePart<TemporaryFile> tempFile = body.getFile("layoutFile");
+    TemporaryFile file = tempFile.getRef();
+
+    File toRead = file.path().toFile();
+
+    //File toRead = (File)request.body().asMultipartFormData().getFile("layoutFile").getRef();
+    try(Scanner in = new Scanner(toRead)){  //safely auto-close scanner
+
+      boolean isLocation = false;
+      String fileLine;
+      String[] lineStringArray;
+      Map<String, Location> newHouseMap = new HashMap<>();
+
+      while (in.hasNextLine()) {
+        fileLine = in.nextLine(); //store line temporarily in string for manipulation
+        System.out.println(fileLine);
+
+        switch(fileLine){ //determine if line has
+          case "Locations {":
+            isLocation = true;
+            break;
+
+          case "Devices {":
+            isLocation = false;
+            break;
+
+          case "}":
+            break;
+
+          default:
+            //split file line according to ',' delimiter
+            lineStringArray = fileLine.split(",");
+
+            if(isLocation){ //create a location instance
+              Location newLocation = new Location(lineStringArray[0], Location.LocationType.valueOf(lineStringArray[1]));
+              newHouseMap.put(newLocation.getName(), newLocation); //split into two steps for readability
+            } else {  //create Device instance
+              Location newDeviceLocation = newHouseMap.get(lineStringArray[2]);
+
+              switch(lineStringArray[0]){ //determine device subclass
+                case "Light":
+                  Light newLight = new Light(lineStringArray[1]);
+                  newLight.setLocation(newDeviceLocation);
+                  break;
+                case "Connection":
+                  Connection newConnection = new Connection(lineStringArray[1]);
+                  newConnection.setLocation(newDeviceLocation);
+                  newConnection.setSecondLocation(lineStringArray[3].equals("Outside")?SHS.getOutside():newHouseMap.get(lineStringArray[3]));
+                  break;
+                case "Door":
+                  Door newDoor = new Door(lineStringArray[1]);
+                  newDoor.setLocation(newDeviceLocation);
+                  newDoor.setSecondLocation(lineStringArray[3].equals("Outside")?SHS.getOutside():newHouseMap.get(lineStringArray[3]));
+                  break;
+                case "Window":
+                  Window newWindow = new Window(lineStringArray[1]);
+                  newWindow.setLocation(newDeviceLocation);
+                  break;
+              }
+            }
+        }
+      }
+      //If function gets here, file is properly formatted and there were no issues generating locations and devices
+      shs.setHome(newHouseMap);
+
+    } catch (FileNotFoundException e) {
+      return badRequest().flashing("error","File could not be found");//TODO insert webpage that the user will see on failure
+    }
+    //TODO Future Deliver: add thorough exception handling
+
+    return index();  //TODO insert webpage that the user will see after the action was performed successfully
+  }
+
+  /**
    * An action that renders an HTML page with a welcome message.
    * The configuration in the <code>routes</code> file means that
    * this method will be called when the application receives a
    * <code>GET</code> request with a path of <code>/</code>.
    */
   public Result index() {
-    return ok(views.html.index.render());
-  }
-  public Result index2() {
-    return ok(views.html.index2.render());
+    return ok(views.html.index.render(shs.getHome()));
   }
   /**
    * Creates a [[models.User User]] instance from the information contained in the [[play.mvc.Http.Request Request]] and then adds it to the [[models.SHS `userMap`]].
@@ -85,12 +202,12 @@ public class HomeController extends Controller {
     // 2nd error check. Web page should already have stopped these errors from occurring
     if (name == null || name.trim().equals("")) {
       // to pass to the webpage: dynamicForm.withError("name","The value must not be empty");
-      return badRequest(views.html.index.render());//TODO insert webpage that handles user creation
+      return badRequest(views.html.index.render(shs.getHome()));//TODO insert webpage that handles user creation
     }
 
     if (!User.isTypeStringValid(typeString)) {
       // to pass to the webpage: dynamicForm.withError("type","The value entered is invalid.");
-      return badRequest(views.html.index.render());//TODO insert webpage that handles user creation
+      return badRequest(views.html.index.render(shs.getHome()));//TODO insert webpage that handles user creation
     }
     User toCreate = new User(name, User.UserType.valueOf(typeString));
     if (toCreate.getType() == User.UserType.Parent) {
@@ -149,12 +266,12 @@ public class HomeController extends Controller {
       toEdit.setType(newType);
     } else {
       // to pass to the webpage: dynamicForm.withError("type","The value entered is invalid.");
-      return badRequest(views.html.index.render());//TODO insert webpage that handles user edition
+      return badRequest(views.html.index.render(shs.getHome()));//TODO insert webpage that handles user edition
     }
 
     if (name == null || name.trim().equals("")) {
       // to pass to the webpage: dynamicForm.withError("name","The value must not be empty");
-      return badRequest(views.html.index.render());//TODO insert webpage that handles user edition
+      return badRequest(views.html.index.render(shs.getHome()));//TODO insert webpage that handles user edition
     } else if (!newName.equals(name)) {
       toEdit.setName(newName);
       shs.getUserMap().remove(name);
@@ -202,21 +319,21 @@ public class HomeController extends Controller {
       newTemperature = parseTemperature(newTemperatureString);
     } catch (NumberFormatException e) {
       // to pass to the webpage: dynamicForm.withError("temperature","The value entered is invalid");
-      return badRequest(views.html.index.render());//TODO insert webpage that handles simulation parameter edition
+      return badRequest(views.html.index.render(shs.getHome()));//TODO insert webpage that handles simulation parameter edition
     }
     LocalDate newDate;
     try {
       newDate = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     } catch (Exception e) {
       // to pass to the webpage: dynamicForm.withError("date","The value entered is invalid");
-      return badRequest(views.html.index.render());//TODO insert webpage that handles simulation parameter edition
+      return badRequest(views.html.index.render(shs.getHome()));//TODO insert webpage that handles simulation parameter edition
     }
     LocalTime newTime;
     try {
       newTime = LocalTime.parse(timeString, DateTimeFormatter.ofPattern("HH:mm:ss"));
     } catch (Exception e) {
       // to pass to the webpage: dynamicForm.withError("time","The value entered is invalid");
-      return badRequest(views.html.index.render());//TODO insert webpage that handles simulation parameter edition
+      return badRequest(views.html.index.render(shs.getHome()));//TODO insert webpage that handles simulation parameter edition
     }
     LocalDateTime newCurrentTime = LocalDateTime.of(newDate, newTime);
 
@@ -269,12 +386,14 @@ public class HomeController extends Controller {
   }
 
 
-  public Result loadSideBar(String name) {
+
+
+  public Result loadSideBar(Http.Request request, String name) {
     switch (name) {
       case "user":
-        return ok(views.html.userSidebar.render());
+        return ok(views.html.userSidebar.render(shs.getActiveUser(), shs.getUserMap()));
       case "house":
-        return ok(views.html.houseLayout.render());
+        return ok(views.html.houseLayout.render(formFactory.form(), request));
       case "device":
         return ok(views.html.deviceSidebar.render());
       case "parameters":

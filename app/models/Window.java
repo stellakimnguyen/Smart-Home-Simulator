@@ -84,4 +84,13 @@ public class Window extends Connection {
     }
     return false;
   }
+
+  /**
+   * By design, a window always connects to Outside
+   * @return the [[models.SHS Outside]] instance registered in [[models.SHS SHS]]
+   */
+  @Override
+  public Location getSecondLocation() {
+    return SHS.getOutside();
+  }
 }
