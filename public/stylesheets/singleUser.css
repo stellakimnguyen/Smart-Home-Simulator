@@ -1,0 +1,69 @@
+.roundedCornerUser {
+    border-radius: 12px;
+    background-color: #EEEEEE;
+    padding: 10px 10px 10px 15px;
+    width: 100%;
+    height: auto;
+    transition: 250ms;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.userContainer {
+    overflow: scroll;
+}
+
+.testDP {
+    border-radius: 1000px;
+    height: 60px;
+    width: 60px;
+    background: white;
+}
+
+.userGear {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+.userGear:hover {
+    fill: #fff;
+    transition: 250ms;
+    cursor: pointer;
+}
+
+.userTitle {
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    font-size: small;
+}
+
+.deleteUserBtn {
+    border-radius: 100px;
+    background: #ff432e;
+    padding: 5px;
+    height: 22px;
+    width: 22px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 250ms;
+    cursor: pointer;
+    margin: 10px -16px -16px 0;
+    float: right;
+}
+.deleteExpanded {
+    width: 88px;
+}
+.deleteTitle {
+    color: white;
+    font-weight: 600;
+    margin-right: 10px;
+}
+.hidden {
+    display: none;
+}

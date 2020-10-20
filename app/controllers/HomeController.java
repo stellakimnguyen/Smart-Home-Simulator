@@ -69,7 +69,9 @@ public class HomeController extends Controller {
   public Result index() {
     return ok(views.html.index.render());
   }
-
+  public Result index2() {
+    return ok(views.html.index2.render());
+  }
   /**
    * Creates a [[models.User User]] instance from the information contained in the [[play.mvc.Http.Request Request]] and then adds it to the [[models.SHS `userMap`]].
    * @param request the http header from the user.
@@ -264,5 +266,20 @@ public class HomeController extends Controller {
     }
     shs.setRunning(!shs.isRunning());
     return ok();//TODO insert webpage that the user will see after the action was performed successfully
+  }
+
+
+  public Result loadSideBar(String name) {
+    switch (name) {
+      case "user":
+        return ok(views.html.userSidebar.render());
+      case "house":
+        return ok(views.html.houseLayout.render());
+      case "device":
+        return ok(views.html.deviceSidebar.render());
+      case "parameters":
+        return ok(views.html.parameters.render());
+    }
+    return ok();
   }
 }
