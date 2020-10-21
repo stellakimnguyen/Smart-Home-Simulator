@@ -1,0 +1,286 @@
+.container-sidebar {
+    height: calc(100vh - 20px);
+    max-height: calc(100vh - 20px);
+    min-height: calc(100vh - 20px);
+}
+#expansion {
+    display: none;
+    background: white;
+    border-radius: 0 12px 12px 0;
+    height: 100%;
+    width: calc(100% - 70px);
+    padding: 20px;
+    flex-direction: column;
+    align-items: center;
+    transition: 250ms;
+    box-shadow: 0 0 15px rgba(50,83,241,0.2);
+}
+.sidebar {
+    height: 100%;
+    padding: 10px;
+    width: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 12px;
+    background: #3253F1;
+    color: #fff;
+    transition: 250ms;
+}
+.sidebar > svg, .sidebar > div {
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: 200ms;
+}
+.sidebar > svg:hover,
+.sidebar > div:hover {
+    fill: white;
+    color: white;
+}
+.sidebar > div {
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    color: #849FFF;
+}
+.sidebar > div:nth-of-type(1) {
+    height: 2px;
+    background-color: #849FFF;
+    width: 50px;
+    margin: 17px 0px;
+    cursor: default;
+}
+.expanded {
+    border-radius: 12px 0 0 12px;
+    box-shadow: 0 0 15px rgba(50,83,241,0.2);
+}
+.roundedCornerUser {
+    border-radius: 12px;
+    background-color: #EEEEEE;
+    padding: 10px 10px 0px 15px;
+    width: 100%;
+    height: auto;
+    transition: 250ms;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.userContainer {
+    overflow: scroll;
+}
+
+.testDP {
+    border-radius: 1000px;
+    height: 60px;
+    width: 60px;
+    background: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.userGear {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+.userGear:hover, .userMakeCurrent:hover {
+    fill: #fff;
+    transition: 250ms;
+    cursor: pointer;
+}
+
+.userMakeCurrent {
+    position: absolute;
+    top: 0;
+    right: 20px;
+}
+
+.userTitle {
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    font-size: small;
+    display: flex;
+    justify-content: space-between;
+}
+
+.form-control-sm {
+    float: right;
+    margin-top: 10px;
+}
+
+.deleteUserBtn {
+    border-radius: 100px;
+    background: #ff432e;
+    padding: 5px;
+    height: 22px;
+    width: 22px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 250ms;
+    cursor: pointer;
+    float: right;
+    margin: 0 15px 15px 0;
+}
+.deleteExpanded {
+    width: 88px;
+}
+.deleteTitle {
+    color: white;
+    font-weight: 600;
+    margin-right: 10px;
+}
+.hidden {
+    display: none;
+}
+.userSidebar {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+}
+
+.userSidebarTitle {
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    font-size: small;
+    margin-bottom: 10px;
+}
+
+.userSeparator {
+    height: 2px;
+    background-color: #EEE;
+    width: 75%;
+    margin: 30px 0px;
+    cursor: default;
+}
+
+.addUserButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    bottom: 0;
+    width: 100%;
+    border-radius: 12px;
+    border: 2px dashed #EEE;
+    padding: 20px 0;
+    cursor: pointer;
+}
+.layout {
+    height: calc(100% - 12px);
+    width: 100%;
+    border-radius: 12px;
+    background-color: #eff5ff;
+    padding: 20px;
+    position: relative;
+}
+
+.metricsOverlay {
+    position: absolute;
+    bottom: 20px;
+}
+input[type="time"]::-webkit-calendar-picker-indicator {
+    background: none;
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: -10px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+}
+
+.paramsTitle {
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    font-size: small;
+}
+
+.paramBackground {
+    background-color: #F5F5F5;
+    border-radius: 5px;
+    padding: 15px;
+    width: 100%;
+    margin: 10px 0 20px;
+}
+
+.temperatureParam {
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    max-width: 250px;
+}
+
+.temperatureParam > input {
+    right: 0;
+}
+.deviceTitle {
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    font-size: small;
+    margin-bottom: 10px;
+}
+.windowBackground {
+    border-radius: 12px;
+    background-color: #EEEEEE;
+    padding: 10px 10px 10px 15px;
+    width: 100%;
+    height: auto;
+    transition: 250ms;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+.windowBackground > .custom-switch {
+    margin-left: 15px;
+}
+
+.windowID {
+    text-transform: lowercase;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    font-size: small;
+}
+.metricsBackground {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    background: white;
+    box-shadow: 0 0 15px rgba(50,83,241,0.2);
+    border-radius: 12px;
+    font-size: medium;
+    letter-spacing: 0.1em;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 10px 0;
+}
+.metricsBackground > div {
+    margin: 0 15px;
+}
+
+.metricsTemperature {
+    display: flex;
+    flex-direction: column;;
+    align-items: center;
+    justify-content: center;
+    color: #3253F1;
+}
+.metricsTemperature > div:nth-of-type(2) {
+    color: #C8C8C8;
+    font-size: small;
+}

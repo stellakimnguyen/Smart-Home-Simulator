@@ -1,53 +1,99 @@
 package models;
 
-public class Window extends Device {
-	private boolean isBlocked;
+/**
+ * Extends a [[models.Connection Connection]]: fixes the [[models.Location Location]] it connects to to [[models.SHS `Outside`]] and introduces a barrier between both [[models.Location Locations]], new statuses, and new actions.
+ * ===Attributes===
+ * `isBlocked (private boolean):` the condition of the barrier.
+ *
+ * ===Class Actions `(public)`===
+ * `actionBlock, actionUnblock`
+ *
+ * ===Class Statuses `(public)`===
+ * `statusBlocked, statusNotBlocked`
+ *
+ * @version 1
+ * @author Rodrigo M. Zanini (40077727)
+ * @author Pierre-Alexis Barras (40022016)
+ */
+public class Window extends Connection {
+  private boolean isBlocked;
 
-	public static final String actionBlock = "block";
-	public static final String actionUnblock = "unblock";
-	public static final String statusBlocked = "blocked";
+  public static final String actionBlock = "block";
+  public static final String actionUnblock = "unblock";
+  public static final String statusBlocked = "blocked";
+  public static final String statusNotBlocked = "not blocked";
 
-	public Window(String name, Location location, boolean isBlocked) {
-		super(name, location);
-		this.isBlocked = isBlocked;
-		super.setStatus(Device.statusClosed);
-	}
+  public Window(String name) {
+    super(name);
+    this.isBlocked = false;
+    super.setStatus(Device.statusClosed);
+  }
 
-	public boolean isBlocked() {
-		return isBlocked;
-	}
-	public void setBlocked(boolean blocked) {
-		isBlocked = blocked;
-	}
+  /**
+   * Get the condition of the barrier.
+   */
+  public boolean isBlocked() {
+    return isBlocked;
+  }
 
-	@Override
-	public String getStatus() {
-		String status = super.getStatus();
-		if (isBlocked) {
-			status = status + "," + statusBlocked;
-		}
-		return status;
-	}
-	@Override
-	public void setStatus(String status) {
-		if (status.equals(Device.statusOpen) || status.equals(Device.statusClosed)) {
-			super.setStatus(status);
-		}
-	}
+  /**
+   * Set the condition of the barrier.
+   */
+  public void setBlocked(boolean blocked) {
+    isBlocked = blocked;
+  }
 
-	@Override
-	public boolean doAction(String action) {
-		if (action.equals(Device.actionOpen)) {
-			super.setStatus(Device.statusOpen);
-			return true;
-		} else if (action.equals(Device.actionClose)) {
-			super.setStatus(Device.statusClosed);
-			return true;
-		} else if (action.equals(actionBlock)) {
-			setBlocked(true);
-		} else if (action.equals(actionUnblock)) {
-			setBlocked(false);
-		}
-		return false;
-	}
+  /**
+   * Get the Device status.
+   * @return a [[String]] that compounds the device status, a comma, and the condition of the barrier.
+   */
+  @Override
+  public String getStatus() {
+    return super.getStatus() + "," + (isBlocked?statusBlocked:statusNotBlocked);
+  }
+
+  /**
+   * Set the Device status. Only accepts `statusOpen, statusClose`
+   * @param status the new status.
+   */
+  @Override
+  public void setStatus(String status) {
+    if (status.equals(Device.statusOpen) || status.equals(Device.statusClosed)) {
+      super.setStatus(status);
+    }
+  }
+
+  /**
+   * Default action system. Only accepts `actionOpen, actionClose, actionBlock, actionUnblock`
+   *
+   * @param action String with the action code to be performed.
+   * @return true if the action was performed, false otherwise.
+   */
+  @Override
+  public boolean doAction(String action) {
+    switch (action) {
+      case Device.actionOpen:
+        super.setStatus(Device.statusOpen);
+        return true;
+      case Device.actionClose:
+        super.setStatus(Device.statusClosed);
+        return true;
+      case actionBlock:
+        setBlocked(true);
+        return true;
+      case actionUnblock:
+        setBlocked(false);
+        return true;
+      default: return false;
+    }
+  }
+
+  /**
+   * By design, a window always connects to Outside
+   * @return the [[models.SHS Outside]] instance registered in [[models.SHS SHS]]
+   */
+  @Override
+  public Location getSecondLocation() {
+    return SHS.getOutside();
+  }
 }

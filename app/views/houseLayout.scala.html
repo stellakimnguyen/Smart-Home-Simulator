@@ -1,4 +1,5 @@
-@()
+@import helper.CSRF
+@(dForm: DynamicForm)(implicit request: play.mvc.Http.Request)
 
 <script>
     $(function(){
@@ -20,14 +21,16 @@
     }
 </style>
 
-<div>
+<form action='@routes.HomeController.loadHouseFromFile("house")' method="post" enctype="multipart/form-data">
+	<fieldset hidden>@CSRF.formField </fieldset>
     <div class="layoutTitle">Upload House Layout</div>
     <div class="input-group mb-3">
         <input type="text" class="form-control" id="upload-file-info" readonly>
         <label class="input-group-btn input-group-append">
             <span class="btn btn-primary">
-                browse<input id="layoutFile" type="file" style="display:none;" onchange="$('#upload-file-info').val(document.getElementById('layoutFile').files[0].name);">
+                browse<input id="layoutFile" name="layoutFile" type="file" style="display:none;" onchange="$('#upload-file-info').val(document.getElementById('layoutFile').files[0].name);">
             </span>
         </label>
     </div>
-</div>
+	<input type="submit">
+</form>
