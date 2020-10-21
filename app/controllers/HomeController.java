@@ -105,7 +105,7 @@ public class HomeController extends Controller {
    * @param request the http header from the user.
    * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successfully loading the file data into the SHS or a redirection to another method if there was an error while reading the file.
    */
-  public Result loadHouseFromFile(Http.Request request){
+  public Result loadHouseFromFile(Http.Request request, String tab){
     Http.MultipartFormData<TemporaryFile> body = request.body().asMultipartFormData();
     Http.MultipartFormData.FilePart<TemporaryFile> tempFile = body.getFile("layoutFile");
     TemporaryFile file = tempFile.getRef();
@@ -177,7 +177,7 @@ public class HomeController extends Controller {
     }
     //TODO Future Deliver: add thorough exception handling
 
-    return index();  //TODO insert webpage that the user will see after the action was performed successfully
+    return redirect(routes.HomeController.main(tab));
   }
 
   /**
@@ -186,45 +186,57 @@ public class HomeController extends Controller {
    * this method will be called when the application receives a
    * <code>GET</code> request with a path of <code>/</code>.
    */
-  public Result index() {
-    return ok(views.html.index.render(shs.getHome()));
+  public Result index(Http.Request request) {
+    return main(request,"none");
+  }
+  /**
+   * An action that renders an HTML page with a welcome message.
+   * The configuration in the <code>routes</code> file means that
+   * this method will be called when the application receives a
+   * <code>GET</code> request with a path of <code>/</code>.
+   */
+  public Result main(Http.Request request, String tab) {
+    return ok(views.html.index.render(tab, shs, formFactory.form(), request));
   }
   /**
    * Creates a [[models.User User]] instance from the information contained in the [[play.mvc.Http.Request Request]] and then adds it to the [[models.SHS `userMap`]].
    * @param request the http header from the user.
    * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successful addition of a [[models.User User]] to the [[models.SHS SHS]] or a redirection to another method upon failure.
    */
-  public Result createUser(Http.Request request) {
+  public Result createUser(Http.Request request, String tab) {
     DynamicForm dynamicForm = formFactory.form().bindFromRequest(request);
     String name, typeString, locationString;
     name = dynamicForm.get("name");
     typeString = dynamicForm.get("type");
+    locationString = dynamicForm.get("location");
     // 2nd error check. Web page should already have stopped these errors from occurring
     if (name == null || name.trim().equals("")) {
       // to pass to the webpage: dynamicForm.withError("name","The value must not be empty");
-      return badRequest(views.html.index.render(shs.getHome()));//TODO insert webpage that handles user creation
+      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));//TODO insert webpage that handles user creation
     }
 
     if (!User.isTypeStringValid(typeString)) {
       // to pass to the webpage: dynamicForm.withError("type","The value entered is invalid.");
-      return badRequest(views.html.index.render(shs.getHome()));//TODO insert webpage that handles user creation
+      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));//TODO insert webpage that handles user creation
     }
     User toCreate = new User(name, User.UserType.valueOf(typeString));
+    toCreate.setLocation(shs.getHome().get(locationString));
     if (toCreate.getType() == User.UserType.Parent) {
       if (shs.getParentAmount() >= 2 ) {
         return badRequest().flashing("error","You can only have a maximum of 2 parents per home.");//TODO insert webpage that the user will see on failure
       }
     }
     shs.getUserMap().put(name,toCreate);
-    return ok();//TODO insert webpage that the user will see after a successful user creation
+    return redirect(routes.HomeController.main(tab));
   }
+
   /**
    * Removes an existing [[models.User User]] instance from the [[models.SHS `userMap`]].
    * @param request the http header from the user.
    * @param name the [[models.User `name`]] of the [[models.User User]] to be deleted.
    * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successful removal of a [[models.User User]] from the [[models.SHS SHS]] or a redirection to another method upon failure.
    */
-  public Result deleteUser(Http.Request request, String name) {
+  public Result deleteUser(Http.Request request, String tab, String name) {
     User toDelete = shs.getUserMap().get(name);
     String errorMessage = null;
     if (toDelete == null) {
@@ -237,7 +249,7 @@ public class HomeController extends Controller {
     }
 
     shs.getUserMap().remove(name);
-    return ok();//TODO insert webpage that the user will see after a successful user deletion
+    return redirect(routes.HomeController.main(tab));
   }
 
   /**
@@ -246,11 +258,12 @@ public class HomeController extends Controller {
    * @param name the [[models.User `name`]] of the [[models.User User]] to be modified.
    * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successful modification of a [[models.User User]] from the [[models.SHS SHS]] or a redirection to another method upon failure.
    */
-  public Result editUser(Http.Request request, String name) {
+  public Result editUser(Http.Request request, String tab, String name) {
     DynamicForm dynamicForm = formFactory.form().bindFromRequest(request);
-    String newName, newTypeString;
+    String newName, newTypeString, locationString;
     newName = dynamicForm.get("name");
     newTypeString = dynamicForm.get("type");
+    locationString = dynamicForm.get("location");
     User toEdit = shs.getUserMap().get(name);
     if (toEdit == null) {
       return badRequest().flashing("error","The user you're trying to edit does not exist.");//TODO insert webpage that the user will see on failure
@@ -266,42 +279,41 @@ public class HomeController extends Controller {
       toEdit.setType(newType);
     } else {
       // to pass to the webpage: dynamicForm.withError("type","The value entered is invalid.");
-      return badRequest(views.html.index.render(shs.getHome()));//TODO insert webpage that handles user edition
+      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));
     }
+
+    Location location = shs.getHome().get(locationString);
+    String errorString = null;
+    if (location == null) {
+      return badRequest().flashing("error", "The location you have selected does not exist");//TODO insert webpage that handles user placement
+    }
+    toEdit.setLocation(location);
+
 
     if (name == null || name.trim().equals("")) {
       // to pass to the webpage: dynamicForm.withError("name","The value must not be empty");
-      return badRequest(views.html.index.render(shs.getHome()));//TODO insert webpage that handles user edition
+      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));//TODO insert webpage that handles user edition
     } else if (!newName.equals(name)) {
       toEdit.setName(newName);
       shs.getUserMap().remove(name);
       shs.getUserMap().put(newName, toEdit);
     }
-    return ok();//TODO insert webpage that the user will see after a successful user edition
+    return redirect(routes.HomeController.main(tab));//TODO insert webpage that the user will see after a successful user edition
   }
 
   /**
-   * Modifies the [[models.User `location`]] property of a [[models.User User]] instance within the [[models.SHS `userMap`]].
+   * Makes an existing [[models.User User]] instance from the [[models.SHS `userMap`]] into the [[models.SHS `activeUser`]].
    * @param request the http header from the user.
-   * @param name the [[models.User `name`]] of the [[models.User User]] to be modified.
-   * @param locationString the [[models.Location `name`]] of the new [[models.Location Location]].
-   * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successful modification of a [[models.User User]] from the [[models.SHS SHS]] or a redirection to another method upon failure.
+   * @param name the [[models.User `name`]] of the [[models.User User]] to be set as active.
+   * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successful change or a redirection to another method upon failure.
    */
-  public Result placeUser(Http.Request request, String name, String locationString) {
-    User toPlace = shs.getUserMap().get(name);
-    Location location = shs.getHome().get(locationString);
-    String errorString = null;
-    if (toPlace == null) {
-      errorString = "The user you have selected does not exist";
-    } else if (location == null) {
-      errorString = "The location you have selected does not exist";
+  public Result setActiveUser(Http.Request request, String tab, String name) {
+    User user = shs.getUserMap().get(name);
+    if (user == null) {
+      return badRequest().flashing("error", "The user you have selected does not exist");//TODO insert webpage that handles user placement
     }
-    if (errorString != null) {
-      return badRequest().flashing("error", errorString);//TODO insert webpage that handles user placement
-    }
-
-    toPlace.setLocation(location);
-    return ok();//TODO insert webpage that the user will see after a successful user placement
+    shs.setActiveUser(name);
+    return redirect(routes.HomeController.main(tab));
   }
 
   /**
@@ -309,7 +321,7 @@ public class HomeController extends Controller {
    * @param request the http header from the user.
    * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successful modification of all attributes or a redirection to another method upon failure.
    */
-  public Result editSimulationParameters(Http.Request request) {
+  public Result editSimulationParameters(Http.Request request, String tab) {
     DynamicForm dynamicForm = formFactory.form().bindFromRequest(request);
     String newTemperatureString = dynamicForm.get("temperature");
     String dateString = dynamicForm.get("date");
@@ -319,28 +331,28 @@ public class HomeController extends Controller {
       newTemperature = parseTemperature(newTemperatureString);
     } catch (NumberFormatException e) {
       // to pass to the webpage: dynamicForm.withError("temperature","The value entered is invalid");
-      return badRequest(views.html.index.render(shs.getHome()));//TODO insert webpage that handles simulation parameter edition
+      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));//TODO insert webpage that handles simulation parameter edition
     }
     LocalDate newDate;
     try {
       newDate = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     } catch (Exception e) {
       // to pass to the webpage: dynamicForm.withError("date","The value entered is invalid");
-      return badRequest(views.html.index.render(shs.getHome()));//TODO insert webpage that handles simulation parameter edition
+      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));//TODO insert webpage that handles simulation parameter edition
     }
     LocalTime newTime;
     try {
       newTime = LocalTime.parse(timeString, DateTimeFormatter.ofPattern("HH:mm:ss"));
     } catch (Exception e) {
       // to pass to the webpage: dynamicForm.withError("time","The value entered is invalid");
-      return badRequest(views.html.index.render(shs.getHome()));//TODO insert webpage that handles simulation parameter edition
+      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));//TODO insert webpage that handles simulation parameter edition
     }
     LocalDateTime newCurrentTime = LocalDateTime.of(newDate, newTime);
 
 
     shs.setOutsideTemperature(newTemperature);
     shs.setCurrentTime(newCurrentTime);
-    return ok();//TODO insert webpage that the user will see after a successful simulation parameter edition
+    return redirect(routes.HomeController.main(tab));
   }
 
   /**
@@ -351,23 +363,27 @@ public class HomeController extends Controller {
    * @param action a [[java.lang.String String]] representation of the action to be performed.
    * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successful execution of the specified action or a redirection to another method upon failure.
    */
-  public Result performDeviceAction(Http.Request request, String locationString, String name, String action) {
+  public Result performDeviceAction(Http.Request request, String tab, String locationString, String name, String action) {
     Location location = shs.getHome().get(locationString);
     if (location == null) {
-      return badRequest().flashing("error","The location for that device does not exist");//TODO insert webpage that the user will see on failure
+      return redirect(routes.HomeController.main(tab)).flashing("error","The location for that device does not exist");//TODO insert webpage that the user will see on failure
     }
     Device device = location.getDeviceMap().get(name);
     if (device == null) {
-      return badRequest().flashing("error","That device does not exist in the specified location");//TODO insert webpage that the user will see on failure
+      return redirect(routes.HomeController.main(tab)).flashing("error","That device does not exist in the specified location");//TODO insert webpage that the user will see on failure
     }
     boolean result = device.doAction(action);
     if (result) {
-      return ok();//TODO insert webpage that the user will see after the action was performed successfully
+      return redirect(routes.HomeController.main(tab));
     } else {
-      return badRequest().flashing("error","That action could not be performed");//TODO insert webpage that the user will see on failure
+      return redirect(routes.HomeController.main(tab)).flashing("error","That action could not be performed");//TODO insert webpage that the user will see on failure
     }
-
   }
+
+  /**
+   * Helper method to give dynamic access to the overriden performDeviceAction method.
+   */
+  public Result deviceActionHelper(Http.Request request, String tab){ return ok();}
 
   /**
    * Starts or stops the simulation if the pre-requisites are satisfied.
@@ -376,28 +392,29 @@ public class HomeController extends Controller {
    */
   public Result toggleSimulationStatus(Http.Request request) {
     if (shs.getActiveUser() == null) {
-      return badRequest().flashing("error","You need to log in to perform this action");//TODO insert webpage that the user will see on failure
+      return redirect(routes.HomeController.index()).flashing("error","You need to log in to perform this action");//TODO insert webpage that the user will see on failure
     }
     if (shs.getHome().size() <= 1) {
-      return badRequest().flashing("error","You need to load a house layout to perform this action");//TODO insert webpage that the user will see on failure
+      return redirect(routes.HomeController.index()).flashing("error","You need to load a house layout to perform this action");//TODO insert webpage that the user will see on failure
     }
     shs.setRunning(!shs.isRunning());
-    return ok();//TODO insert webpage that the user will see after the action was performed successfully
+    return redirect(routes.HomeController.index());//TODO insert webpage that the user will see after the action was performed successfully
   }
 
 
 
 
   public Result loadSideBar(Http.Request request, String name) {
+    DynamicForm dynamicForm = formFactory.form();
     switch (name) {
       case "user":
-        return ok(views.html.userSidebar.render(shs.getActiveUser(), shs.getUserMap()));
+        return ok(views.html.userSidebar.render(shs.getActiveUser(), shs, dynamicForm, request));
       case "house":
         return ok(views.html.houseLayout.render(formFactory.form(), request));
       case "device":
-        return ok(views.html.deviceSidebar.render());
+        return ok(views.html.contextSidebar.render(shs, dynamicForm, request));
       case "parameters":
-        return ok(views.html.parameters.render());
+        return ok(views.html.parameters.render(shs, dynamicForm, request));
     }
     return ok();
   }

@@ -2,6 +2,7 @@ package models;
 
 import javax.inject.Singleton;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -58,6 +59,9 @@ public class SHS extends Module {
   private SHS(String name) {
     super(name);
     this.userMap = new HashMap<>();
+    User defaultUser = new User("Starting User", User.UserType.Parent);
+    this.userMap.put(defaultUser.getName(), defaultUser);
+    this.activeUser = defaultUser;
     this.moduleList = new LinkedList<>();
     this.home = new HashMap<>();
     this.isRunning = false;
@@ -70,6 +74,20 @@ public class SHS extends Module {
    */
   public LocalDateTime getCurrentTime() {
     return currentTime;
+  }
+
+  /**
+   * Get the SHS' current time String.
+   */
+  public String getTimeString() {
+    return currentTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+  }
+
+  /**
+   * Get the SHS' current date String.
+   */
+  public String getDateString() {
+    return currentTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
   }
 
   /**

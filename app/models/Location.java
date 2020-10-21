@@ -69,6 +69,15 @@ public class Location {
   }
 
   /**
+   * Get the Location temperature String.
+   */
+  public String getTemperatureString() {
+    int base = temperature/100;
+    int decimal = temperature%100;
+    return base + "." + (decimal<10?"0"+decimal:decimal);
+  }
+
+  /**
    * Set the Location temperature.
    */
   public void setTemperature(int temperature) {

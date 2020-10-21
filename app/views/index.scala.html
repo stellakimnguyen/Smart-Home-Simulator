@@ -1,25 +1,20 @@
-@(home: java.util.Map[String, models.Location])
+@(tab: String)(implicit shs: SHS, dynamicForm: DynamicForm, request: Http.Request)
 
-<style>
-  .layout {
-    height: calc(100% - 12px);
-    width: 100%;
-    border-radius: 12px;
-    background-color: #eff5ff;
-    padding: 20px;
-    position: relative;
-  }
-
-  .metricsOverlay {
-    position: absolute;
-    bottom: 20px;
-  }
-</style>
-
-@layouts.main {
+@layouts.main(tab){
   <div class="layout">
-	  @if(home.size > 1) {
-		  House layout was loaded!
+	  @if(shs.isRunning) {
+		  The simulation is now running.
+	  } else {
+		  The simulation is now stopped.
+	  }
+	  @if(shs.getHome.size > 1) {
+		  <br />
+		  @for(locationEntry: (String, Location) <- shs.getHome) {
+			  <div class="deviceTitle">@locationEntry._1 : @locationEntry._2.getTemperatureString °C</div>
+			  @for(deviceEntry: (String, Device) <- locationEntry._2.getDeviceMap) {
+				  <div class="deviceTitle"> - @deviceEntry._1 : @deviceEntry._2.getStatus</div>
+			  }
+		  }
 	  } else {
 		  House Layout is missing!
 	  }

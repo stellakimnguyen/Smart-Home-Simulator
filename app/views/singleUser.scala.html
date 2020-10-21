@@ -1,125 +1,5 @@
-@(user: User)
-
-<script>
-    function toggleUserSettings() {
-        document.getElementById(user_@user.getName + "NameInput").disabled = !document.getElementById(user_@user.getName + "NameInput").disabled;
-        document.getElementById(user_@user.getName + "TypeInput").disabled = !document.getElementById(user_@user.getName + "TypeInput").disabled;
-        document.getElementById(user_@user.getName + "LocationInput").disabled = !document.getElementById(user_@user.getName + "LocationInput").disabled;
-        document.getElementById(user_@user.getName + "DeleteButton").classList.toggle('hidden');
-        document.getElementById(user_@user.getName + "SubmitInfo").classList.toggle('hidden');
-    }
-
-    function updateCurrentUser() {
-        console.log('Update current user');
-        // Update current user
-    }
-
-    function confirmDelete() {
-        document.getElementById(user_@user.getName + "DeleteButton").classList.toggle('deleteExpanded');
-        document.getElementById('deleteTitle').classList.toggle('hidden');
-
-        // Confirm User Removal
-        if (!document.getElementById(user_@user.getName + "DeleteButton").classList.contains('deleteExpanded')) {
-            // Delete user from user list here
-            console.log("Deleted user");
-        }
-    }
-
-    function submitUserInformation() {
-        let name = document.getElementById(user_@user.getName + "NameInput");
-        let type = document.getElementById(user_@user.getName + "TypeInput");
-        let location = document.getElementById(user_@user.getName + "LocationInput");
-        console.log('Update user information to: ' + name + ', ' + type + ', ' + location);
-    }
-</script>
-
-<style>
-    .roundedCornerUser {
-        border-radius: 12px;
-        background-color: #EEEEEE;
-        padding: 10px 10px 0px 15px;
-        width: 100%;
-        height: auto;
-        transition: 250ms;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 10px;
-    }
-
-    .userContainer {
-        overflow: scroll;
-    }
-
-    .testDP {
-        border-radius: 1000px;
-        height: 60px;
-        width: 60px;
-        background: white;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .userGear {
-        position: absolute;
-        top: 0;
-        right: 0;
-    }
-    .userGear:hover, .userMakeCurrent:hover {
-        fill: #fff;
-        transition: 250ms;
-        cursor: pointer;
-    }
-
-    .userMakeCurrent {
-        position: absolute;
-        top: 0;
-        right: 20px;
-    }
-
-    .userTitle {
-        text-transform: uppercase;
-        font-weight: 700;
-        letter-spacing: 0.2em;
-        font-size: small;
-        display: flex;
-        justify-content: space-between;
-    }
-
-    .form-control-sm {
-        float: right;
-        margin-top: 10px;
-    }
-
-    .deleteUserBtn {
-        border-radius: 100px;
-        background: #ff432e;
-        padding: 5px;
-        height: 22px;
-        width: 22px;
-        text-align: center;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: 250ms;
-        cursor: pointer;
-        float: right;
-        margin: 0 15px 15px 0;
-    }
-    .deleteExpanded {
-        width: 88px;
-    }
-    .deleteTitle {
-        color: white;
-        font-weight: 600;
-        margin-right: 10px;
-    }
-    .hidden {
-        display: none;
-    }
-</style>
+@import views.html.helper.CSRF
+@(user: User)(implicit shs: SHS, dynamicForm: DynamicForm, request: Http.Request)
 
 <div>
     <div class="flex-container roundedCornerUser" id="userBackground">
@@ -129,36 +9,44 @@
             </svg>
         </div>
         <div class="col" style="position: relative">
-            <svg onclick="toggleUserSettings()" height="1em" viewBox="0 0 16 16" class="bi bi-gear-fill userGear" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <svg onclick='toggleUserSettings("@user.getId")' height="1em" viewBox="0 0 16 16" class="bi bi-gear-fill userGear" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 0 0-5.86 2.929 2.929 0 0 0 0 5.858z"/>
             </svg>
-            <svg onclick="updateCurrentUser()" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-lightning-fill userMakeCurrent" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <svg onclick='updateCurrentUser("@user.getName")' width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-lightning-fill userMakeCurrent" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09z"/>
             </svg>
             @* READ-ONLY STATE *@
-            <form class="form-group" id='@("user_" + user.getName + "Form")' style='margin-top: 15px'>
+            <form class="form-group" id='@("user_" + user.getId + "Form")' style='margin-top: 15px' method="post" action='@routes.HomeController.editUser("user", user.getName)'>
+	            <fieldset hidden>@CSRF.formField</fieldset>
                 <div class="userTitle form-inline">
                     <div>name:</div>
-                    <input type="text" class="form-control form-control-sm" id='@(user.getName) + "NameInput' placeholder="user's name" disabled>
+                    <input name="name" type="text" class="form-control form-control-sm" id='@("user_" + user.getId + "NameInput")' placeholder="user's name" value='@user.getName' disabled>
                 </div>
                 <div class="userTitle form-inline">
                     <div>type:</div>
-                    <select class="form-control-sm" id="@("user_" + user.getName "TypeInput")" disabled>
-                        <option>Underage Teenager</option>
+                    <select name="type" class="form-control-sm" id="@("user_" + user.getId + "TypeInput")" disabled>
+	                    <option value='@User.UserType.Parent' @if(user.getType.equals(User.UserType.Parent)){selected}>Parent</option>
+	                    <option value='@User.UserType.Child_Adult' @if(user.getType.equals(User.UserType.Child_Adult)){selected}>Child - Adult</option>
+	                    <option value='@User.UserType.Child_Teenager' @if(user.getType.equals(User.UserType.Child_Teenager)){selected}>Child - Teenager</option>
+	                    <option value='@User.UserType.Child_Underage' @if(user.getType.equals(User.UserType.Child_Underage)){selected}>Child - Underage</option>
+	                    <option value='@User.UserType.Guest' @if(user.getType.equals(User.UserType.Guest)){selected}>Guest</option>
+	                    <option value='@User.UserType.Stranger' @if(user.getType.equals(User.UserType.Stranger)){selected}>Stranger</option>
                     </select>
                 </div>
                 <div class='userTitle form-inline'>
                     <div>location:</div>
-                    <select class='form-control-sm' id="@("user_" + user.getName + "LocationInput")" disabled>
-                        <option>Kitchen</option>
+                    <select name="location" class='form-control-sm' id="@("user_" + user.getId + "LocationInput")" disabled>
+	                    @for(entry: (String, Location) <- shs.getHome) {
+		                    <option value='@entry._1' @if(user.getLocation.equals(entry._2)){selected}>@entry._1</option>
+	                    }
                     </select>
                 </div>
-                <button id="@("user_" + user.getName + "SubmitInfo")" class="btn btn-primary btn-sm hidden" style="float: right; margin-top: 10px;">submit</button>
+                <button id="@("user_" + user.getId + "SubmitInfo")" class="btn btn-primary btn-sm hidden" style="float: right; margin-top: 10px;">submit</button>
             </form>
 
             @* EDIT MODE *@
-            <div id="@("user_" + user.getName + "DeleteButton")" onclick="confirmDelete()" class="deleteUserBtn hidden">
-                <div id="deleteTitle" class="deleteTitle hidden">delete</div>
+            <div id='@("user_" + user.getId + "DeleteButton")' onclick='confirmDelete("@user.getId", "@user.getName")' class="deleteUserBtn hidden">
+                <div id='@("user_" + user.getId + "deleteTitle")' class="deleteTitle hidden">delete</div>
                 <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash-fill" fill="white" xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5a.5.5 0 0 0-1 0v7a.5.5 0 0 0 1 0v-7z"/>
                 </svg>

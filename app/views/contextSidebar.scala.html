@@ -1,0 +1,11 @@
+@()(implicit shs: SHS, dynamicForm: DynamicForm, request: Http.Request)
+<div>
+	@for(locationEntry: (String, Location) <- shs.getHome) {
+		<div class="locationTitle">@locationEntry._1</div>
+		@for(deviceEntry: (String, Device) <- locationEntry._2.getDeviceMap) {
+			@if(deviceEntry._2.isInstanceOf[models.Window]) {
+				@singleWindow(deviceEntry._2.asInstanceOf[models.Window])
+			}
+		}
+	}
+</div>

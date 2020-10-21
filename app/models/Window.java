@@ -71,18 +71,21 @@ public class Window extends Connection {
    */
   @Override
   public boolean doAction(String action) {
-    if (action.equals(Device.actionOpen)) {
-      super.setStatus(Device.statusOpen);
-      return true;
-    } else if (action.equals(Device.actionClose)) {
-      super.setStatus(Device.statusClosed);
-      return true;
-    } else if (action.equals(actionBlock)) {
-      setBlocked(true);
-    } else if (action.equals(actionUnblock)) {
-      setBlocked(false);
+    switch (action) {
+      case Device.actionOpen:
+        super.setStatus(Device.statusOpen);
+        return true;
+      case Device.actionClose:
+        super.setStatus(Device.statusClosed);
+        return true;
+      case actionBlock:
+        setBlocked(true);
+        return true;
+      case actionUnblock:
+        setBlocked(false);
+        return true;
+      default: return false;
     }
-    return false;
   }
 
   /**

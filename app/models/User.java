@@ -65,6 +65,14 @@ public class User {
   }
 
   /**
+   * Get the User name, with no whitespaces.
+   */
+  public String getId() {
+    return name.replaceAll(" ","");
+  }
+
+
+  /**
    * Set the User name.
    */
   public void setName(String name) {

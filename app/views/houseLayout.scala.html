@@ -21,7 +21,7 @@
     }
 </style>
 
-<form action='@routes.HomeController.loadHouseFromFile()' method="post" enctype="multipart/form-data">
+<form action='@routes.HomeController.loadHouseFromFile("house")' method="post" enctype="multipart/form-data">
 	<fieldset hidden>@CSRF.formField </fieldset>
     <div class="layoutTitle">Upload House Layout</div>
     <div class="input-group mb-3">
