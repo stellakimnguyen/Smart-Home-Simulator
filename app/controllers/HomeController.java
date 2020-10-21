@@ -109,7 +109,9 @@ public class HomeController extends Controller {
     Http.MultipartFormData<TemporaryFile> body = request.body().asMultipartFormData();
     Http.MultipartFormData.FilePart<TemporaryFile> tempFile = body.getFile("layoutFile");
     TemporaryFile file = tempFile.getRef();
-
+    if (file == null) {
+      return redirect(routes.HomeController.main(tab));
+    }
     File toRead = file.path().toFile();
 
     //File toRead = (File)request.body().asMultipartFormData().getFile("layoutFile").getRef();
