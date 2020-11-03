@@ -1,5 +1,8 @@
 package models;
 
+import java.util.Set;
+import java.util.HashSet;
+
 /**
  * Template for all modules registered at [[models.SHS SHS]]. Contains common attributes.
  * ===Attributes===
@@ -9,8 +12,9 @@ package models;
  * @author Rodrigo M. Zanini (40077727)
  * @author Pierre-Alexis Barras (40022016)
  */
-public abstract class Module {
+public abstract class Module implements Observable {
   private String name;
+  private final Set<Observer> observers = new HashSet<>();
 
   public Module(String name) {
     this.name = name;
@@ -28,5 +32,22 @@ public abstract class Module {
    */
   public void setName(String name) {
     this.name = name;
+  }
+
+  @Override
+  public void addObserver(Observer observer) {
+    this.observers.add(observer);
+  }
+
+  @Override
+  public void removeObserver(Observer observer) {
+    this.observers.remove(observer);
+  }
+
+  @Override
+  public void notifyObservers() {
+    for (Observer observer : observers) {
+      observer.observe(this);
+    }
   }
 }

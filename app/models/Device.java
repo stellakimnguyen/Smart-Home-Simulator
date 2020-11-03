@@ -94,10 +94,10 @@ public abstract class Device {
     }
     // if device is already at a location, remove it from that map.
     if (this.location != null) {
-      this.location.getDeviceMap().remove(this.name);
+      this.location.removeDevice(this);
     }
     this.location = location;
-    this.location.getDeviceMap().put(this.name, this);
+    this.location.addDevice(this);
     return true;
   }
 
