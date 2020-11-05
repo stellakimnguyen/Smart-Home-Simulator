@@ -1,4 +1,4 @@
-package models;
+package models.modules;
 
 import javax.inject.Singleton;
 
@@ -15,6 +15,17 @@ import javax.inject.Singleton;
  * @author Stella Nguyen (40065803)
  */
 @Singleton
-public class SHC {
+public class SHC extends Module {
+  private static final SHC instance = new SHC("SHC");
 
+  /**
+   * Get the Singleton Class instance for SHS.
+   */
+  public static SHC getInstance(){
+    return instance;
+  }
+
+  private SHC(String name) {
+    super(name);
+  }
 }

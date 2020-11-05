@@ -1,7 +1,11 @@
-package models;
+package models.devices;
+
+import models.Location;
+import models.modules.SHS;
+import models.exceptions.WindowBlockedException;
 
 /**
- * Extends a [[models.Connection Connection]]: fixes the [[models.Location Location]] it connects to to [[models.SHS `Outside`]] and introduces a barrier between both [[models.Location Locations]], new statuses, and new actions.
+ * Extends a [[models.devices.Connection Connection]]: fixes the [[models.Location Location]] it connects to to [[models.modules.SHS `Outside`]] and introduces a barrier between both [[models.Location Locations]], new statuses, and new actions.
  * ===Attributes===
  * `isBlocked (private boolean):` the condition of the barrier.
  *
@@ -48,7 +52,7 @@ public class Window extends Connection {
    * @return a [[String]] that compounds the device status, a comma, and the condition of the barrier.
    */
   @Override
-  public String getStatus() {
+  public String getFullStatus() {
     return super.getStatus() + "," + (isBlocked?statusBlocked:statusNotBlocked);
   }
 
@@ -70,13 +74,19 @@ public class Window extends Connection {
    * @return true if the action was performed, false otherwise.
    */
   @Override
-  public boolean doAction(String action) {
+  public boolean doAction(String action) throws WindowBlockedException {
     switch (action) {
       case Device.actionOpen:
-        super.setStatus(Device.statusOpen);
+        if (isBlocked) {
+          throw new WindowBlockedException(this);
+        }
+        setStatus(Device.statusOpen);
         return true;
       case Device.actionClose:
-        super.setStatus(Device.statusClosed);
+        if (isBlocked) {
+          throw new WindowBlockedException(this);
+        }
+        setStatus(Device.statusClosed);
         return true;
       case actionBlock:
         setBlocked(true);
@@ -90,10 +100,15 @@ public class Window extends Connection {
 
   /**
    * By design, a window always connects to Outside
-   * @return the [[models.SHS Outside]] instance registered in [[models.SHS SHS]]
+   * @return the [[models.modules.SHS Outside]] instance registered in [[models.modules.SHS SHS]]
    */
   @Override
   public Location getSecondLocation() {
     return SHS.getOutside();
+  }
+
+  @Override
+  public String toString() {
+    return "[" + getLocation().getName() + "] " + getName();
   }
 }

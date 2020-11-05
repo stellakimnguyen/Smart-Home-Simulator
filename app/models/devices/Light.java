@@ -1,7 +1,9 @@
-package models;
+package models.devices;
+
+import models.devices.Device;
 
 /**
- * Extends a [[models.Device Device]]: represents a light source.
+ * Extends a [[models.devices.Device Device]]: represents a light source.
  *
  * @version 1
  * @author Rodrigo M. Zanini (40077727)

@@ -1,5 +1,7 @@
 package models;
 
+import models.devices.Device;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -20,7 +22,7 @@ import java.util.Set;
  *
  * `locationType (private LocationType):` The type of the location.
  *
- * `deviceMap (private [[java.util.Map Map]]&#91;[[java.lang.String String]], [[models.Device Device]]&#93;):` The map of all [[models.Device Devices]] at this location.
+ * `deviceMap (private [[java.util.Map Map]]&#91;[[java.lang.String String]], [[models.devices.Device Device]]&#93;):` The map of all [[models.devices.Device Devices]] at this location.
  *
  * `userMap (private [[java.util.Map Map]]&#91;[[java.lang.String String]], [[models.User User]]&#93;):` The map of all [[models.User Users]] at this location.
  *
@@ -108,7 +110,7 @@ public class Location implements Observable {
   }
 
   /**
-   * Get the [[java.util.Map Map]] of [[models.Device Devices]] at the Location. It is a clone therefore modifying the
+   * Get the [[java.util.Map Map]] of [[models.devices.Device Devices]] at the Location. It is a clone therefore modifying the
    * returned map will not affect the location.
    */
   public Map<String, Device> getDeviceMap() {
@@ -116,16 +118,16 @@ public class Location implements Observable {
   }
 
   /**
-   * Add a [[models.Device Device]] to the [[java.util.Map Map]] of [[models.Device Devices]] of this location.
-   * @param device the [[models.Device Device]] to be added
+   * Add a [[models.devices.Device Device]] to the [[java.util.Map Map]] of [[models.devices.Device Devices]] of this location.
+   * @param device the [[models.devices.Device Device]] to be added
    */
   public void addDevice(Device device) {
     this.deviceMap.put(device.getName(), device);
   }
 
   /**
-   * Remove a [[models.Device Device]] from the [[java.util.Map Map]] of [[models.Device Devices]] of this location.
-   * @param device the [[models.Device Device]] to be removed
+   * Remove a [[models.devices.Device Device]] from the [[java.util.Map Map]] of [[models.devices.Device Devices]] of this location.
+   * @param device the [[models.devices.Device Device]] to be removed
    */
   public void removeDevice(Device device) {
     this.deviceMap.remove(device.getName());

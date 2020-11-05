@@ -1,4 +1,5 @@
 @import views.html.helper.CSRF
+@import models.modules.SHS
 @()(implicit shs: SHS, dynamicForm: DynamicForm, request: Http.Request)
 
 <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("libraries/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css")">
@@ -34,22 +35,37 @@
 
 <form name="parameters" id="parameters" method="post" action='@routes.HomeController.editSimulationParameters("parameters")'>
 	<fieldset hidden>@CSRF.formField</fieldset>
-    <div class="paramsTitle">Date and Time</div>
-    <div class="paramBackground">
-        <div id="datepicker" class="input-group mb-3">
-            <input name="date" id="simulatorDate" class="form-control add-on bg-white" placeholder="dd/mm/yyyy" data-format="dd/mm/yyyy" type="text" aria-describedby="dateLabel" value='@shs.getDateString' readonly/>
-            <div class="input-group-append">
-                <span data-time-icon="icon-time" data-date-icon="icon-calendar" class="input-group-text" id="dateLabel">📅</span>
-            </div>
-        </div>
-        <div id="timepicker" class="input-group mb-3">
-            <input name="time" id="simulatorTime" class="form-control add-on bg-white" placeholder="hh:mm:ss" data-format="hh:mm:ss" type="text" aria-describedby="timeLabel" value='@shs.getTimeString' readonly/>
-            <div class="input-group-append">
-                <span data-time-icon="icon-time" data-date-icon="icon-calendar" class="input-group-text" id="timeLabel">🕑</span>
-            </div>
-        </div>
-    </div>
 
+	<div class="paramsTitle">Simulation Time Multiplier</div>
+	<div class="paramBackground">
+		<div class="input-group mb-3">
+			<input name="timeMultiplier" id="timeMultiplier" class="form-control add-on bg-white" type="number" aria-describedby="timeMultiplierLabel" value='@shs.getTimeMultiplier' min="1"/>
+			<div class="input-group-append">
+				<span class="input-group-text" id="timeMultiplierLabel"><i class="fas fa-tachometer-alt"></i></span>
+			</div>
+		</div>
+	</div>
+	@if(!shs.isRunning) {
+		<div class="paramsTitle">Date and Time</div>
+		<div class="paramBackground">
+			<div id="datepicker" class="input-group mb-3">
+				<input name="date" id="simulatorDate" class="form-control add-on bg-white" placeholder="dd/mm/yyyy" data-format="dd/mm/yyyy" type="text" aria-describedby="dateLabel" value='@shs.getDateString' readonly/>
+				<div class="input-group-append">
+					<span data-time-icon="icon-time" data-date-icon="icon-calendar" class="input-group-text" id="dateLabel">
+						📅
+					</span>
+				</div>
+			</div>
+			<div id="timepicker" class="input-group mb-3">
+				<input name="time" id="simulatorTime" class="form-control add-on bg-white" placeholder="hh:mm:ss" data-format="hh:mm:ss" type="text" aria-describedby="timeLabel" value='@shs.getTimeString' readonly/>
+				<div class="input-group-append">
+					<span data-time-icon="icon-time" data-date-icon="icon-calendar" class="input-group-text" id="timeLabel">
+						🕑
+					</span>
+				</div>
+			</div>
+		</div>
+	}
     <div class="paramsTitle">Temperature</div>
     <div class="paramBackground">
         <div class="input-group mb-3 temperatureParam">

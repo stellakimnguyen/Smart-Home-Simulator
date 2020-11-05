@@ -1,7 +1,7 @@
-package models;
+package models.devices;
 
 /**
- * Extends a [[models.Connection Connection]]: introduces a barrier between both [[models.Location Locations]], new statuses, and new actions.
+ * Extends a [[models.devices.Connection Connection]]: introduces a barrier between both [[models.Location Locations]], new statuses, and new actions.
  * ===Attributes===
  * `isLocked (private boolean):` the condition of the lock.
  *
@@ -48,7 +48,7 @@ public class Door extends Connection {
    * @return a [[java.lang.String String]] that compounds the device status, a comma, and the condition of the lock.
    */
   @Override
-  public String getStatus() {
+  public String getFullStatus() {
     return super.getStatus() + "," + (isLocked?statusLocked:statusNotLocked);
   }
 
