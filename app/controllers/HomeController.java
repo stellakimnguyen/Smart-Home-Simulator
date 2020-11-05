@@ -1,6 +1,11 @@
 package controllers;
 
 import models.*;
+import models.devices.*;
+import models.exceptions.DeviceException;
+import models.modules.SHC;
+import models.modules.SHS;
+import models.permissions.*;
 import play.data.DynamicForm;
 import play.data.FormFactory;
 import play.libs.Files.TemporaryFile;
@@ -9,20 +14,20 @@ import play.mvc.*;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 /**
- * Contains all actions that handle HTTP requests from the Users and the instance of [[models.SHS SHS]].
+ * Contains all actions that handle HTTP requests from the Users and the instance of [[models.modules.SHS SHS]].
  * ===Attributes===
  * `formFactory (private final FormFactory):` Helper to create HTML forms.
  *
- * `shs (private final [[models.SHS SHS]]):` Singleton instance of SHS.
+ * `shs (private final [[models.modules.SHS SHS]]):` Singleton instance of SHS.
  *
  * @version 1
  * @author Rodrigo M. Zanini (40077727)
@@ -31,10 +36,17 @@ import java.util.Scanner;
 public class HomeController extends Controller {
   private final FormFactory formFactory;
   public final SHS shs = SHS.getInstance();
+  public final SHC shc = SHC.getInstance();
+  private TimeUpdater timeUpdater = new TimeUpdater();
 
   @Inject
   public HomeController(FormFactory formFactory) {
     this.formFactory = formFactory;
+    initialize();
+  }
+
+  private void initialize() {
+
   }
 
   /**
@@ -64,7 +76,7 @@ public class HomeController extends Controller {
   }
 
   /**
-   * Reads a house layout formatted text file and parses the information into a [[java.util.Map Map]] of [[models.Location Locations]]. The [[java.util.Map Map]] is then set as the [[models.SHS SHS]] `home` value.
+   * Reads a house layout formatted text file and parses the information into a [[java.util.Map Map]] of [[models.Location Locations]]. The [[java.util.Map Map]] is then set as the [[models.modules.SHS SHS]] `home` value.
    * File content must respect the following format for success:
    * {{{
    * Locations {
@@ -77,11 +89,11 @@ public class HomeController extends Controller {
    * }
    * }}}
    * Location names must be unique. Device names must be unique for that location. No location may have devices of the same name.
-   * For each [[models.Device Device]] subclass, extra properties may need to be specified. refer to the list below for each subclass format:
-   *  - `[[models.Light Light]],<Light Name>,<Light Location Name>`
-   *  - `[[models.Connection Connection]],<Connection Name>,<Connection Location Name>,<Connection secondLocation Name>`
-   *  - `[[models.Door Door]],<Door Name>,<Door Location Name>,<Door secondLocation Name>`
-   *  - `[[models.Window Window]],<Window Name>,<Window Location Name>,<Window secondLocation Name>`
+   * For each [[models.devices.Device Device]] subclass, extra properties may need to be specified. refer to the list below for each subclass format:
+   *  - `[[models.devices.Light Light]],<Light Name>,<Light Location Name>`
+   *  - `[[models.devices.Connection Connection]],<Connection Name>,<Connection Location Name>,<Connection secondLocation Name>`
+   *  - `[[models.devices.Door Door]],<Door Name>,<Door Location Name>,<Door secondLocation Name>`
+   *  - `[[models.devices.Window Window]],<Window Name>,<Window Location Name>,<Window secondLocation Name>`
    *
    * @example {{{
    *     Locations {
@@ -114,7 +126,6 @@ public class HomeController extends Controller {
     }
     File toRead = file.path().toFile();
 
-    //File toRead = (File)request.body().asMultipartFormData().getFile("layoutFile").getRef();
     try(Scanner in = new Scanner(toRead)){  //safely auto-close scanner
 
       boolean isLocation = false;
@@ -124,7 +135,6 @@ public class HomeController extends Controller {
 
       while (in.hasNextLine()) {
         fileLine = in.nextLine(); //store line temporarily in string for manipulation
-        System.out.println(fileLine);
 
         switch(fileLine){ //determine if line has
           case "Locations {":
@@ -161,7 +171,7 @@ public class HomeController extends Controller {
                 case "Door":
                   Door newDoor = new Door(lineStringArray[1]);
                   newDoor.setLocation(newDeviceLocation);
-                  newDoor.setSecondLocation(lineStringArray[3].equals("Outside")?SHS.getOutside():newHouseMap.get(lineStringArray[3]));
+                  newDoor.setSecondLocation(lineStringArray[3].equals("Outside")? SHS.getOutside():newHouseMap.get(lineStringArray[3]));
                   break;
                 case "Window":
                   Window newWindow = new Window(lineStringArray[1]);
@@ -183,6 +193,191 @@ public class HomeController extends Controller {
   }
 
   /**
+   * Reads a user profile formatted text file and parses the information into a [[java.util.Map Map]] of [[models.User Users]]. The [[java.util.Map Map]] is then set as the [[models.modules.SHS SHS]] `userMap` value.
+   * The file also updates [[models.permissions.Permission Permissions]].
+   * File content must respect the following format for success:
+   * {{{
+   * Users {
+   * <User Name>,<Parent/Child_Adult/Child_Teenager/Child_Underage/Guest/Stranger>(,Active)
+   * ...
+   * }
+   * Permissions {
+   * <Permission Class Type>,always,(Comma Separated list of [[models.User User.UserTypes]]),home,(Comma Separated list of [[models.User User.UserTypes]]),local,(Comma Separated list of [[models.User User.UserTypes]])
+   * ...
+   * }
+   * }}}
+   * User names must be unique.
+   * Only one [[models.User User]] can be set to "Active". If multiple are set, only the last one will be considered.
+   *
+   * @example {{{
+   *     Users {
+   *     Father,Parent,Active
+   *     Mother,Parent
+   *     Youngest Daughter,Child_Underage
+   *     }
+   *     Permissions {
+   *     PermitWindowOpenClose,local,Parent,home,always
+   *     }
+   * }}}
+   * @param request the http header from the user.
+   * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successfully loading the file data into the SHS or a redirection to another method if there was an error while reading the file.
+   */
+  public Result loadUsersFromFile(Http.Request request, String tab) {
+    Http.MultipartFormData<TemporaryFile> body = request.body().asMultipartFormData();
+    Http.MultipartFormData.FilePart<TemporaryFile> tempFile = body.getFile("userFile");
+    TemporaryFile file = tempFile.getRef();
+    if (file == null) {
+      return redirect(routes.HomeController.main(tab));
+    }
+    File toRead = file.path().toFile();
+    try(Scanner in = new Scanner(toRead)){  //safely auto-close scanner
+      boolean isUser = false;
+      String fileLine;
+      String[] lineStringArray;
+      Map<String, User> newUserMap = new HashMap<>();
+      shs.setUserMap(newUserMap);
+
+      while (in.hasNextLine()) {
+        fileLine = in.nextLine(); //store line temporarily in string for manipulation
+
+        switch(fileLine){ //determine if line has
+          case "Users {":
+            isUser = true;
+            break;
+          case "Permissions {":
+            isUser = false;
+            break;
+          case "}":
+            break;
+          default:
+            //split file line according to ',' delimiter
+            lineStringArray = fileLine.split(",");
+
+            if (isUser){ //create a User instance
+              User newUser = new User(lineStringArray[0],User.UserType.valueOf(lineStringArray[1]));
+              newUserMap.put(newUser.getName(), newUser); //split into two steps for readability
+              if (lineStringArray.length>2) {
+                shs.setActiveUser(newUser.getName());
+              }
+            } else { //update Permissions
+              Permission permission;
+              switch (lineStringArray[0]) {
+                case "PermitDoorLockUnlock":
+                  permission = PermitDoorLockUnlock.getPermission();
+                  break;
+                case "PermitDoorOpenClose":
+                  permission = PermitDoorOpenClose.getPermission();
+                  break;
+                case "PermitLightOnOff":
+                  permission = PermitLightOnOff.getPermission();
+                  break;
+                case "PermitWindowOpenClose":
+                  permission = PermitWindowOpenClose.getPermission();
+                  break;
+                default:
+                  throw new Exception();
+              }
+
+              HashSet<User.UserType> newSet = new HashSet<>();
+              for (int i = 1; i < lineStringArray.length; i++) {
+                switch (lineStringArray[i]) {
+                  case "local":
+                    newSet = new HashSet<>();
+                    permission.setLocal(newSet);
+                    break;
+                  case "home":
+                    newSet = new HashSet<>();
+                    permission.setHome(newSet);
+                    break;
+                  case "always":
+                    newSet = new HashSet<>();
+                    permission.setAlways(newSet);
+                    break;
+                  default:
+                    newSet.add(User.UserType.valueOf(lineStringArray[i]));
+                }
+              }
+            }
+        }
+      }
+      //If function gets here, file is properly formatted and there were no issues generating locations and devices
+
+    } catch (FileNotFoundException e) {
+      return badRequest().flashing("error","File could not be found");//TODO insert webpage that the user will see on failure
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    //TODO Future Deliver: add thorough exception handling
+
+    return redirect(routes.HomeController.main(tab));
+  }
+
+  /**
+   * Saves the [[models.modules.SHS SHS.userMap]] and [[models.permissions Permission]] configurations to a file that the user can download.
+   * The file follows the same format as [[controllers.HomeController.loadUsersFromFile loadUsersFromFile()]].
+   * @return a file to be downloaded by the user.
+   */
+  public Result saveUsersToFile() {
+    FileWriter writer = null;
+    try {
+      File saveFile = new File("target/userProfiles.txt");
+      writer = new FileWriter(saveFile,false);
+      writer.write("Users {\n");
+      for (User user : shs.getUserMap().values()) {
+        writer.write(user.getName() + "," + user.getType());
+        if (user == shs.getActiveUser()) {
+          writer.write(",Active");
+        }
+        writer.write("\n");
+      }
+      writer.write("}\nPermissions {\n");
+      Permission permission;
+      for (int i = 0; i < 4; i++) {
+        switch (i) {
+          case 0:
+            permission = PermitDoorLockUnlock.getPermission();
+            writer.write("PermitDoorLockUnlock,always");
+            break;
+          case 1:
+            permission = PermitDoorOpenClose.getPermission();
+            writer.write("PermitDoorOpenClose,always");
+            break;
+          case 2:
+            permission = PermitLightOnOff.getPermission();
+            writer.write("PermitLightOnOff,always");
+            break;
+          default:
+            permission = PermitWindowOpenClose.getPermission();
+            writer.write("PermitWindowOpenClose,always");
+            break;
+        }
+        List<User.UserType> userTypes = new LinkedList<>(PermitDoorLockUnlock.getPermission().getAlways());
+        for (User.UserType userType : userTypes) {
+          writer.write("," + userType);
+        }
+        writer.write(",home");
+        userTypes = new LinkedList<>(PermitDoorLockUnlock.getPermission().getHome());
+        for (User.UserType userType : userTypes) {
+          writer.write("," + userType);
+        }
+        writer.write(",local");
+        userTypes = new LinkedList<>(PermitDoorLockUnlock.getPermission().getLocal());
+        for (User.UserType userType : userTypes) {
+          writer.write("," + userType);
+        }
+        writer.write("\n");
+      }
+      writer.write("}");
+      writer.close();
+      writer = null;
+      return ok(saveFile, false);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return ok(); //TODO
+  }
+
+  /**
    * An action that renders an HTML page with a welcome message.
    * The configuration in the <code>routes</code> file means that
    * this method will be called when the application receives a
@@ -201,9 +396,9 @@ public class HomeController extends Controller {
     return ok(views.html.index.render(tab, shs, formFactory.form(), request));
   }
   /**
-   * Creates a [[models.User User]] instance from the information contained in the [[play.mvc.Http.Request Request]] and then adds it to the [[models.SHS `userMap`]].
+   * Creates a [[models.User User]] instance from the information contained in the [[play.mvc.Http.Request Request]] and then adds it to the [[models.modules.SHS `userMap`]].
    * @param request the http header from the user.
-   * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successful addition of a [[models.User User]] to the [[models.SHS SHS]] or a redirection to another method upon failure.
+   * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successful addition of a [[models.User User]] to the [[models.modules.SHS SHS]] or a redirection to another method upon failure.
    */
   public Result createUser(Http.Request request, String tab) {
     DynamicForm dynamicForm = formFactory.form().bindFromRequest(request);
@@ -233,10 +428,10 @@ public class HomeController extends Controller {
   }
 
   /**
-   * Removes an existing [[models.User User]] instance from the [[models.SHS `userMap`]].
+   * Removes an existing [[models.User User]] instance from the [[models.modules.SHS `userMap`]].
    * @param request the http header from the user.
    * @param name the [[models.User `name`]] of the [[models.User User]] to be deleted.
-   * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successful removal of a [[models.User User]] from the [[models.SHS SHS]] or a redirection to another method upon failure.
+   * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successful removal of a [[models.User User]] from the [[models.modules.SHS SHS]] or a redirection to another method upon failure.
    */
   public Result deleteUser(Http.Request request, String tab, String name) {
     User toDelete = shs.getUserMap().get(name);
@@ -255,10 +450,10 @@ public class HomeController extends Controller {
   }
 
   /**
-   * Modifies the information of an existing [[models.User User]] instance and if necessary updates the [[models.SHS `userMap`]].
+   * Modifies the information of an existing [[models.User User]] instance and if necessary updates the [[models.modules.SHS `userMap`]].
    * @param request the http header from the user.
    * @param name the [[models.User `name`]] of the [[models.User User]] to be modified.
-   * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successful modification of a [[models.User User]] from the [[models.SHS SHS]] or a redirection to another method upon failure.
+   * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successful modification of a [[models.User User]] from the [[models.modules.SHS SHS]] or a redirection to another method upon failure.
    */
   public Result editUser(Http.Request request, String tab, String name) {
     DynamicForm dynamicForm = formFactory.form().bindFromRequest(request);
@@ -273,7 +468,7 @@ public class HomeController extends Controller {
 
     if (User.isTypeStringValid(newTypeString)) {
       User.UserType newType = User.UserType.valueOf(newTypeString);
-      if (newType == User.UserType.Parent) {
+      if ((newType == User.UserType.Parent) && (toEdit.getType() != User.UserType.Parent)) {
         if (shs.getParentAmount() >= 2 ) {
           return badRequest().flashing("error","You can only have a maximum of 2 parents per home.");//TODO insert webpage that the user will see on failure
         }
@@ -304,7 +499,7 @@ public class HomeController extends Controller {
   }
 
   /**
-   * Makes an existing [[models.User User]] instance from the [[models.SHS `userMap`]] into the [[models.SHS `activeUser`]].
+   * Makes an existing [[models.User User]] instance from the [[models.modules.SHS `userMap`]] into the [[models.modules.SHS `activeUser`]].
    * @param request the http header from the user.
    * @param name the [[models.User `name`]] of the [[models.User User]] to be set as active.
    * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successful change or a redirection to another method upon failure.
@@ -319,7 +514,7 @@ public class HomeController extends Controller {
   }
 
   /**
-   * Modifies the [[models.SHS `currentTime`]] simulation attribute and [[models.Location `temperature`]] of [[models.Location Outdoor]] and [[models.Location Outside]] instances in the [[models.SHS `home`]].
+   * Modifies the [[models.modules.SHS `currentTime`]] simulation attribute and [[models.Location `temperature`]] of [[models.Location Outdoor]] and [[models.Location Outside]] instances in the [[models.modules.SHS `home`]].
    * @param request the http header from the user.
    * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successful modification of all attributes or a redirection to another method upon failure.
    */
@@ -328,64 +523,109 @@ public class HomeController extends Controller {
     String newTemperatureString = dynamicForm.get("temperature");
     String dateString = dynamicForm.get("date");
     String timeString = dynamicForm.get("time");
+    String timeMultiplierString = dynamicForm.get("timeMultiplier");
+    int timeMultiplier;
+    try {
+      timeMultiplier = Integer.parseInt(timeMultiplierString);
+      shs.setTimeMultiplier(timeMultiplier);
+    } catch (NumberFormatException e) {
+      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));//TODO insert webpage that handles simulation parameter edition
+    }
     int newTemperature;
     try {
       newTemperature = parseTemperature(newTemperatureString);
+      shs.setOutsideTemperature(newTemperature);
     } catch (NumberFormatException e) {
       // to pass to the webpage: dynamicForm.withError("temperature","The value entered is invalid");
       return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));//TODO insert webpage that handles simulation parameter edition
     }
     LocalDate newDate;
-    try {
-      newDate = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-    } catch (Exception e) {
-      // to pass to the webpage: dynamicForm.withError("date","The value entered is invalid");
-      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));//TODO insert webpage that handles simulation parameter edition
-    }
     LocalTime newTime;
     try {
+      newDate = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
       newTime = LocalTime.parse(timeString, DateTimeFormatter.ofPattern("HH:mm:ss"));
+      LocalDateTime newCurrentTime = LocalDateTime.of(newDate, newTime);
+      shs.setSimulationTime(newCurrentTime);
     } catch (Exception e) {
-      // to pass to the webpage: dynamicForm.withError("time","The value entered is invalid");
-      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));//TODO insert webpage that handles simulation parameter edition
+      //Do nothing. It happens when the simulation is running.
     }
-    LocalDateTime newCurrentTime = LocalDateTime.of(newDate, newTime);
-
-
-    shs.setOutsideTemperature(newTemperature);
-    shs.setCurrentTime(newCurrentTime);
     return redirect(routes.HomeController.main(tab));
   }
 
   /**
-   * Performs the specified action on the [[models.Device Device]].
+   * Performs the specified action on the [[models.devices.Device Device]].
    * @param request the http header from the user.
    * @param locationString the [[models.Location.name name]] of the [[models.Location Location]] where the device is.
-   * @param name the [[models.Device `name`]] of the [[models.Device Device]] that will perform the action.
+   * @param name the [[models.devices.Device `name`]] of the [[models.devices.Device Device]] that will perform the action.
    * @param action a [[java.lang.String String]] representation of the action to be performed.
    * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successful execution of the specified action or a redirection to another method upon failure.
    */
   public Result performDeviceAction(Http.Request request, String tab, String locationString, String name, String action) {
     Location location = shs.getHome().get(locationString);
     if (location == null) {
-      return redirect(routes.HomeController.main(tab)).flashing("error","The location for that device does not exist");//TODO insert webpage that the user will see on failure
+      return redirect(routes.HomeController.main(tab)).flashing("error","The location for that device does not exist");
     }
     Device device = location.getDeviceMap().get(name);
     if (device == null) {
-      return redirect(routes.HomeController.main(tab)).flashing("error","That device does not exist in the specified location");//TODO insert webpage that the user will see on failure
+      return redirect(routes.HomeController.main(tab)).flashing("error","That device does not exist in the specified location");
     }
-    boolean result = device.doAction(action);
-    if (result) {
-      return redirect(routes.HomeController.main(tab));
-    } else {
-      return redirect(routes.HomeController.main(tab)).flashing("error","That action could not be performed");//TODO insert webpage that the user will see on failure
+    User user = shs.getActiveUser();
+
+    try {
+      switch (action) {
+        case Device.actionOpen:
+        case Device.actionClose:
+          if (device instanceof Window) {
+            return devicePerformAction(PermitWindowOpenClose.isAuthorized(user, device), device, action, tab);
+          }
+          if (device instanceof Door) {
+            return devicePerformAction(PermitDoorOpenClose.isAuthorized(user, device), device, action, tab);
+          }
+          // User is attempting to "open" or "close" something other than a Door or Window
+          return deviceActionPerformed(device.doAction(action), tab);
+        case Device.actionOn:
+        case Device.actionOff:
+          if (device instanceof Light) {
+            return devicePerformAction(PermitLightOnOff.isAuthorized(user, device), device, action, tab);
+          }
+          // User is attempting to "turn on" or "turn off" something other than a Light
+          return deviceActionPerformed(device.doAction(action), tab);
+        case Door.actionLock:
+        case Door.actionUnlock:
+          if (device instanceof Door) {
+            return devicePerformAction(PermitDoorLockUnlock.isAuthorized(user, device), device, action, tab);
+          }
+          // User is attempting to "lock" or "unlock" something other than a Door
+          return deviceActionPerformed(device.doAction(action), tab);
+      }
+      // User is attempting to do another action
+      return deviceActionPerformed(device.doAction(action), tab);
+    /*} catch (WindowBlockedException e) {
+      return redirect(routes.HomeController.main(tab)).flashing("error",e.getMessage());
+    } catch (DoorLockedException e) {
+      return redirect(routes.HomeController.main(tab)).flashing("error","That door is locked, action could not be performed.");
+    */} catch ( DeviceException e) {
+      return redirect(routes.HomeController.main(tab)).flashing("error",e.getMessage());
     }
+  }
+
+  private Result deviceActionPerformed(boolean isSuccessful, String tab) {
+    return isSuccessful?
+            redirect(routes.HomeController.main(tab)) :
+            redirect(routes.HomeController.main(tab)).flashing("error","That action could not be performed.");
+  }
+  private Result devicePerformAction(boolean canPerform, Device device, String action, String tab) throws DeviceException{
+    return canPerform?
+            deviceActionPerformed(device.doAction(action), tab) :
+            redirect(routes.HomeController.main(tab)).flashing("error","You are not allowed to perform that action.");
   }
 
   /**
    * Helper method to give dynamic access to the overriden performDeviceAction method.
    */
-  public Result deviceActionHelper(Http.Request request, String tab){ return ok();}
+  public Result deviceActionHelper(Http.Request request, String tab){
+    return ok();
+  }
 
   /**
    * Starts or stops the simulation if the pre-requisites are satisfied.
@@ -399,7 +639,14 @@ public class HomeController extends Controller {
     if (shs.getHome().size() <= 1) {
       return redirect(routes.HomeController.index()).flashing("error","You need to load a house layout to perform this action");//TODO insert webpage that the user will see on failure
     }
-    shs.setRunning(!shs.isRunning());
+    boolean isRunning = shs.isRunning();
+    if (isRunning) {
+      timeUpdater.terminate();
+    } else {
+      timeUpdater = new TimeUpdater();
+      timeUpdater.start();
+    }
+    shs.setRunning(!isRunning);
     return redirect(routes.HomeController.index());//TODO insert webpage that the user will see after the action was performed successfully
   }
 
@@ -417,7 +664,12 @@ public class HomeController extends Controller {
         return ok(views.html.contextSidebar.render(shs, dynamicForm, request));
       case "parameters":
         return ok(views.html.parameters.render(shs, dynamicForm, request));
+      case "SHC":
+      case "SHP":
     }
     return ok();
+  }
+  public Result loadMetrics() {
+    return ok(views.html.constantMetrics.render(shs));
   }
 }

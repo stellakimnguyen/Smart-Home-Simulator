@@ -3,13 +3,19 @@
 # ~~~~
 
 # An example controller showing a sample home page
+GET     /toggleSimulationStatus                           controllers.HomeController.toggleSimulationStatus(request: Request)
+GET     /loadMetrics                           controllers.HomeController.loadMetrics()
+GET     /saveUsers                    controllers.HomeController.saveUsersToFile()
+GET     /loadSideBar/:name                controllers.HomeController.loadSideBar(request: Request, name: String)
 POST    /:tab/loadHouse                    controllers.HomeController.loadHouseFromFile(request: Request, tab: String)
+POST    /:tab/loadUsers                    controllers.HomeController.loadUsersFromFile(request: Request, tab: String)
 GET     /:tab/performDeviceAction/    controllers.HomeController.deviceActionHelper(request: Request, tab: String)
 GET     /:tab/performDeviceAction/:location/:name/:action    controllers.HomeController.performDeviceAction(request: Request, tab: String, location: String, name: String, action: String)
+# localhost:9000/house/performDeviceAction/Bedroom/BedroomWindow/open
+# localhost:9000/house/performDeviceAction/Kitchen/KitchenPatioDoor/open
+# localhost:9000/house/performDeviceAction/Kitchen/KitchenLights/turn on
 GET     /             controllers.HomeController.index(request: Request)
 GET     /:tab/                           controllers.HomeController.main(request: Request, tab: String)
-GET     /toggleSimulationStatus                           controllers.HomeController.toggleSimulationStatus(request: Request)
-GET     /loadSideBar/:name                controllers.HomeController.loadSideBar(request: Request, name: String)
 POST    /:tab/editUser/:name         controllers.HomeController.editUser(request: Request, tab: String, name: String)
 GET     /:tab/deleteUser/:name         controllers.HomeController.deleteUser(request: Request, tab: String, name: String)
 GET     /:tab/setActiveUser/:name         controllers.HomeController.setActiveUser(request: Request, tab: String, name: String)

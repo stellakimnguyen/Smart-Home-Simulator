@@ -1,4 +1,7 @@
-package models;
+package models.devices;
+
+import models.Location;
+import models.exceptions.DeviceException;
 
 /**
  * Template for all devices existing in a [[models.Location Location]]. Contains common attributes and a basic set of actions and statuses.
@@ -62,6 +65,13 @@ public abstract class Device {
   }
 
   /**
+   * Get the Device's full status.
+   */
+  public String getFullStatus() {
+    return status;
+  }
+
+  /**
    * Set the Device status.
    */
   public void setStatus(String status) {
@@ -107,5 +117,10 @@ public abstract class Device {
    * @param action String with the action code to be performed.
    * @return true if the action was performed, false otherwise.
    */
-  public abstract boolean doAction(String action);
+  public abstract boolean doAction(String action) throws DeviceException;
+
+  @Override
+  public String toString() {
+    return "[" + getLocation().getName() + "] " + getName();
+  }
 }

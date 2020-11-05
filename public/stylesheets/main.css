@@ -284,3 +284,10 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     color: #C8C8C8;
     font-size: small;
 }
+.layoutTitle {
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    font-size: small;
+    margin-bottom: 10px;
+}

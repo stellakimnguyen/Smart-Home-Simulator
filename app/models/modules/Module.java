@@ -1,10 +1,13 @@
-package models;
+package models.modules;
+
+import models.Observable;
+import models.Observer;
 
 import java.util.Set;
 import java.util.HashSet;
 
 /**
- * Template for all modules registered at [[models.SHS SHS]]. Contains common attributes.
+ * Template for all modules registered at [[models.modules.SHS SHS]]. Contains common attributes.
  * ===Attributes===
  * `name (private [[java.lang.String String]]):` Unique identifier for the Module.
  *

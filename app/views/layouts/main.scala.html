@@ -4,6 +4,9 @@
  * two arguments, a `String` for the title of the page and an `Html`
  * object to insert into the body of the page.
  *@
+@import models.devices.Window
+@import models.devices
+@import models.modules.SHS
 @(tab: String)(content: Html)(implicit shs: SHS, dynamicForm: DynamicForm, request: Http.Request)
 
 <!DOCTYPE html>
@@ -51,6 +54,10 @@
 				          }
 			          }
 		          }
+		          function metrics() {
+		          	let overlay = $('#metricsOverlay');
+			          overlay.load('@routes.HomeController.loadMetrics()');
+		          }
 		          function addUser() {
 			          document.getElementById('tempUser').classList.toggle('hidden');
 			          // add user to user list here
@@ -83,9 +90,9 @@
 
 		          function toggleWindowBlock(location, name, isBlocked) {
 			          if(isBlocked){
-				          window.location.href = '@routes.HomeController.deviceActionHelper("device")' + location + "/" + name + "/" + '@models.Window.actionUnblock';
+				          window.location.href = '@routes.HomeController.deviceActionHelper("device")' + location + "/" + name + "/" + '@Window.actionUnblock';
 			          }else{
-				          window.location.href = '@routes.HomeController.deviceActionHelper("device")' + location + "/" + name + "/" + '@models.Window.actionBlock';
+				          window.location.href = '@routes.HomeController.deviceActionHelper("device")' + location + "/" + name + "/" + '@devices.Window.actionBlock';
 			          }
 			          console.log("Toggle window block to: " + e.checked);
 			          // Toggle window block
@@ -95,11 +102,12 @@
 			          window.location.href='@routes.HomeController.toggleSimulationStatus()';
 		          }
 
-					    // TOOLTIP
+					    // TOOLTIP and TIMERS
 					    $(function () {
 					    	resetSelection();
-						    sidebar($('#icon' + '@tab.charAt(0).toUpper' + '@tab.substring(1)'), '@tab')
-						    $('[data-toggle="tooltip"]').tooltip()
+						    sidebar($('#icon' + '@tab.charAt(0).toUpper' + '@tab.substring(1)'), '@tab');
+						    @if(shs.isRunning){setInterval(function(){metrics()}, 1000);}
+						    $('[data-toggle="tooltip"]').tooltip();
 					    });
 	    </script>
     </head>
@@ -119,7 +127,7 @@
 		        viewBox="0 0 16 16" class="bi bi-person" fill="#849FFF" xmlns="http://www.w3.org/2000/svg">
 			        <path fill-rule="evenodd" d="M10 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm6 5c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
 		        </svg>
-		        <svg onclick='sidebar($(this), "house")' id="iconHouse" width="2em" height="2em" data-toggle="tooltip" data-placement="right" title="House Layout"
+		        <svg @if(!shs.isRunning){onclick='sidebar($(this), "house")'} id="iconHouse" width="2em" height="2em" data-toggle="tooltip" data-placement="right" title="House Layout"
 		        viewBox="0 0 16 16" class="bi bi-house" fill="#849FFF" xmlns="http://www.w3.org/2000/svg">
 			        <path fill-rule="evenodd" d="M2 13.5V7h1v6.5a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5V7h1v6.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5zm11-11V6l-2-2V2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5z"/>
 			        <path fill-rule="evenodd" d="M7.293 1.5a1 1 0 0 1 1.414 0l6.647 6.646a.5.5 0 0 1-.708.708L8 2.207 1.354 8.854a.5.5 0 1 1-.708-.708L7.293 1.5z"/>
@@ -137,6 +145,13 @@
 		        <div class="separator"></div>
 		        <svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-puzzle-fill" xmlns="http://www.w3.org/2000/svg" fill="#849FFF" data-toggle="tooltip" data-placement="right" title="Modules">
 			        <path fill-rule="evenodd" d="M3.112 3.645A1.5 1.5 0 0 1 4.605 2H7a.5.5 0 0 1 .5.5v.382c0 .696-.497 1.182-.872 1.469a.459.459 0 0 0-.115.118.113.113 0 0 0-.012.025L6.5 4.5v.003l.003.01c.004.01.014.028.036.053a.86.86 0 0 0 .27.194C7.09 4.9 7.51 5 8 5c.492 0 .912-.1 1.19-.24a.86.86 0 0 0 .271-.194.213.213 0 0 0 .036-.054l.003-.01v-.008a.112.112 0 0 0-.012-.025.459.459 0 0 0-.115-.118c-.375-.287-.872-.773-.872-1.469V2.5A.5.5 0 0 1 9 2h2.395a1.5 1.5 0 0 1 1.493 1.645L12.645 6.5h.237c.195 0 .42-.147.675-.48.21-.274.528-.52.943-.52.568 0 .947.447 1.154.862C15.877 6.807 16 7.387 16 8s-.123 1.193-.346 1.638c-.207.415-.586.862-1.154.862-.415 0-.733-.246-.943-.52-.255-.333-.48-.48-.675-.48h-.237l.243 2.855A1.5 1.5 0 0 1 11.395 14H9a.5.5 0 0 1-.5-.5v-.382c0-.696.497-1.182.872-1.469a.459.459 0 0 0 .115-.118.113.113 0 0 0 .012-.025L9.5 11.5v-.003l-.003-.01a.214.214 0 0 0-.036-.053.859.859 0 0 0-.27-.194C8.91 11.1 8.49 11 8 11c-.491 0-.912.1-1.19.24a.859.859 0 0 0-.271.194.214.214 0 0 0-.036.054l-.003.01v.002l.001.006a.113.113 0 0 0 .012.025c.016.027.05.068.115.118.375.287.872.773.872 1.469v.382a.5.5 0 0 1-.5.5H4.605a1.5 1.5 0 0 1-1.493-1.645L3.356 9.5h-.238c-.195 0-.42.147-.675.48-.21.274-.528.52-.943.52-.568 0-.947-.447-1.154-.862C.123 9.193 0 8.613 0 8s.123-1.193.346-1.638C.553 5.947.932 5.5 1.5 5.5c.415 0 .733.246.943.52.255.333.48.48.675.48h.238l-.244-2.855z"/>
+		        </svg>
+
+		        <svg width="3em" height="1.5em" fill="#849FFF" onclick='sidebar($(this), "SHC")' id="iconSHC" class="bi mb-1" data-toggle="tooltip" data-placement="right" title="Smart Home Core">
+			        <text x="50%" y="50%" font-weight="bold" text-anchor="middle">SHC</text>
+		        </svg>
+		        <svg width="3em" height="1.5em" fill="#849FFF" onclick='sidebar($(this), "SHP")' id="iconSHP" class="bi mb-1" data-toggle="tooltip" data-placement="right" title="Smart Home Security">
+			        <text x="50%" y="50%" font-weight="bold" text-anchor="middle">SHP</text>
 		        </svg>
 
 	        </div>

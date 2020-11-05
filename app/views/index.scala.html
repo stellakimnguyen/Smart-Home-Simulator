@@ -1,3 +1,5 @@
+@import models.devices.Device
+@import models.modules.SHS
 @(tab: String)(implicit shs: SHS, dynamicForm: DynamicForm, request: Http.Request)
 
 @layouts.main(tab){
@@ -12,13 +14,13 @@
 		  @for(locationEntry: (String, Location) <- shs.getHome) {
 			  <div class="deviceTitle">@locationEntry._1 : @locationEntry._2.getTemperatureString °C</div>
 			  @for(deviceEntry: (String, Device) <- locationEntry._2.getDeviceMap) {
-				  <div class="deviceTitle"> - @deviceEntry._1 : @deviceEntry._2.getStatus</div>
+				  <div class="deviceTitle"> - @deviceEntry._1 : @deviceEntry._2.getFullStatus</div>
 			  }
 		  }
 	  } else {
 		  House Layout is missing!
 	  }
-    <div class="metricsOverlay">
+    <div class="metricsOverlay" id="metricsOverlay">
       @constantMetrics()
     </div>
   </div>

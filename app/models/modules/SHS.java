@@ -1,4 +1,7 @@
-package models;
+package models.modules;
+
+import models.Location;
+import models.User;
 
 import javax.inject.Singleton;
 import java.time.LocalDateTime;
@@ -17,7 +20,7 @@ import java.util.*;
  *
  * `userMap (private [[java.util.Map Map]]&#91;[[java.lang.String String]], [[models.User User]]&#93;):` The map of all registered [[models.User Users]].
  *
- * `moduleList (private [[java.util.List List]]&#91;[[models.Module Module]]&#93;):` The List of all registered [[models.Module Modules]].
+ * `moduleList (private [[java.util.List List]]&#91;[[models.modules.Module Module]]&#93;):` The List of all registered [[models.modules.Module Modules]].
  *
  * `home (private [[java.util.Map Map]]&#91;[[java.lang.String String]], [[models.Location Location]]&#93;):` The map of all registered [[models.Location Locations]] within the home.
  *
@@ -31,7 +34,8 @@ import java.util.*;
  */
 @Singleton
 public class SHS extends Module {
-  private LocalDateTime currentTime;
+  private LocalDateTime simulationTime;
+  private int timeMultiplier;
   private boolean isRunning;
   private User activeUser;
 
@@ -66,36 +70,37 @@ public class SHS extends Module {
     this.home = new HashMap<>();
     this.isRunning = false;
     this.home.put(outside.getName(), outside);
-    this.currentTime = LocalDateTime.now();
+    this.simulationTime = LocalDateTime.now();
+    this.timeMultiplier = 1;
   }
 
   /**
    * Get the SHS' current time.
    */
-  public LocalDateTime getCurrentTime() {
-    return currentTime;
+  public LocalDateTime getSimulationTime() {
+    return simulationTime;
   }
 
   /**
    * Get the SHS' current time String.
    */
   public String getTimeString() {
-    return currentTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+    return simulationTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
   }
 
   /**
    * Get the SHS' current date String.
    */
   public String getDateString() {
-    return currentTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    return simulationTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
   }
 
   /**
    * Set the SHS' current time.
    */
-  public void setCurrentTime(LocalDateTime currentTime) {
-    if (currentTime != null) {
-      this.currentTime = currentTime;
+  public void setSimulationTime(LocalDateTime simulationTime) {
+    if (simulationTime != null) {
+      this.simulationTime = simulationTime;
     }
   }
 
@@ -159,14 +164,14 @@ public class SHS extends Module {
   }
 
   /**
-   * Get the [[java.util.List List]] of [[models.Module Modules]] registered in the SHS.
+   * Get the [[java.util.List List]] of [[models.modules.Module Modules]] registered in the SHS.
    */
   public List<Module> getModuleList() {
     return moduleList;
   }
 
   /**
-   * Set the [[java.util.List List]] of [[models.Module Modules]] registered in the SHS.
+   * Set the [[java.util.List List]] of [[models.modules.Module Modules]] registered in the SHS.
    */
   public void setModuleList(List<Module> moduleList) {
     if (moduleList != null) {
@@ -201,5 +206,13 @@ public class SHS extends Module {
         location.setTemperature(temperature);
       }
     }
+  }
+
+  public int getTimeMultiplier() {
+    return timeMultiplier;
+  }
+
+  public void setTimeMultiplier(int timeMultiplier) {
+    this.timeMultiplier = timeMultiplier;
   }
 }

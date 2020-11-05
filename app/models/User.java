@@ -1,5 +1,7 @@
 package models;
 
+import models.modules.SHS;
+
 /**
  * A virtual person that will interact with the Smart Home.
  * ===Inner Class===
@@ -14,7 +16,7 @@ package models;
  *
  * `userType (private UserType):` The type of user.
  *
- * `location (private [[models.Location Location]]):` The location the user is currently at, defaults to [[models.SHS Outside]].
+ * `location (private [[models.Location Location]]):` The location the user is currently at, defaults to [[models.modules.SHS Outside]].
  *
  * @version 2
  * @author Rodrigo M. Zanini (40077727)
