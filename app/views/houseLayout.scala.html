@@ -13,8 +13,8 @@
 
 <form action='@routes.HomeController.loadHouseFromFile("house")' method="post" enctype="multipart/form-data">
 	<fieldset hidden>@CSRF.formField </fieldset>
-	<div class="layoutTitle">Upload House Layout</div>
-	<div class="paramBackground">
+	<div class="textTitle">Upload House Layout</div>
+	<div class="formGroupBackground inputBackground">
 		<div class="input-group mb-3">
 			<input type="text" class="form-control" id="upload-file-info" readonly>
 			<label class="input-group-btn input-group-append">
@@ -28,8 +28,8 @@
 </form>
 <form action='@routes.HomeController.loadUsersFromFile("house")' method="post" enctype="multipart/form-data">
 	<fieldset hidden>@CSRF.formField </fieldset>
-	<div class="layoutTitle">Upload User Profiles</div>
-	<div class="paramBackground">
+	<div class="textTitle">Upload User Profiles</div>
+	<div class="formGroupBackground inputBackground">
 		<div class="input-group mb-3">
 			<input type="text" class="form-control" id="user-file-info" readonly>
 			<label class="input-group-btn input-group-append">
@@ -41,7 +41,7 @@
 		<button type="submit" class="btn btn-primary">Upload</button>
 	</div>
 </form>
-<div class="layoutTitle">Download User Profiles</div>
-<div class="paramBackground">
+<div class="textTitle">Download User Profiles</div>
+<div class="formGroupBackground inputBackground">
 	<a href='@routes.HomeController.saveUsersToFile()' class="btn btn-primary" target="_blank">Download</a>
 </div>

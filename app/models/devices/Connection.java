@@ -59,7 +59,7 @@ public class Connection extends Device {
    */
   @Override
   public boolean doAction(String action) throws DeviceException {
-    return false; // By default, no action is performed
+    return false;
   }
 
   @Override

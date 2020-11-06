@@ -1,0 +1,10 @@
+@import models.devices.Device
+@import models.devices.Window
+@(window: Window)
+<div class="formGroupBackground switchBackground">
+    <div class="textSubtitle">@window.getName</div>
+    <div class="custom-control custom-switch ml-auto">
+        <input onchange='toggleWindowControl("@window.getLocation.getName", "@window.getName", "@window.getStatus")' type="checkbox" class="custom-control-input" id='switch@window.toString' @if(window.getStatus.equals(Device.statusOpen)){checked}>
+        <label class="custom-control-label" for='switch@window.toString'>@window.getStatus</label>
+    </div>
+</div>

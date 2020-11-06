@@ -9,8 +9,7 @@ public class TimeUpdater extends Thread {
     running = false;
   }
 
-  @Override
-  public void run() {
+  public void runOld() {
     running = true;
     long startTime = System.currentTimeMillis();
     SHS shs = SHS.getInstance();
@@ -32,4 +31,25 @@ public class TimeUpdater extends Thread {
       timeTillNextDisplayChange = 1000 - elapsedTime;
     }
   }
+
+  public void run() {
+    running = true;
+    long startTime = System.currentTimeMillis();
+    SHS shs = SHS.getInstance();
+    long elapsedTime = System.currentTimeMillis() - startTime;
+    long timeTillNextDisplayChange = 500 - (elapsedTime % 500);
+
+    while (running) {
+      try {
+        Thread.sleep(timeTillNextDisplayChange);
+      } catch (InterruptedException e) {
+        running = false;
+      }
+      startTime = System.currentTimeMillis();
+      shs.setSimulationTime(shs.getSimulationTime().plusNanos(shs.getTimeMultiplier() * 500000000L));
+      elapsedTime = System.currentTimeMillis() - startTime;
+      timeTillNextDisplayChange = 500 - elapsedTime;
+    }
+  }
+
 }

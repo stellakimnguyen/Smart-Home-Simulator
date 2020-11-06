@@ -3,9 +3,15 @@ package models.modules;
 import models.Location;
 import models.Observable;
 import models.Observer;
+import models.devices.Light;
+import models.exceptions.DeviceException;
 
 import javax.inject.Singleton;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Smart Home security module, it handles permissions and alarms. It is a Singleton Class.
@@ -20,11 +26,16 @@ import java.time.LocalDateTime;
  * @author Stella Nguyen (40065803)
  */
 @Singleton
-public class SHP implements Observer {
+public class SHP extends Module implements Observer {
   private boolean isAway;
   private LocalDateTime invasionTime;
   private boolean isUnderInvasion;
   private int timeBeforeAuthorities;
+  private boolean autoLightsInAwayMode;
+  private final Set<Light> awayLights = new HashSet<>();
+  private LocalTime awayLightStart = LocalTime.of(18,0,0);
+  private LocalTime awayLightEnd = LocalTime.of(21,15,0);
+
 
   private static final SHP instance = new SHP();
 
@@ -36,6 +47,7 @@ public class SHP implements Observer {
   }
 
   private SHP() {
+    super("SHP");
     isAway = false;
     isUnderInvasion = false;
     timeBeforeAuthorities = 5;
@@ -73,12 +85,74 @@ public class SHP implements Observer {
     this.timeBeforeAuthorities = timeBeforeAuthorities;
   }
 
+  public void registerLight(Light light, String startString, String endString) {
+    LocalTime startTime = LocalTime.parse(startString, DateTimeFormatter.ofPattern("HH:mm:ss"));
+    LocalTime endTime = LocalTime.parse(endString, DateTimeFormatter.ofPattern("HH:mm:ss"));
+
+  }
+
+  public void toggleAutoLightsInAwayMode() {
+    autoLightsInAwayMode = !autoLightsInAwayMode;
+  }
+
+  public boolean isAutoLightsInAwayMode() {
+    return autoLightsInAwayMode;
+  }
+
+  public LocalTime getAwayLightStart() {
+    return awayLightStart;
+  }
+
+  public void setAwayLightStart(LocalTime awayLightStart) {
+    this.awayLightStart = awayLightStart;
+  }
+
+  public LocalTime getAwayLightEnd() {
+    return awayLightEnd;
+  }
+
+  public void setAwayLightEnd(LocalTime awayLightEnd) {
+    this.awayLightEnd = awayLightEnd;
+  }
+
+  public void addLight(Light light) {
+    awayLights.add(light);
+  }
+
+  public void removeLight(Light light) {
+    awayLights.remove(light);
+  }
+
   @Override
   public void observe(Observable observable) {
     if (isAway) {
       if (observable instanceof Location) {
         Location toObserve = (Location) observable;
 
+      }
+
+      if (observable instanceof SHS) {
+        if (autoLightsInAwayMode) {
+          SHS shs = (SHS)observable;
+          LocalTime simulationTime = shs.getSimulationTime().toLocalTime();
+          if (simulationTime.isAfter(awayLightStart) && simulationTime.isBefore(awayLightEnd)) {
+            for (Light light : awayLights) {
+              try {
+                light.doAction(Light.actionOn);
+              } catch (DeviceException e) {
+                //Do nothing
+              }
+            }
+          } else {
+            for (Light light : awayLights) {
+              try {
+                light.doAction(Light.actionOff);
+              } catch (DeviceException e) {
+                //Do nothing
+              }
+            }
+          }
+        }
       }
     }
   }

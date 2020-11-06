@@ -1,0 +1,62 @@
+@import models.modules.SHS
+@(selector: Int)(implicit shs: SHS, dynamicForm: DynamicForm, request: Http.Request)
+<div>
+	<ul class="nav nav-tabs" id="shcTab" role="tablist">
+		<li class="nav-item" role="presentation">
+			<a class="nav-link @if(selector==0){active}" id="light-tab" data-toggle="tab" href="#light" role="tab" aria-controls="light" aria-selected="@if(selector==0){true}else{false}">Lights</a>
+		</li>
+		<li class="nav-item" role="presentation">
+			<a class="nav-link @if(selector==1){active}" id="door-tab" data-toggle="tab" href="#door" role="tab" aria-controls="door" aria-selected="@if(selector==1){true}else{false}">Doors</a>
+		</li>
+		<li class="nav-item" role="presentation">
+			<a class="nav-link @if(selector==2){active}" id="window-tab" data-toggle="tab" href="#window" role="tab" aria-controls="window" aria-selected="@if(selector==2){true}else{false}">Windows</a>
+		</li>
+	</ul>
+	<div class="tab-content mt-2" id="myTabContent">
+		<div class="tab-pane fade @if(selector==0){show active}" id="light" role="tabpanel" aria-labelledby="light-tab">
+			<div class="formGroupBackground switchBackground">
+				<div class="textSubtitle">Auto Mode</div>
+				<div class="custom-control custom-switch">
+					<input onchange='toggleAutoLight()' type="checkbox" class="custom-control-input" id='switchAutoLight' @if(models.modules.SHC.getInstance().isAutoLights){checked}>
+					<label class="custom-control-label" for='switchAutoLight'>@if(models.modules.SHC.getInstance().isAutoLights){on}else{off}</label>
+				</div>
+			</div>
+			@for(locationEntry: (String, Location) <- shs.getHome) {
+				@if(!locationEntry._2.equals(SHS.getOutside)) {
+					<div class="locationTitle">@locationEntry._1</div>
+					@for(deviceEntry: (String, models.devices.Device) <- locationEntry._2.getDeviceMap) {
+						@if(deviceEntry._2.isInstanceOf[models.devices.Light]) {
+							@components.controlLight(deviceEntry._2.asInstanceOf[models.devices.Light])
+						}
+					}
+				}
+			}
+		</div>
+		<div class="tab-pane fade @if(selector==1){show active}" id="door" role="tabpanel" aria-labelledby="door-tab">
+			Doors
+				@for(locationEntry: (String, Location) <- shs.getHome) {
+					@if(!locationEntry._2.equals(SHS.getOutside)) {
+						<div class="locationTitle">@locationEntry._1</div>
+						@for(deviceEntry: (String, models.devices.Device) <- locationEntry._2.getDeviceMap) {
+							@if(deviceEntry._2.isInstanceOf[models.devices.Door]) {
+								@components.controlDoor(deviceEntry._2.asInstanceOf[models.devices.Door])
+							}
+						}
+					}
+				}
+		</div>
+		<div class="tab-pane fade @if(selector==2){show active}" id="window" role="tabpanel" aria-labelledby="window-tab">
+			Windows
+				@for(locationEntry: (String, Location) <- shs.getHome) {
+					@if(!locationEntry._2.equals(SHS.getOutside)) {
+						<div class="locationTitle">@locationEntry._1</div>
+						@for(deviceEntry: (String, models.devices.Device) <- locationEntry._2.getDeviceMap) {
+							@if(deviceEntry._2.isInstanceOf[models.devices.Window]) {
+								@components.controlWindow(deviceEntry._2.asInstanceOf[models.devices.Window])
+							}
+						}
+					}
+				}
+		</div>
+	</div>
+</div>

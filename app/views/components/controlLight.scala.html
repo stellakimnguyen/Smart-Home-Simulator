@@ -1,0 +1,10 @@
+@import models.devices.Light
+@import models.devices.Device
+@(light: Light)
+<div class="formGroupBackground switchBackground">
+    <div class="textSubtitle">@light.getName</div>
+    <div class="custom-control custom-switch ml-auto">
+        <input onchange='toggleLightControl("@light.getLocation.getName", "@light.getName", "@light.getStatus")' type="checkbox" class="custom-control-input" id='switch@light.toString' @if(light.getStatus.equals(Device.statusOn)){checked}>
+        <label class="custom-control-label" for='switch@light.toString'>@light.getStatus</label>
+    </div>
+</div>

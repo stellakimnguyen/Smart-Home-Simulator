@@ -1,6 +1,8 @@
 package models.devices;
 
 import models.Location;
+import models.exceptions.InvalidActionException;
+import models.exceptions.SameStatusException;
 import models.modules.SHS;
 import models.exceptions.WindowBlockedException;
 
@@ -74,27 +76,38 @@ public class Window extends Connection {
    * @return true if the action was performed, false otherwise.
    */
   @Override
-  public boolean doAction(String action) throws WindowBlockedException {
+  public boolean doAction(String action) throws WindowBlockedException, SameStatusException, InvalidActionException {
     switch (action) {
       case Device.actionOpen:
-        if (isBlocked) {
+        if (getStatus().equals(Window.statusOpen)) {
+          throw new SameStatusException(this);
+        } else if (isBlocked) {
           throw new WindowBlockedException(this);
         }
         setStatus(Device.statusOpen);
         return true;
       case Device.actionClose:
-        if (isBlocked) {
+        if (getStatus().equals(Window.statusClosed)) {
+          throw new SameStatusException(this);
+        } else if (isBlocked) {
           throw new WindowBlockedException(this);
         }
         setStatus(Device.statusClosed);
         return true;
       case actionBlock:
+        if (isBlocked) {
+          throw new SameStatusException(this);
+        }
         setBlocked(true);
         return true;
       case actionUnblock:
-        setBlocked(false);
+        if (!isBlocked) {
+          throw new SameStatusException(this);
+        }
+        setBlocked(true);
         return true;
-      default: return false;
+      default:
+        throw new InvalidActionException(this);
     }
   }
 

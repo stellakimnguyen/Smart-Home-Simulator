@@ -1,6 +1,8 @@
 package models.devices;
 
 import models.devices.Device;
+import models.exceptions.InvalidActionException;
+import models.exceptions.SameStatusException;
 
 /**
  * Extends a [[models.devices.Device Device]]: represents a light source.
@@ -32,14 +34,22 @@ public class Light extends Device {
    * @return true if the action was performed, false otherwise.
    */
   @Override
-  public boolean doAction(String action) {
-    if (action.equals(Device.actionOff)) {
-      super.setStatus(Device.statusOff);
-      return true;
-    } else if (action.equals(Device.actionOn)) {
-      super.setStatus(Device.statusOn);
-      return true;
+  public boolean doAction(String action) throws SameStatusException, InvalidActionException {
+    switch (action) {
+      case actionOff:
+        if (getStatus().equals(statusOff)) {
+          throw new SameStatusException(this);
+        }
+        super.setStatus(Device.statusOff);
+        return true;
+      case actionOn:
+        if (getStatus().equals(statusOn)) {
+          throw new SameStatusException(this);
+        }
+        super.setStatus(Device.statusOn);
+        return true;
+      default:
+        throw new InvalidActionException(this);
     }
-    return false;
   }
 }

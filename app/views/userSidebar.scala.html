@@ -3,10 +3,10 @@
 @(activeUser: User)(implicit shs: SHS, dynamicForm: DynamicForm, request: Http.Request)
 
 <div class="userSidebar">
-	<div class="userSidebarTitle">current user</div>
+	<div class="textTitle">current user</div>
 	@singleUser(activeUser)
-	<div class="userSeparator"></div>
-	<div class="userSidebarTitle">other users</div>
+		<div class="userSeparator"></div>
+	<div class="textTitle">other users</div>
 	@for(entry: (String, User) <- shs.getUserMap) {
 		@if(!entry._1.equals(activeUser.getName)) {
 			@singleUser(entry._2)

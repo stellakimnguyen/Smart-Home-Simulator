@@ -1,7 +1,7 @@
 @import models.devices.Window
 @(window: Window)
-<div class="windowBackground">
-    <div class="windowID">@window.getName</div>
+<div class="formGroupBackground switchBackground">
+    <div class="textSubtitle">@window.getName</div>
     <div class="custom-control custom-switch">
         <input onchange='toggleWindowBlock("@window.getLocation.getName", "@window.getName", @window.isBlocked)' type="checkbox" class="custom-control-input" id='switch@window.toString' @if(window.isBlocked){checked}>
         <label class="custom-control-label" for='switch@window.toString'>block</label>

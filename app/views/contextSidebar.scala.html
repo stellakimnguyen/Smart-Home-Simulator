@@ -4,10 +4,12 @@
 @()(implicit shs: SHS, dynamicForm: DynamicForm, request: Http.Request)
 <div>
 	@for(locationEntry: (String, Location) <- shs.getHome) {
-		<div class="locationTitle">@locationEntry._1</div>
-		@for(deviceEntry: (String, Device) <- locationEntry._2.getDeviceMap) {
-			@if(deviceEntry._2.isInstanceOf[Window]) {
-				@singleWindow(deviceEntry._2.asInstanceOf[Window])
+		@if(!locationEntry._2.equals(SHS.getOutside)) {
+			<div class="locationTitle">@locationEntry._1</div>
+			@for(deviceEntry: (String, Device) <- locationEntry._2.getDeviceMap) {
+				@if(deviceEntry._2.isInstanceOf[Window]) {
+					@components.controlWindowBlock(deviceEntry._2.asInstanceOf[Window])
+				}
 			}
 		}
 	}

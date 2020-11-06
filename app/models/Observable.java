@@ -24,4 +24,9 @@ public interface Observable{
    * Method to notify all [[models.Observer Observers]] of a change
    */
   void notifyObservers();
+
+  /**
+   * Get the Observable name.
+   */
+  String getName();
 }

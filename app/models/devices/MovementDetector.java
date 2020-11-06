@@ -3,6 +3,14 @@ package models.devices;
 import models.Location;
 import models.Observable;
 import models.Observer;
+import models.exceptions.DeviceException;
+import models.exceptions.InvalidActionException;
+import models.exceptions.SameStatusException;
+import models.modules.SHC;
+import models.modules.SHP;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Extends a [[models.devices.Device Device]]: represents a light source.
@@ -12,9 +20,32 @@ import models.Observer;
  * @author Pierre-Alexis Barras (40022016)
  */
 public class MovementDetector extends Device implements Observer, Observable {
+  private final Set<Observer> observers = new HashSet<>();
+
   public MovementDetector(String name) {
     super(name);
     setStatus(Device.statusOff);
+    addObserver(SHP.getInstance());
+    if (SHC.getInstance().isAutoLights()) {
+      addObserver(SHC.getInstance());
+    }
+  }
+  /**
+   * Set the [[models.Location Location]] the Device is in and registers as an [[models.Observer Observer]],
+   * while unregistering from the previous [[models.Location Location]].
+   * @return true if the [[models.Location Location]] was changed successfully, false otherwise.
+   */
+  @Override
+  public boolean setLocation(Location location) {
+    Location oldLocation = getLocation();
+    boolean wasSuccessful = super.setLocation(location);
+    if (wasSuccessful) {
+      if (oldLocation!=null) {
+        oldLocation.removeObserver(this);
+      }
+      location.addObserver(this);
+    }
+    return wasSuccessful;
   }
 
   /**
@@ -34,37 +65,42 @@ public class MovementDetector extends Device implements Observer, Observable {
    * @return true if the action was performed, false otherwise.
    */
   @Override
-  public boolean doAction(String action) {
-    if (action.equals(Device.actionOff)) {
-      super.setStatus(Device.statusOff);
-      return true;
-    } else if (action.equals(Device.actionOn)) {
-      super.setStatus(Device.statusOn);
-      return true;
+  public boolean doAction(String action) throws SameStatusException, InvalidActionException {
+    switch (action) {
+      case actionOff:
+        if (getStatus().equals(statusOff)) {
+          throw new SameStatusException(this);
+        }
+        super.setStatus(Device.statusOff);
+        notifyObservers();
+        return true;
+      case actionOn:
+        if (getStatus().equals(statusOn)) {
+          throw new SameStatusException(this);
+        }
+        super.setStatus(Device.statusOn);
+        notifyObservers();
+        return true;
+      default:
+        throw new InvalidActionException(this);
     }
-    return false;
   }
 
-  /**
-   * Do nothing, since only the [[models.modules.SHP SHP]] observes this Device
-   * @param observer ignored.
-   */
   @Override
-  public void addObserver(Observer observer) {}
+  public void addObserver(Observer observer) {
+    observers.add(observer);
+  }
 
-  /**
-   * Do nothing, since only the [[models.modules.SHP SHP]] observes this Device
-   * @param observer ignored.
-   */
   @Override
-  public void removeObserver(Observer observer) {}
+  public void removeObserver(Observer observer) {
+    observers.remove(observer);
+  }
 
-  /**
-   * Notify the Singleton [[models.modules.SHP SHP]] of changes to this Device.
-   */
   @Override
   public void notifyObservers() {
-    models.modules.SHP.getInstance().observe(this);
+    for(Observer observer : observers) {
+      observer.observe(this);
+    }
   }
 
   @Override
@@ -72,12 +108,14 @@ public class MovementDetector extends Device implements Observer, Observable {
     if (observable instanceof Location) {
       Location toObserve = (Location) observable;
       if (toObserve == getLocation()) {
-        if (toObserve.getUserMap().size() == 0) {
-          doAction(Device.actionOff);
-          notifyObservers();
-        } else if (getStatus().equals(Device.actionOff)) {
-          doAction(Device.actionOn);
-          notifyObservers();
+        try {
+          if (toObserve.getUserMap().size() == 0) {
+            doAction(Device.actionOff);
+          } else {
+            doAction(Device.actionOn);
+          }
+        } catch (DeviceException e) {
+          // Do nothing
         }
       }
     }

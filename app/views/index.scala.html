@@ -12,9 +12,9 @@
 	  @if(shs.getHome.size > 1) {
 		  <br />
 		  @for(locationEntry: (String, Location) <- shs.getHome) {
-			  <div class="deviceTitle">@locationEntry._1 : @locationEntry._2.getTemperatureString °C</div>
+			  <div class="textTitle">@locationEntry._1 : @locationEntry._2.getTemperatureString °C</div>
 			  @for(deviceEntry: (String, Device) <- locationEntry._2.getDeviceMap) {
-				  <div class="deviceTitle"> - @deviceEntry._1 : @deviceEntry._2.getFullStatus</div>
+				  <div class="textTitle"> - @deviceEntry._1 : @deviceEntry._2.getFullStatus</div>
 			  }
 		  }
 	  } else {

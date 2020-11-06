@@ -1,6 +1,8 @@
 package models.modules;
 
 import models.Location;
+import models.Observable;
+import models.Observer;
 import models.User;
 
 import javax.inject.Singleton;
@@ -33,7 +35,7 @@ import java.util.*;
  * @author Pierre-Alexis Barras (40022016)
  */
 @Singleton
-public class SHS extends Module {
+public class SHS extends Module implements Observable {
   private LocalDateTime simulationTime;
   private int timeMultiplier;
   private boolean isRunning;
@@ -42,6 +44,7 @@ public class SHS extends Module {
   private Map<String, User> userMap;
   private List<Module> moduleList;
   private Map<String, Location> home;
+  private final Set<Observer> observers = new HashSet<>();
 
   private static final Location outside = new Location("Outside", Location.LocationType.Outside);
   private static final SHS instance = new SHS("SHS");
@@ -70,7 +73,7 @@ public class SHS extends Module {
     this.home = new HashMap<>();
     this.isRunning = false;
     this.home.put(outside.getName(), outside);
-    this.simulationTime = LocalDateTime.now();
+    this.simulationTime = LocalDateTime.now().withNano(0);
     this.timeMultiplier = 1;
   }
 
@@ -101,6 +104,7 @@ public class SHS extends Module {
   public void setSimulationTime(LocalDateTime simulationTime) {
     if (simulationTime != null) {
       this.simulationTime = simulationTime;
+      notifyObservers();
     }
   }
 
@@ -214,5 +218,22 @@ public class SHS extends Module {
 
   public void setTimeMultiplier(int timeMultiplier) {
     this.timeMultiplier = timeMultiplier;
+  }
+
+  @Override
+  public void addObserver(Observer observer) {
+    observers.add(observer);
+  }
+
+  @Override
+  public void removeObserver(Observer observer) {
+    observers.remove(observer);
+  }
+
+  @Override
+  public void notifyObservers() {
+    for(Observer observer : observers) {
+      observer.observe(this);
+    }
   }
 }

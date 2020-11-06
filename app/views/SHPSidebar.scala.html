@@ -1,0 +1,21 @@
+@import models.modules.SHS
+@()(implicit shs: SHS, dynamicForm: DynamicForm, request: Http.Request)
+<div class="formGroupBackground switchBackground">
+	<div class="textSubtitle">Away Mode</div>
+	<div class="custom-control custom-switch ml-auto">
+		<input onchange='toggleAwayMode()' type="checkbox" class="custom-control-input" id='switchAwayMode' @if(models.modules.SHP.getInstance().isAway) {checked}>
+	<label class="custom-control-label" for='switchAwayMode'>@if(models.modules.SHP.getInstance().isAway) {on} else {off}</label>
+	</div>
+</div>
+<form>
+@for(locationEntry: (String, Location) <- shs.getHome) {
+	@if(!locationEntry._2.equals(SHS.getOutside)) {
+		<div class="locationTitle">@locationEntry._1</div>
+		@for(deviceEntry: (String, models.devices.Device) <- locationEntry._2.getDeviceMap) {
+			@if(deviceEntry._2.isInstanceOf[models.devices.Light]) {
+				@components.controlAwayLight(deviceEntry._2.asInstanceOf[models.devices.Light])
+			}
+		}
+	}
+}
+</form>

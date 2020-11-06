@@ -1,5 +1,7 @@
 package models.devices;
 
+import models.exceptions.*;
+
 /**
  * Extends a [[models.devices.Connection Connection]]: introduces a barrier between both [[models.Location Locations]], new statuses, and new actions.
  * ===Attributes===
@@ -69,20 +71,38 @@ public class Door extends Connection {
    * @return true if the action was performed, false otherwise.
    */
   @Override
-  public boolean doAction(String action) {
-    if (action.equals(Device.actionOpen) && !isLocked) {
-      super.setStatus(Device.statusOpen);
-      return true;
-    } else if (action.equals(Device.actionClose)) {
-      super.setStatus(Device.statusClosed);
-      return true;
-    } else if (action.equals(actionLock) && getStatus().equals(Device.statusClosed)) {
-      setLocked(true);
-      return true;
-    } else if (action.equals(actionUnlock)) {
-      setLocked(false);
-      return true;
+  public boolean doAction(String action) throws DoorLockedException, SameStatusException, DoorOpenException, InvalidActionException {
+    switch (action) {
+      case Device.actionOpen:
+        if (getStatus().equals(Device.statusOpen)) {
+          throw new SameStatusException(Device.statusOpen, this);
+        } else if (isLocked) {
+          throw new DoorLockedException(this);
+        }
+        super.setStatus(Device.statusOpen);
+        return true;
+      case Device.actionClose:
+        if (getStatus().equals(Device.statusClosed)) {
+          throw new SameStatusException(Device.statusClosed, this);
+        }
+        super.setStatus(Device.statusClosed);
+        return true;
+      case Door.actionLock:
+        if (isLocked) {
+          throw new SameStatusException(Door.statusLocked, this);
+        } else if (getStatus().equals(Device.statusOpen)) {
+          throw new DoorOpenException(this);
+        }
+        setLocked(true);
+        return true;
+      case Door.actionUnlock:
+        if (!isLocked) {
+          throw new SameStatusException(Door.statusNotLocked, this);
+        }
+        setLocked(false);
+        return true;
+      default:
+        throw new InvalidActionException(this);
     }
-    return false;
   }
 }

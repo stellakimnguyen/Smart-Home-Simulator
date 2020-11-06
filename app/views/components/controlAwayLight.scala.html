@@ -1,0 +1,28 @@
+@import models.devices.Light
+@import models.devices.Device
+@(light: Light)
+<div class="formGroupBackground inputBackground">
+	<div class="formGroupBackground switchBackground">
+		<div class="textSubtitle">@light.getName</div>
+		<div class="custom-control custom-switch ml-auto">
+			<input type="checkbox" class="custom-control-input" id='switch@light.hashCode()' @if(light.getStatus.equals(Device.statusOn)) {checked}>
+			<label class="custom-control-label" for='switch@light.toString'>@light.getStatus</label>
+		</div>
+	</div>
+	<div id="timepicker" class="input-group w-50">
+		<input name="time" id="simulatorTime" class="form-control add-on bg-white" placeholder="hh:mm" data-format="hh:mm" type="text" aria-describedby="timeLabel" value='10:15' readonly/>
+		<div class="input-group-append">
+			<span data-time-icon="icon-time" data-date-icon="icon-calendar" class="input-group-text" id="timeLabel">
+				🕑
+			</span>
+		</div>
+	</div>
+	<div id="timepicker" class="input-group w-50">
+		<input name="time" id="simulatorTime" class="form-control add-on bg-white" placeholder="hh:mm" data-format="hh:mm" type="text" aria-describedby="timeLabel" value='10:15' readonly/>
+		<div class="input-group-append">
+			<span data-time-icon="icon-time" data-date-icon="icon-calendar" class="input-group-text" id="timeLabel">
+				🕑
+			</span>
+		</div>
+	</div>
+</div>

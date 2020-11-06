@@ -2,7 +2,8 @@ package controllers;
 
 import models.*;
 import models.devices.*;
-import models.exceptions.DeviceException;
+import models.exceptions.*;
+import models.modules.Logger;
 import models.modules.SHC;
 import models.modules.SHS;
 import models.permissions.*;
@@ -37,6 +38,7 @@ public class HomeController extends Controller {
   private final FormFactory formFactory;
   public final SHS shs = SHS.getInstance();
   public final SHC shc = SHC.getInstance();
+  public final Logger logger = SHC.logger;
   private TimeUpdater timeUpdater = new TimeUpdater();
 
   @Inject
@@ -46,7 +48,22 @@ public class HomeController extends Controller {
   }
 
   private void initialize() {
+    PermissionLocation local = PermissionLocation.local;
+    PermissionLocation home = PermissionLocation.home;
+    PermissionLocation always = PermissionLocation.always;
+    User.UserType childAdult = User.UserType.Child_Adult;
+    User.UserType childTeenager = User.UserType.Child_Teenager;
+    User.UserType childUnderage = User.UserType.Child_Underage;
+    User.UserType guest = User.UserType.Guest;
+    PermitDoorOpenClose.authorize(childAdult,local);
+    PermitDoorOpenClose.authorize(childTeenager,local);
+    PermitDoorOpenClose.authorize(childUnderage,local);
+    PermitDoorOpenClose.authorize(guest,local);
+    PermitWindowOpenClose.authorize(childAdult,local);
+    PermitWindowOpenClose.authorize(childTeenager,local);
+    PermitWindowOpenClose.authorize(childAdult,home);
 
+    logger.log(shs, "System initialized successfully.", Logger.MessageType.normal);
   }
 
   /**
@@ -154,15 +171,13 @@ public class HomeController extends Controller {
 
             if(isLocation){ //create a location instance
               Location newLocation = new Location(lineStringArray[0], Location.LocationType.valueOf(lineStringArray[1]));
+              (new Light(newLocation.getName() + " light")).setLocation(newLocation);
+              (new MovementDetector("Movement Detector")).setLocation(newLocation);
               newHouseMap.put(newLocation.getName(), newLocation); //split into two steps for readability
             } else {  //create Device instance
               Location newDeviceLocation = newHouseMap.get(lineStringArray[2]);
 
               switch(lineStringArray[0]){ //determine device subclass
-                case "Light":
-                  Light newLight = new Light(lineStringArray[1]);
-                  newLight.setLocation(newDeviceLocation);
-                  break;
                 case "Connection":
                   Connection newConnection = new Connection(lineStringArray[1]);
                   newConnection.setLocation(newDeviceLocation);
@@ -185,10 +200,15 @@ public class HomeController extends Controller {
       shs.setHome(newHouseMap);
 
     } catch (FileNotFoundException e) {
-      return badRequest().flashing("error","File could not be found");//TODO insert webpage that the user will see on failure
+      logger.log("House Layout could not be loaded. File could not be found.", Logger.MessageType.normal);
+      return redirect(routes.HomeController.main(tab));
+    } catch (Exception e) {
+      logger.log("House Layout could not be loaded. File selected is invalid.", Logger.MessageType.danger);
+      return redirect(routes.HomeController.main(tab));
     }
     //TODO Future Deliver: add thorough exception handling
 
+    logger.log("House Layout loaded successfully.", Logger.MessageType.success);
     return redirect(routes.HomeController.main(tab));
   }
 
@@ -303,12 +323,15 @@ public class HomeController extends Controller {
       //If function gets here, file is properly formatted and there were no issues generating locations and devices
 
     } catch (FileNotFoundException e) {
-      return badRequest().flashing("error","File could not be found");//TODO insert webpage that the user will see on failure
+      logger.log("User Profiles could not be loaded. File could not be found.", Logger.MessageType.normal);
+      return redirect(routes.HomeController.main(tab));
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.log("User Profiles could not be loaded. File selected is invalid.", Logger.MessageType.danger);
+      return redirect(routes.HomeController.main(tab));
     }
     //TODO Future Deliver: add thorough exception handling
 
+    logger.log("User Profiles loaded successfully", Logger.MessageType.success);
     return redirect(routes.HomeController.main(tab));
   }
 
@@ -510,6 +533,7 @@ public class HomeController extends Controller {
       return badRequest().flashing("error", "The user you have selected does not exist");//TODO insert webpage that handles user placement
     }
     shs.setActiveUser(name);
+    logger.log('\'' + shs.getActiveUser().getName() + "' is now the current user", Logger.MessageType.normal);
     return redirect(routes.HomeController.main(tab));
   }
 
@@ -527,17 +551,24 @@ public class HomeController extends Controller {
     int timeMultiplier;
     try {
       timeMultiplier = Integer.parseInt(timeMultiplierString);
-      shs.setTimeMultiplier(timeMultiplier);
+      if (shs.getTimeMultiplier() != timeMultiplier) {
+        shs.setTimeMultiplier(timeMultiplier);
+        logger.log("Simulation Time Multiplier changed to " + shs.getTimeMultiplier() + '.', Logger.MessageType.success);
+      }
     } catch (NumberFormatException e) {
-      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));//TODO insert webpage that handles simulation parameter edition
+      logger.log("Attempted to change Simulation Time Multiplier to an invalid value.", Logger.MessageType.warning);
+      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));
     }
     int newTemperature;
     try {
       newTemperature = parseTemperature(newTemperatureString);
-      shs.setOutsideTemperature(newTemperature);
+      if (SHS.getOutside().getTemperature() != newTemperature) {
+        shs.setOutsideTemperature(newTemperature);
+        logger.log("Outside and Outdoor temperature changed to " + SHS.getOutside().getTemperatureString() + '.', Logger.MessageType.success);
+      }
     } catch (NumberFormatException e) {
-      // to pass to the webpage: dynamicForm.withError("temperature","The value entered is invalid");
-      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));//TODO insert webpage that handles simulation parameter edition
+      logger.log("Attempted to change Outside and Outdoor temperature to an invalid value.", Logger.MessageType.warning);
+      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));
     }
     LocalDate newDate;
     LocalTime newTime;
@@ -545,10 +576,26 @@ public class HomeController extends Controller {
       newDate = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
       newTime = LocalTime.parse(timeString, DateTimeFormatter.ofPattern("HH:mm:ss"));
       LocalDateTime newCurrentTime = LocalDateTime.of(newDate, newTime);
-      shs.setSimulationTime(newCurrentTime);
+      if (!shs.getSimulationTime().equals(newCurrentTime)) {
+        shs.setSimulationTime(newCurrentTime);
+        logger.log("Simulation Current Time changed to " + shs.getSimulationTime() + '.', Logger.MessageType.success);
+      }
     } catch (Exception e) {
       //Do nothing. It happens when the simulation is running.
     }
+    return redirect(routes.HomeController.main(tab));
+  }
+
+  private Result unauthorizedAction(String action, Device device, String tab) {
+    logger.log(shs.getActiveUser(), "You don't have the permissions necessary to '" + action +"' the '" + device.toString() + '\'', Logger.MessageType.warning);
+    return redirect(routes.HomeController.main(tab));
+  }
+  private Result failedAction(String action, Device device, String tab) {
+    logger.log(shs.getActiveUser(), "It is impossible to '" + action +"' the '" + device.toString() + '\'', Logger.MessageType.danger);
+    return redirect(routes.HomeController.main(tab));
+  }
+  private Result succeededAction(String action, Device device, String tab) {
+    logger.log(shs.getActiveUser(), "You have succeeded to '" + action +"' the '" + device.toString() + '\'', Logger.MessageType.success);
     return redirect(routes.HomeController.main(tab));
   }
 
@@ -563,11 +610,13 @@ public class HomeController extends Controller {
   public Result performDeviceAction(Http.Request request, String tab, String locationString, String name, String action) {
     Location location = shs.getHome().get(locationString);
     if (location == null) {
-      return redirect(routes.HomeController.main(tab)).flashing("error","The location for that device does not exist");
+      logger.log("Attempted to access a Location that does not exist.", Logger.MessageType.warning);
+      return redirect(routes.HomeController.main(tab));
     }
     Device device = location.getDeviceMap().get(name);
     if (device == null) {
-      return redirect(routes.HomeController.main(tab)).flashing("error","That device does not exist in the specified location");
+      logger.log("Attempted to access a Device that does not exist.", Logger.MessageType.warning);
+      return redirect(routes.HomeController.main(tab));
     }
     User user = shs.getActiveUser();
 
@@ -576,48 +625,94 @@ public class HomeController extends Controller {
         case Device.actionOpen:
         case Device.actionClose:
           if (device instanceof Window) {
-            return devicePerformAction(PermitWindowOpenClose.isAuthorized(user, device), device, action, tab);
+            if (PermitWindowOpenClose.isAuthorized(user, device)) {
+              if (device.doAction(action)) {
+                return succeededAction(action, device, tab);
+              } else {
+                return failedAction(action, device, tab);
+              }
+            } else {
+              return unauthorizedAction(action, device, tab);
+            }
           }
           if (device instanceof Door) {
-            return devicePerformAction(PermitDoorOpenClose.isAuthorized(user, device), device, action, tab);
+            if (PermitDoorOpenClose.isAuthorized(user, device)) {
+              if (((Door)device).doAction(action)) {
+                return succeededAction(action, device, tab);
+              } else {
+                return failedAction(action, device, tab);
+              }
+            } else {
+              return unauthorizedAction(action, device, tab);
+            }
           }
           // User is attempting to "open" or "close" something other than a Door or Window
-          return deviceActionPerformed(device.doAction(action), tab);
+          if (device.doAction(action)) {
+            return succeededAction(action, device, tab);
+          } else {
+            return failedAction(action, device, tab);
+          }
         case Device.actionOn:
         case Device.actionOff:
           if (device instanceof Light) {
-            return devicePerformAction(PermitLightOnOff.isAuthorized(user, device), device, action, tab);
+            if (PermitLightOnOff.isAuthorized(user, device)) {
+              if (device.doAction(action)) {
+                return succeededAction(action, device, tab);
+              } else {
+                return failedAction(action, device, tab);
+              }
+            } else {
+              return unauthorizedAction(action, device, tab);
+            }
           }
           // User is attempting to "turn on" or "turn off" something other than a Light
-          return deviceActionPerformed(device.doAction(action), tab);
+          if (device.doAction(action)) {
+            return succeededAction(action, device, tab);
+          } else {
+            return failedAction(action, device, tab);
+          }
         case Door.actionLock:
         case Door.actionUnlock:
           if (device instanceof Door) {
-            return devicePerformAction(PermitDoorLockUnlock.isAuthorized(user, device), device, action, tab);
+            if (PermitDoorLockUnlock.isAuthorized(user, device)) {
+              if (device.doAction(action)) {
+                return succeededAction(action, device, tab);
+              } else {
+                return failedAction(action, device, tab);
+              }
+            } else {
+              return unauthorizedAction(action, device, tab);
+            }
           }
           // User is attempting to "lock" or "unlock" something other than a Door
-          return deviceActionPerformed(device.doAction(action), tab);
+          if (device.doAction(action)) {
+            return succeededAction(action, device, tab);
+          } else {
+            return failedAction(action, device, tab);
+          }
       }
       // User is attempting to do another action
-      return deviceActionPerformed(device.doAction(action), tab);
-    /*} catch (WindowBlockedException e) {
-      return redirect(routes.HomeController.main(tab)).flashing("error",e.getMessage());
+      if (device.doAction(action)) {
+        return succeededAction(action, device, tab);
+      } else {
+        return failedAction(action, device, tab);
+      }
+    } catch (WindowBlockedException e) {
+      logger.log(shs.getActiveUser(), "It is impossible to '" + action +"' the '" + device.toString() + "'. Something is blocking the window.", Logger.MessageType.danger);
+      return redirect(routes.HomeController.main(tab));
     } catch (DoorLockedException e) {
-      return redirect(routes.HomeController.main(tab)).flashing("error","That door is locked, action could not be performed.");
-    */} catch ( DeviceException e) {
-      return redirect(routes.HomeController.main(tab)).flashing("error",e.getMessage());
+      logger.log(shs.getActiveUser(), "It is impossible to '" + action +"' the '" + device.toString() + "'. This door is locked.", Logger.MessageType.danger);
+      return redirect(routes.HomeController.main(tab));
+    } catch (SameStatusException e) {
+      logger.log(shs.getActiveUser(), "It is impossible to '" + action +"' the '" + device.toString() + "', since it's already '" + e.getMessage() + "'.", Logger.MessageType.danger);
+      return redirect(routes.HomeController.main(tab));
+    }  catch (DoorOpenException e) {
+      logger.log(shs.getActiveUser(), "It is impossible to '" + action +"' the '" + device.toString() + "', since it is '" + Device.actionOpen + '\'', Logger.MessageType.danger);
+      return redirect(routes.HomeController.main(tab));
+    } catch (DeviceException e) {
+      logger.log(shs.getActiveUser(), "It is impossible to '" + action +"' the '" + device.toString() + "'.", Logger.MessageType.danger);
+      return redirect(routes.HomeController.main(tab));
     }
-  }
-
-  private Result deviceActionPerformed(boolean isSuccessful, String tab) {
-    return isSuccessful?
-            redirect(routes.HomeController.main(tab)) :
-            redirect(routes.HomeController.main(tab)).flashing("error","That action could not be performed.");
-  }
-  private Result devicePerformAction(boolean canPerform, Device device, String action, String tab) throws DeviceException{
-    return canPerform?
-            deviceActionPerformed(device.doAction(action), tab) :
-            redirect(routes.HomeController.main(tab)).flashing("error","You are not allowed to perform that action.");
   }
 
   /**
@@ -650,7 +745,16 @@ public class HomeController extends Controller {
     return redirect(routes.HomeController.index());//TODO insert webpage that the user will see after the action was performed successfully
   }
 
-
+  /**
+   * Starts or stops the [[models.modules.SHC SHC]]'s Auto Light mode.
+   * @param request the http header from the user.
+   * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successfully starting/stopping the simulation or a redirection to another method if the pre-requisites are not satisfied.
+   */
+  public Result toggleAutoLight(Http.Request request) {
+    shc.toggleAutoLights();
+    logger.log("Auto light mode has been turned " + (shc.isAutoLights()?"on":"off"), Logger.MessageType.success);
+    return redirect(routes.HomeController.main("SHC0"));
+  }
 
 
   public Result loadSideBar(Http.Request request, String name) {
@@ -664,8 +768,14 @@ public class HomeController extends Controller {
         return ok(views.html.contextSidebar.render(shs, dynamicForm, request));
       case "parameters":
         return ok(views.html.parameters.render(shs, dynamicForm, request));
-      case "SHC":
+      case "SHC0":
+        return ok(views.html.SHCSidebar.render(0, shs, dynamicForm, request));
+      case "SHC1":
+        return ok(views.html.SHCSidebar.render(1, shs, dynamicForm, request));
+      case "SHC2":
+        return ok(views.html.SHCSidebar.render(2, shs, dynamicForm, request));
       case "SHP":
+        return ok(views.html.SHPSidebar.render(shs, dynamicForm, request));
     }
     return ok();
   }

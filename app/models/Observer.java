@@ -15,4 +15,9 @@ public interface Observer {
    * @param observable the object to be observed.
    */
   void observe(Observable observable);
+
+  /**
+   * Get the Observer name.
+   */
+  String getName();
 }
