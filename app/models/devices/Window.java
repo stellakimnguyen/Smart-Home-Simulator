@@ -63,7 +63,7 @@ public class Window extends Connection {
    * @param status the new status.
    */
   @Override
-  public void setStatus(String status) {
+  void setStatus(String status) {
     if (status.equals(Device.statusOpen) || status.equals(Device.statusClosed)) {
       super.setStatus(status);
     }
@@ -104,7 +104,7 @@ public class Window extends Connection {
         if (!isBlocked) {
           throw new SameStatusException(this);
         }
-        setBlocked(true);
+        setBlocked(false);
         return true;
       default:
         throw new InvalidActionException(this);

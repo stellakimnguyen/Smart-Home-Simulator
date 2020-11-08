@@ -1,5 +1,6 @@
 package models.devices;
 
+import models.Location;
 import models.exceptions.*;
 
 /**
@@ -46,6 +47,24 @@ public class Door extends Connection {
   }
 
   /**
+   * Check if the door can be locked remotely. Only Doors that go to [[models.Location Outside]] [[models.Location Locations]]
+   * or that join [[models.Location Indoor]] and [[models.Location Outdoor]] [[models.Location Locations]] can be remotely locked.
+   * @return true if door can be locked remotely, false otherwise.
+   */
+  public boolean canBeLockedRemotely() {
+    switch (getSecondLocation().getLocationType()) {
+      case Indoor: //outdoor-indoor
+       return (getLocation().getLocationType() == Location.LocationType.Outdoor); // 1st location is not outdoor, Door can't be locked
+      case Outside: //indoor-outside, outdoor-outside
+        return true;
+      case Outdoor: //indoor-outdoor
+        return (getLocation().getLocationType() == Location.LocationType.Indoor); // 1st location is not indoor, Door can't be locked
+      default:
+        return false;
+    }
+  }
+
+  /**
    * Get the Device status.
    * @return a [[java.lang.String String]] that compounds the device status, a comma, and the condition of the lock.
    */
@@ -58,7 +77,7 @@ public class Door extends Connection {
    * Set the Device status. Only accepts `statusOpen, statusClose`
    */
   @Override
-  public void setStatus(String status) {
+  void setStatus(String status) {
     if (status.equals(Device.statusOpen) || status.equals(Device.statusClosed)) {
       super.setStatus(status);
     }

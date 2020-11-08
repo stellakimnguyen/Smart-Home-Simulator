@@ -1,5 +1,3 @@
-@()(implicit shs: models.modules.SHS, dynamicForm: DynamicForm, request: Http.Request)
-<div class="console" id="console">
-	<p class="text-normal">Real Time [Simulator Time] Actor : Message</p>
-	@Html.apply(models.modules.SHC.logger.toHtml)
-</div>
+@()(implicit shs: models.modules.SHS)
+<p class="text-normal">Real Time [Simulator Time] Actor : Message</p>
+@Html.apply(models.modules.SHC.logger.toHtml)

@@ -1,6 +1,6 @@
 package models.devices;
 
-import models.devices.Device;
+import models.Location;
 import models.exceptions.InvalidActionException;
 import models.exceptions.SameStatusException;
 
@@ -21,7 +21,7 @@ public class Light extends Device {
    * Set the Device status. Only accepts `statusOn, statusOff`
    */
   @Override
-  public void setStatus(String status) {
+  void setStatus(String status) {
     if (status.equals(Device.statusOff) || status.equals(Device.statusOn)) {
       super.setStatus(status);
     }
@@ -51,5 +51,14 @@ public class Light extends Device {
       default:
         throw new InvalidActionException(this);
     }
+  }
+
+  /**
+   * setLocation Template Step, Lights are allowed at ALL [[models.Location LocationTypes]].
+   * @return true.
+   */
+  @Override
+  public boolean checkLocationTypeAllowed(Location location) {
+    return true;
   }
 }

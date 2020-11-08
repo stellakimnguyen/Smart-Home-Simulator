@@ -1,11 +1,10 @@
 package controllers;
 
 import models.*;
+import models.Observable;
 import models.devices.*;
 import models.exceptions.*;
-import models.modules.Logger;
-import models.modules.SHC;
-import models.modules.SHS;
+import models.modules.*;
 import models.permissions.*;
 import play.data.DynamicForm;
 import play.data.FormFactory;
@@ -38,8 +37,8 @@ public class HomeController extends Controller {
   private final FormFactory formFactory;
   public final SHS shs = SHS.getInstance();
   public final SHC shc = SHC.getInstance();
+  public final SHP shp = SHP.getInstance();
   public final Logger logger = SHC.logger;
-  private TimeUpdater timeUpdater = new TimeUpdater();
 
   @Inject
   public HomeController(FormFactory formFactory) {
@@ -135,6 +134,13 @@ public class HomeController extends Controller {
    * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successfully loading the file data into the SHS or a redirection to another method if there was an error while reading the file.
    */
   public Result loadHouseFromFile(Http.Request request, String tab){
+    //Reset all Users to 'Outside', in case you're loading a new Layout.
+    for(User user : shs.getUserMap().values()) {
+      user.setLocation(SHS.getOutside());
+    }
+    //Reset invasion on the SHP, while keeping the Away Mode
+    shp.setUnderInvasion(false);
+
     Http.MultipartFormData<TemporaryFile> body = request.body().asMultipartFormData();
     Http.MultipartFormData.FilePart<TemporaryFile> tempFile = body.getFile("layoutFile");
     TemporaryFile file = tempFile.getRef();
@@ -145,21 +151,31 @@ public class HomeController extends Controller {
 
     try(Scanner in = new Scanner(toRead)){  //safely auto-close scanner
 
-      boolean isLocation = false;
+      boolean foundMatrixDimensions = false;
+      int section = -1;
+      int[][] locationMatrix = new int[10][10];
+      int rowIndex = 0;
+      List<Location> locationList = new ArrayList<>();
+      locationList.add(SHS.getOutside());
       String fileLine;
       String[] lineStringArray;
       Map<String, Location> newHouseMap = new HashMap<>();
+      int doorwayCount = 1;
 
       while (in.hasNextLine()) {
         fileLine = in.nextLine(); //store line temporarily in string for manipulation
 
         switch(fileLine){ //determine if line has
           case "Locations {":
-            isLocation = true;
+            section = 0;
             break;
 
           case "Devices {":
-            isLocation = false;
+            section = 1;
+            break;
+
+          case "Map {":
+            section = 2;
             break;
 
           case "}":
@@ -169,12 +185,13 @@ public class HomeController extends Controller {
             //split file line according to ',' delimiter
             lineStringArray = fileLine.split(",");
 
-            if(isLocation){ //create a location instance
+            if(section == 0){ //create a location instance
               Location newLocation = new Location(lineStringArray[0], Location.LocationType.valueOf(lineStringArray[1]));
-              (new Light(newLocation.getName() + " light")).setLocation(newLocation);
-              (new MovementDetector("Movement Detector")).setLocation(newLocation);
+              (new Light(newLocation.getName() + " Light")).setLocation(newLocation);
+              (new MovementDetector(" Movement Detector")).setLocation(newLocation);
               newHouseMap.put(newLocation.getName(), newLocation); //split into two steps for readability
-            } else {  //create Device instance
+              locationList.add(newLocation);
+            } else  if (section == 1) {  //create Device instance
               Location newDeviceLocation = newHouseMap.get(lineStringArray[2]);
 
               switch(lineStringArray[0]){ //determine device subclass
@@ -186,27 +203,59 @@ public class HomeController extends Controller {
                 case "Door":
                   Door newDoor = new Door(lineStringArray[1]);
                   newDoor.setLocation(newDeviceLocation);
-                  newDoor.setSecondLocation(lineStringArray[3].equals("Outside")? SHS.getOutside():newHouseMap.get(lineStringArray[3]));
+                  if (lineStringArray[3].equals("Outside")) {
+                    String bufferName = "Doorway " + doorwayCount;
+                    while (newHouseMap.containsKey(bufferName)) {
+                      bufferName = "Doorway " + ++doorwayCount;
+                    }
+                    Location buffer = new Location(bufferName, Location.LocationType.Outside);
+                    newHouseMap.put(bufferName, buffer);
+                    locationList.add(buffer);
+                    Light newLight =new Light(buffer.getName() + " Light");
+                    newLight.setLocation(buffer);
+                    System.out.println("newLight.getLocation().getName() = " + newLight.getLocation().getName());
+                    (new MovementDetector(" Movement Detector")).setLocation(buffer);
+                    newDoor.setSecondLocation(buffer);
+                  } else {
+                    newDoor.setSecondLocation(newHouseMap.get(lineStringArray[3]));
+                  }
                   break;
                 case "Window":
                   Window newWindow = new Window(lineStringArray[1]);
                   newWindow.setLocation(newDeviceLocation);
                   break;
               }
+            } else if (section == 2) {
+              if (!foundMatrixDimensions) {
+                lineStringArray = fileLine.split("x");
+                locationMatrix = new int[Integer.parseInt(lineStringArray[0])][Integer.parseInt(lineStringArray[1])];
+                foundMatrixDimensions = true;
+              } else {
+                for (int i = 0; i < lineStringArray.length; i++) {
+                  locationMatrix[rowIndex][i] = Integer.parseInt(lineStringArray[i]);
+                }
+                rowIndex++;
+              }
             }
         }
       }
       //If function gets here, file is properly formatted and there were no issues generating locations and devices
       shs.setHome(newHouseMap);
+      HomeMapper.mapHome(locationMatrix, locationList);
+      //Register new layout for Away Mode
+      shp.setRegistrationForAll("MovementDetector", shp.isAway());
+      //Register new layout for Auto Light Mode
+      shc.setRegistrationForAll("MovementDetector", shc.isAutoLights());
+
 
     } catch (FileNotFoundException e) {
       logger.log("House Layout could not be loaded. File could not be found.", Logger.MessageType.normal);
       return redirect(routes.HomeController.main(tab));
     } catch (Exception e) {
       logger.log("House Layout could not be loaded. File selected is invalid.", Logger.MessageType.danger);
+      e.printStackTrace();
       return redirect(routes.HomeController.main(tab));
     }
-    //TODO Future Deliver: add thorough exception handling
 
     logger.log("House Layout loaded successfully.", Logger.MessageType.success);
     return redirect(routes.HomeController.main(tab));
@@ -729,20 +778,21 @@ public class HomeController extends Controller {
    */
   public Result toggleSimulationStatus(Http.Request request) {
     if (shs.getActiveUser() == null) {
-      return redirect(routes.HomeController.index()).flashing("error","You need to log in to perform this action");//TODO insert webpage that the user will see on failure
+      logger.log("You need to log in before starting the simulation.", Logger.MessageType.warning);
+      return redirect(routes.HomeController.index());
     }
     if (shs.getHome().size() <= 1) {
-      return redirect(routes.HomeController.index()).flashing("error","You need to load a house layout to perform this action");//TODO insert webpage that the user will see on failure
+      logger.log("You need to load a house layout before starting the simulation.", Logger.MessageType.warning);
+      return redirect(routes.HomeController.index());
     }
     boolean isRunning = shs.isRunning();
     if (isRunning) {
-      timeUpdater.terminate();
+      shs.stopClock();
     } else {
-      timeUpdater = new TimeUpdater();
-      timeUpdater.start();
+      shs.startClock();
     }
     shs.setRunning(!isRunning);
-    return redirect(routes.HomeController.index());//TODO insert webpage that the user will see after the action was performed successfully
+    return redirect(routes.HomeController.index());
   }
 
   /**
@@ -756,6 +806,91 @@ public class HomeController extends Controller {
     return redirect(routes.HomeController.main("SHC0"));
   }
 
+  /**
+   * Starts or stops the [[models.modules.SHP SHP]]'s Away mode.
+   * @param request the http header from the user.
+   * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successfully starting/stopping the simulation or a redirection to another method if the pre-requisites are not satisfied.
+   */
+  public Result toggleAwayMode(Http.Request request) {
+    shp.toggleAway();
+    return redirect(routes.HomeController.main("SHP"));
+  }
+
+  /**
+   * Starts or stops the [[models.modules.SHP SHP]]'s Away mode control over a given [[models.devices.Light Light]].
+   * @param request the http header from the user.
+   * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successfully starting/stopping the simulation or a redirection to another method if the pre-requisites are not satisfied.
+   */
+  public Result toggleAwayModeLight(Http.Request request, String locationString, String name, boolean register) {
+    Location location = shs.getHome().get(locationString);
+    if (location == null) {
+      logger.log("The location specified does not exist.", Logger.MessageType.warning);
+      return redirect(routes.HomeController.main("SHP"));
+    }
+    Device device = location.getDeviceMap().get(name);
+    if (!(device instanceof Light)) {
+      logger.log("The device specified is not a Light.", Logger.MessageType.warning);
+      return redirect(routes.HomeController.main("SHP"));
+    }
+    if (register) {
+      shp.registerLight((Light)device);
+    } else {
+      shp.unregisterLight((Light)device);
+    }
+    return redirect(routes.HomeController.main("SHP"));
+  }
+
+  public Result editAwayMode(Http.Request request) {
+    DynamicForm dynamicForm = formFactory.form().bindFromRequest(request);
+    String awayLightStartString = dynamicForm.get("awayLightStart");
+    String awayLightEndString = dynamicForm.get("awayLightEnd");
+    String timeDelayString = dynamicForm.get("timeDelay");
+
+    try {
+      LocalTime awayLightStart = LocalTime.parse(awayLightStartString, DateTimeFormatter.ofPattern("HH:mm:ss"));
+      LocalTime awayLightEnd = LocalTime.parse(awayLightEndString, DateTimeFormatter.ofPattern("HH:mm:ss"));
+      if (!shp.getAwayLightStart().equals(awayLightStart)) {
+        shp.setAwayLightStart(awayLightStart);
+        logger.log("Time to turn on Lights in Away Mode changed to " + shp.getAwayLightStartString() + ".", Logger.MessageType.success);
+      }
+      if (!shp.getAwayLightEnd().equals(awayLightEnd)) {
+        shp.setAwayLightEnd(awayLightEnd);
+        logger.log("Time to turn off Lights in Away Mode changed to " + shp.getAwayLightEndString() + ".", Logger.MessageType.success);
+      }
+    } catch (Exception e) {
+      //Do nothing.
+    }
+    try {
+      int timeDelay = Integer.parseInt(timeDelayString);
+      if (shp.getTimeBeforeAuthorities() != timeDelay) {
+        shp.setTimeBeforeAuthorities(timeDelay);
+        logger.log("Time before contacting authorities in Away Mode changed to " + shp.getTimeBeforeAuthorities() + " seconds.", Logger.MessageType.success);
+      }
+    } catch (NumberFormatException e) {
+      logger.log("Attempted to change the time before contacting authorities in Away Mode to an invalid value.", Logger.MessageType.warning);
+      return badRequest(views.html.index.render("SHP", shs, formFactory.form(), request));
+    }
+    for (Location location : shs.getHome().values()) {
+      for (Device device : location.getDeviceMap().values()) {
+        if (device instanceof Light) {
+          Light light = (Light)device;
+          String status = dynamicForm.get(light.toString());
+          if (status != null) {
+            if (!shp.isLightRegistered(light)) {
+              shp.registerLight(light);
+              logger.log(light + " will now be controlled by the SHP while Away Mode is on.", Logger.MessageType.success);
+            }
+          } else {
+            if (shp.isLightRegistered(light)) {
+              shp.registerLight(light);
+              logger.log(light + " will not be controlled anymore by the SHP while Away Mode is on.", Logger.MessageType.success);
+            }
+          }
+        }
+      }
+    }
+    return redirect(routes.HomeController.main("SHP"));
+  }
 
   public Result loadSideBar(Http.Request request, String name) {
     DynamicForm dynamicForm = formFactory.form();
@@ -780,6 +915,10 @@ public class HomeController extends Controller {
     return ok();
   }
   public Result loadMetrics() {
-    return ok(views.html.constantMetrics.render(shs));
+    //return ok(views.html.constantMetrics.render(shs));
+    return ok(views.html.house.render(shs));
+  }
+  public Result loadConsole() {
+    return ok(views.html.console.render(shs));
   }
 }

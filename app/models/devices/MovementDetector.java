@@ -52,7 +52,7 @@ public class MovementDetector extends Device implements Observer, Observable {
    * Set the Device status. Only accepts `statusOn, statusOff`
    */
   @Override
-  public void setStatus(String status) {
+  void setStatus(String status) {
     if (status.equals(Device.statusOff) || status.equals(Device.statusOn)) {
       super.setStatus(status);
     }
@@ -119,5 +119,14 @@ public class MovementDetector extends Device implements Observer, Observable {
         }
       }
     }
+  }
+
+  /**
+   * setLocation Template Step, Movement Detectors are allowed at ALL [[models.Location LocationTypes]].
+   * @return true.
+   */
+  @Override
+  public boolean checkLocationTypeAllowed(Location location) {
+    return true;
   }
 }

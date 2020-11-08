@@ -1,8 +1,7 @@
 package models.modules;
 
+import models.ClockThread;
 import models.Location;
-import models.Observable;
-import models.Observer;
 import models.User;
 
 import javax.inject.Singleton;
@@ -35,16 +34,14 @@ import java.util.*;
  * @author Pierre-Alexis Barras (40022016)
  */
 @Singleton
-public class SHS extends Module implements Observable {
-  private LocalDateTime simulationTime;
-  private int timeMultiplier;
+public class SHS extends Module {
   private boolean isRunning;
   private User activeUser;
+  private final Clock clock = Clock.getInstance();
 
   private Map<String, User> userMap;
   private List<Module> moduleList;
   private Map<String, Location> home;
-  private final Set<Observer> observers = new HashSet<>();
 
   private static final Location outside = new Location("Outside", Location.LocationType.Outside);
   private static final SHS instance = new SHS("SHS");
@@ -73,29 +70,27 @@ public class SHS extends Module implements Observable {
     this.home = new HashMap<>();
     this.isRunning = false;
     this.home.put(outside.getName(), outside);
-    this.simulationTime = LocalDateTime.now().withNano(0);
-    this.timeMultiplier = 1;
   }
 
   /**
    * Get the SHS' current time.
    */
   public LocalDateTime getSimulationTime() {
-    return simulationTime;
+    return clock.getTime();
   }
 
   /**
    * Get the SHS' current time String.
    */
   public String getTimeString() {
-    return simulationTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+    return getSimulationTime().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
   }
 
   /**
    * Get the SHS' current date String.
    */
   public String getDateString() {
-    return simulationTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    return getSimulationTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
   }
 
   /**
@@ -103,8 +98,7 @@ public class SHS extends Module implements Observable {
    */
   public void setSimulationTime(LocalDateTime simulationTime) {
     if (simulationTime != null) {
-      this.simulationTime = simulationTime;
-      notifyObservers();
+      clock.setTime(simulationTime);
     }
   }
 
@@ -187,7 +181,7 @@ public class SHS extends Module implements Observable {
    * Get the [[java.util.Map Map]] of [[models.Location Locations]] registered in the SHS.
    */
   public Map<String, Location> getHome() {
-    return home;
+    return new TreeMap<>(home);
   }
 
   /**
@@ -213,27 +207,18 @@ public class SHS extends Module implements Observable {
   }
 
   public int getTimeMultiplier() {
-    return timeMultiplier;
+    return clock.getTimeMultiplier();
   }
 
   public void setTimeMultiplier(int timeMultiplier) {
-    this.timeMultiplier = timeMultiplier;
+    clock.setTimeMultiplier(timeMultiplier);
   }
 
-  @Override
-  public void addObserver(Observer observer) {
-    observers.add(observer);
+  public void startClock() {
+    clock.startClock();
   }
 
-  @Override
-  public void removeObserver(Observer observer) {
-    observers.remove(observer);
-  }
-
-  @Override
-  public void notifyObservers() {
-    for(Observer observer : observers) {
-      observer.observe(this);
-    }
+  public void stopClock() {
+    clock.stopClock();
   }
 }

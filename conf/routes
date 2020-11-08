@@ -5,7 +5,10 @@
 # An example controller showing a sample home page
 GET     /toggleSimulationStatus                           controllers.HomeController.toggleSimulationStatus(request: Request)
 GET     /toggleAutoLight                           controllers.HomeController.toggleAutoLight(request: Request)
+GET     /toggleAwayMode                           controllers.HomeController.toggleAwayMode(request: Request)
+POST    /editAwayMode                           controllers.HomeController.editAwayMode(request: Request)
 GET     /loadMetrics                           controllers.HomeController.loadMetrics()
+GET     /loadConsole                           controllers.HomeController.loadConsole()
 GET     /saveUsers                    controllers.HomeController.saveUsersToFile()
 GET     /loadSideBar/:name                controllers.HomeController.loadSideBar(request: Request, name: String)
 POST    /:tab/loadHouse                    controllers.HomeController.loadHouseFromFile(request: Request, tab: String)

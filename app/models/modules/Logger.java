@@ -75,7 +75,7 @@ public class Logger {
     }
   }
   public void log(Module actor, String message, MessageType type) {
-    Message toLog = new Message("User", message, type);
+    Message toLog = new Message(actor.getName(), message, type);
     messageList.add(toLog);
     try {
       fileWriter.write(toLog.toString() + '\n');

@@ -11,10 +11,11 @@ package models;
  */
 public interface Observer {
   /**
-   * Method to be executed when the [[models.Observable Observable]] objects notifies this [[models.Observer Observer]]
+   * Method to be executed when the [[models.Observable Observable]] objects notifies this [[models.Observer Observer]].
+   * By default, it does nothing.
    * @param observable the object to be observed.
    */
-  void observe(Observable observable);
+  default void observe(Observable observable) {}
 
   /**
    * Get the Observer name.

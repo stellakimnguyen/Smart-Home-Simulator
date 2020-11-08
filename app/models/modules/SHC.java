@@ -3,12 +3,11 @@ package models.modules;
 import models.Location;
 import models.Observable;
 import models.Observer;
-import models.devices.Device;
-import models.devices.Light;
-import models.devices.MovementDetector;
+import models.devices.*;
 import models.exceptions.DeviceException;
 import models.exceptions.InvalidActionException;
 import models.exceptions.SameStatusException;
+import models.exceptions.WindowBlockedException;
 
 import javax.inject.Singleton;
 
@@ -25,10 +24,9 @@ import javax.inject.Singleton;
  * @author Stella Nguyen (40065803)
  */
 @Singleton
-public class SHC extends Module implements Observer {
+public class SHC extends Module {
   private boolean autoLights;
   public static final Logger logger = new Logger();
-
 
   private static final SHC instance = new SHC("SHC");
 
@@ -49,13 +47,56 @@ public class SHC extends Module implements Observer {
 
   public void toggleAutoLights() {
     autoLights = !autoLights;
+    setRegistrationForAll("MovementDetector", autoLights);
+  }
+
+  public static void lockAllDoors() {
     for (Location location : SHS.getInstance().getHome().values()) {
       for (Device device : location.getDeviceMap().values()) {
-        if (device instanceof MovementDetector) {
-          if (autoLights) {
-            ((MovementDetector)device).addObserver(this);
-          } else {
-            ((MovementDetector)device).removeObserver(this);
+        if (device instanceof Door) {
+          Door door = (Door)device;
+          switch (door.getSecondLocation().getLocationType()) {
+            case Outdoor:
+            case Outside:
+              try {
+                door.doAction(Door.actionClose);
+                logger.log(instance, "The '" + device.toString() + "' was " + Door.statusClosed + ".", Logger.MessageType.normal);
+              } catch (SameStatusException e) {
+                // Do nothing (door was already closed)
+              } catch (DeviceException e) {
+                logger.log(instance, "It is impossible to '" + Door.actionClose +"' the '" + device.toString() + "'.", Logger.MessageType.danger);
+              }
+              try {
+                door.doAction(Door.actionLock);
+                logger.log(instance, "The '" + device.toString() + "' was " + Door.statusLocked + ".", Logger.MessageType.normal);
+              } catch (SameStatusException e) {
+                // Do nothing (door was already closed)
+              } catch (DeviceException e) {
+                logger.log(instance, "It is impossible to '" + Door.actionLock +"' the '" + device.toString() + "'.", Logger.MessageType.danger);
+              }
+              break;
+            default:
+              //Do nothing;
+          }
+        }
+      }
+    }
+  }
+
+  public static void closeAllWindows() {
+    for (Location location : SHS.getInstance().getHome().values()) {
+      for (Device device : location.getDeviceMap().values()) {
+        if (device instanceof Window) {
+          Window window = (Window) device;
+          try {
+            window.doAction(Window.actionClose);
+            logger.log(instance, "The '" + device.toString() + "' was " + Window.statusClosed + ".", Logger.MessageType.normal);
+          } catch (SameStatusException e) {
+            // Do nothing (window was already closed)
+          } catch (WindowBlockedException e) {
+            logger.log(instance, "It is impossible to '" + Window.actionClose +"' the '" + device.toString() + "'. Something is blocking the window.", Logger.MessageType.danger);
+          } catch (DeviceException e) {
+            logger.log(instance, "It is impossible to '" + Window.actionClose +"' the '" + device.toString() + "'.", Logger.MessageType.danger);
           }
         }
       }

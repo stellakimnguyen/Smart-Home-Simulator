@@ -2,10 +2,7 @@ package models;
 
 import models.devices.Device;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A physical location.
@@ -35,7 +32,7 @@ import java.util.Set;
 public class Location implements Observable {
   private String name;
   private int temperature;
-  private LocationType locationType;
+  private final LocationType locationType;
   private final Map<String, Device> deviceMap = new HashMap<>();
   private final Map<String, User> userMap = new HashMap<>();
   private final Set<Observer> observers = new HashSet<>();
@@ -99,22 +96,11 @@ public class Location implements Observable {
   }
 
   /**
-   * Set the Location type.
-   */
-  public void setLocationType(LocationType locationType) {
-    if (locationType == LocationType.Outside) {
-      this.locationType = LocationType.Outdoor;
-    } else if (locationType != null) {
-      this.locationType = locationType;
-    }
-  }
-
-  /**
    * Get the [[java.util.Map Map]] of [[models.devices.Device Devices]] at the Location. It is a clone therefore modifying the
    * returned map will not affect the location.
    */
   public Map<String, Device> getDeviceMap() {
-    return new HashMap<>(deviceMap);
+    return new TreeMap<>(deviceMap);
   }
 
   /**
@@ -138,7 +124,7 @@ public class Location implements Observable {
    * returned map will not affect the location.
    */
   public Map<String, User> getUserMap() {
-    return new HashMap<>(userMap);
+    return new TreeMap<>(userMap);
   }
 
   /**

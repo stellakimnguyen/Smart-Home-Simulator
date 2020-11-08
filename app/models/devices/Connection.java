@@ -40,7 +40,7 @@ public class Connection extends Device {
       return false; // TODO throw some sort of exception once error handling is in place
     }
     // check if there is a location cycle
-    if (getLocation().equals(secondLocation)) {
+    if (secondLocation.equals(getLocation())) {
       return false; // TODO throw some sort of exception once error handling is in place
     }
     // if device is already at a location, remove it from that map.

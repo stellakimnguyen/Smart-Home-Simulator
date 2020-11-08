@@ -15,6 +15,7 @@
   align-items: center;
   transition: 250ms;
   box-shadow: 0 0 15px rgba(50, 83, 241, 0.2);
+  overflow-y: auto;
 }
 
 .sidebar {
@@ -139,20 +140,18 @@
   cursor: pointer;
 }
 
-#expansion {
-  overflow-y: auto;
-}
-
 .layout {
   height: calc(100vh - 10em - 12px);
   background-color: #EFF5FF;
   padding: 20px;
+  overflow-y: hidden;
 }
 
 .console {
   height: calc(10em);
   background-color: #404040;
   padding: 0 0.5em;
+  overflow-y: auto;
 }
 
 .console p {
@@ -166,7 +165,6 @@
   width: 100%;
   border-radius: 12px;
   position: relative;
-  overflow-y: auto;
 }
 
 .layoutTitle {
@@ -385,3 +383,34 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   display: none;
 }
 
+.houseGrid, .houseGrid td, .houseNode, .houseNode td{
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: center;
+  align-items: center;
+  align-content: center;
+  align-self: center;
+  alignment: center;
+}
+
+.wall-left {
+  border-left: 2px solid #808080;
+}
+.wall-top {
+  border-top: 2px solid darkgrey;
+}
+.wall-right {
+  border-right: 2px solid darkgrey;
+}
+.wall-bottom {
+  border-bottom: 2px solid darkgrey;
+}
+.door-left {
+  border-left: 3px solid blue;
+}
+.door-top {
+  border-top: 3px solid blue;
+}
+.houseNode .fas {
+  font-size: 1em;
+}
