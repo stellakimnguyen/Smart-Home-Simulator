@@ -16,6 +16,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -438,6 +440,18 @@ public class HomeController extends Controller {
       e.printStackTrace();
     }
     return ok(); //TODO
+  }
+
+  /**
+   * Saves the [[models.modules.Logger console log]] to a file that the user can download.
+   * The file displays displays the same contents as the console log at the time of download.
+   * @return a file to be downloaded by the user.
+   */
+  public Result snapshotConsole() {
+    //make file-friendly time string
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMMMdd_H'h'mm'm'ss's'-SSS");
+    //return log with new name
+    return ok(new File("target/logFile.txt"), false, Optional.of("consoleSnapshot_" + LocalDateTime.now().format(formatter) + ".txt"));
   }
 
   /**

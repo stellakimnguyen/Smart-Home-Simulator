@@ -10,6 +10,9 @@ import play.test.WithApplication;
 
 import java.util.HashMap;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
 import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.*;
@@ -54,5 +57,4 @@ public class HomeControllerTest extends WithApplication {
     Result result = route(app, request);
     assertEquals(404, result.status());
   }
-
 }

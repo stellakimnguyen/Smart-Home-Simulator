@@ -11,6 +11,7 @@ POST    /editPermissions                           controllers.HomeController.ed
 GET     /loadMetrics                           controllers.HomeController.loadMetrics()
 GET     /loadConsole                           controllers.HomeController.loadConsole()
 GET     /saveUsers                    controllers.HomeController.saveUsersToFile()
+GET     /saveConsole                    controllers.HomeController.snapshotConsole()
 GET     /loadSideBar/:name                controllers.HomeController.loadSideBar(request: Request, name: String)
 POST    /:tab/loadHouse                    controllers.HomeController.loadHouseFromFile(request: Request, tab: String)
 POST    /:tab/loadUsers                    controllers.HomeController.loadUsersFromFile(request: Request, tab: String)
