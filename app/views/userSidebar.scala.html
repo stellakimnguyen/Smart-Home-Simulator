@@ -3,6 +3,14 @@
 @(activeUser: User)(implicit shs: SHS, dynamicForm: DynamicForm, request: Http.Request)
 
 <div class="userSidebar">
+	<button type="button" class="bg-transparent border-0 userPermissionsContainer" data-toggle="modal" data-target="#permissionsModal">
+		<svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-key-fill" fill="#3253F1" xmlns="http://www.w3.org/2000/svg">
+			<path fill-rule="evenodd" d="M3.5 11.5a3.5 3.5 0 1 1 3.163-5H14L15.5 8 14 9.5l-1-1-1 1-1-1-1 1-1-1-1 1H6.663a3.5 3.5 0 0 1-3.163 2zM2.5 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+		</svg>
+		<div class="userSidebarTitle userPermissionsTitle">manage permissions</div>
+	</button>
+	<div class="userSeparator"></div>
+
 	<div class="textTitle">current user</div>
 	@singleUser(activeUser)
 		<div class="userSeparator"></div>
@@ -12,6 +20,499 @@
 			@singleUser(entry._2)
 		}
 	}
+
+		<!-- Permissions Modal -->
+	<div class="modal fade" id="permissionsModal" tabindex="-1" role="dialog" aria-labelledby="permissionsModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="permissionsModalLabel">Manage User Permissions</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<form>
+					<div class="modal-body">
+							<!-- SHP Module -->
+						<div class="permissionsModalTitle">SHP</div>
+						<div class="userSidebarTitle permissionsModalSubtitle">set away mode</div>
+						<div class="sidebarCaption">Allow the following user(s) to enable or disable the AWAY mode</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">child underage</div>
+							<div class="custom-control custom-switch">
+								<input type="checkbox" class="custom-control-input" id="childUnderSHP">
+								<label class="custom-control-label userTypeLabelCheckbox" for="childUnderSHP">enable</label>
+							</div>
+						</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">child teenager</div>
+							<div class="custom-control custom-switch">
+								<input type="checkbox" class="custom-control-input" id="childTeenSHP">
+								<label class="custom-control-label userTypeLabelCheckbox" for="childTeenSHP">enable</label>
+							</div>
+						</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">child adult</div>
+							<div class="custom-control custom-switch">
+								<input type="checkbox" class="custom-control-input" id="childAdult">
+								<label class="custom-control-label userTypeLabelCheckbox" for="childAdult">enable</label>
+							</div>
+						</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">guest</div>
+							<div class="custom-control custom-switch">
+								<input type="checkbox" class="custom-control-input" id="guestSHP">
+								<label class="custom-control-label userTypeLabelCheckbox" for="guestSHP">enable</label>
+							</div>
+						</div>
+
+							<!-- SHC Module -->
+						<div class="userSeparator"></div>
+						<div class="permissionsModalTitle">SHC</div>
+						<div class="userSidebarTitle permissionsModalSubtitle">open/close windows</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">child underage</div>
+							<div id="test">
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childUnderWindows" id="childUnderLocalWindows" value="local">
+									<label class="form-check-label userTypeLabelCheckbox" for="childUnderLocalWindows">local</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childUnderWindows" id="childUnderHomeWindows" value="home">
+									<label class="form-check-label userTypeLabelCheckbox" for="childUnderHomeWindows">home</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childUnderWindows" id="childUnderAlwaysWindows" value="always">
+									<label class="form-check-label userTypeLabelCheckbox" for="childUnderAlwaysWindows">always</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childUnderWindows" id="childUnderNeverWindows" value="never">
+									<label class="form-check-label userTypeLabelCheckbox" for="childUnderNeverWindows">never</label>
+								</div>
+							</div>
+						</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">child teenager</div>
+							<div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childTeenWindows" id="childTeenLocalWindows" value="local">
+									<label class="form-check-label userTypeLabelCheckbox" for="childTeenLocalWindows">local</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childTeenWindows" id="childTeenHomeWindows" value="home">
+									<label class="form-check-label userTypeLabelCheckbox" for="childTeenHomeWindows">home</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childTeenWindows" id="childTeenAlwaysWindows" value="always">
+									<label class="form-check-label userTypeLabelCheckbox" for="childTeenAlwaysWindows">always</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childTeenWindows" id="childTeenNeverWindows" value="never">
+									<label class="form-check-label userTypeLabelCheckbox" for="childTeenNeverWindows">never</label>
+								</div>
+							</div>
+						</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">child adult</div>
+							<div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childAdultWindows" id="childAdultLocalWindows" value="local">
+									<label class="form-check-label userTypeLabelCheckbox" for="childAdultLocalWindows">local</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childAdultWindows" id="childAdultHomeWindows" value="home">
+									<label class="form-check-label userTypeLabelCheckbox" for="childAdultHomeWindows">home</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childAdultWindows" id="childAdultAlwaysWindows" value="always">
+									<label class="form-check-label userTypeLabelCheckbox" for="childAdultAlwaysWindows">always</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childAdultWindows" id="childAdultNeverWindows" value="never">
+									<label class="form-check-label userTypeLabelCheckbox" for="childAdultNeverWindows">never</label>
+								</div>
+							</div>
+						</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">guest</div>
+							<div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="adultWindows" id="adultLocalWindows" value="local">
+									<label class="form-check-label userTypeLabelCheckbox" for="adultLocalWindows">local</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="adultWindows" id="adultHomeWindows" value="home">
+									<label class="form-check-label userTypeLabelCheckbox" for="adultHomeWindows">home</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="adultWindows" id="adultAlwaysWindows" value="always">
+									<label class="form-check-label userTypeLabelCheckbox" for="adultAlwaysWindows">always</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="adultWindows" id="adultNeverWindows" value="never">
+									<label class="form-check-label userTypeLabelCheckbox" for="adultNeverWindows">never</label>
+								</div>
+							</div>
+						</div>
+
+						<br />
+						<div class="userSidebarTitle permissionsModalSubtitle">open/close doors</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">child underage</div>
+							<div id="test">
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childUnderDoors" id="childUnderLocalOpenDoors" value="local">
+									<label class="form-check-label userTypeLabelCheckbox" for="childUnderLocalOpenDoors">local</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childUnderDoors" id="childUnderHomeOpenDoors" value="home">
+									<label class="form-check-label userTypeLabelCheckbox" for="childUnderHomeOpenDoors">home</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childUnderDoors" id="childUnderAlwaysOpenDoors" value="always">
+									<label class="form-check-label userTypeLabelCheckbox" for="childUnderAlwaysOpenDoors">always</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childUnderDoors" id="childUnderNeverOpenDoors" value="never">
+									<label class="form-check-label userTypeLabelCheckbox" for="childUnderNeverOpenDoors">never</label>
+								</div>
+							</div>
+						</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">child teenager</div>
+							<div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childTeenDoors" id="childTeenLocalOpenDoors" value="local">
+									<label class="form-check-label userTypeLabelCheckbox" for="childTeenLocalOpenDoors">local</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childTeenDoors" id="childTeenHomeOpenDoors" value="home">
+									<label class="form-check-label userTypeLabelCheckbox" for="childTeenHomeOpenDoors">home</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childTeenDoors" id="childTeenAlwaysOpenDoors" value="always">
+									<label class="form-check-label userTypeLabelCheckbox" for="childTeenAlwaysOpenDoors">always</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childTeenDoors" id="childTeenNeverOpenDoors" value="never">
+									<label class="form-check-label userTypeLabelCheckbox" for="childTeenNeverOpenDoors">never</label>
+								</div>
+							</div>
+						</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">child adult</div>
+							<div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childAdultDoors" id="childAdultLocalOpenDoors" value="local">
+									<label class="form-check-label userTypeLabelCheckbox" for="childAdultLocalOpenDoors">local</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childAdultDoors" id="childAdultHomeOpenDoors" value="home">
+									<label class="form-check-label userTypeLabelCheckbox" for="childAdultHomeOpenDoors">home</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childAdultDoors" id="childAdultAlwaysOpenDoors" value="always">
+									<label class="form-check-label userTypeLabelCheckbox" for="childAdultAlwaysOpenDoors">always</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childAdultDoors" id="childAdultNeverOpenDoors" value="never">
+									<label class="form-check-label userTypeLabelCheckbox" for="childAdultNeverOpenDoors">never</label>
+								</div>
+							</div>
+						</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">guest</div>
+							<div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="adultDoors" id="adultLocalOpenDoors" value="local">
+									<label class="form-check-label userTypeLabelCheckbox" for="adultLocalOpenDoors">local</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="adultDoors" id="adultHomeOpenDoors" value="home">
+									<label class="form-check-label userTypeLabelCheckbox" for="adultHomeOpenDoors">home</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="adultDoors" id="adultAlwaysOpenDoors" value="always">
+									<label class="form-check-label userTypeLabelCheckbox" for="adultAlwaysOpenDoors">always</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="adultDoors" id="adultNeverOpenDoors" value="never">
+									<label class="form-check-label userTypeLabelCheckbox" for="adultNeverOpenDoors">never</label>
+								</div>
+							</div>
+						</div>
+
+						<br />
+						<div class="userSidebarTitle permissionsModalSubtitle">lock/unlock doors</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">child underage</div>
+							<div id="test">
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childUnderLockDoors" id="childUnderLocalLockDoors" value="local">
+									<label class="form-check-label userTypeLabelCheckbox" for="childUnderLocalLockDoors">local</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childUnderLockDoors" id="childUnderHomeLockDoors" value="home">
+									<label class="form-check-label userTypeLabelCheckbox" for="childUnderHomeLockDoors">home</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childUnderDoors" id="childUnderAlwaysLockDoors" value="always">
+									<label class="form-check-label userTypeLabelCheckbox" for="childUnderAlwaysLockDoors">always</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childUnderDoors" id="childUnderNeverLockDoors" value="never">
+									<label class="form-check-label userTypeLabelCheckbox" for="childUnderNeverLockDoors">never</label>
+								</div>
+							</div>
+						</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">child teenager</div>
+							<div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childTeenLockDoors" id="childTeenLocalLockDoors" value="local">
+									<label class="form-check-label userTypeLabelCheckbox" for="childTeenLocalLockDoors">local</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childTeenLockDoors" id="childTeenHomeLockDoors" value="home">
+									<label class="form-check-label userTypeLabelCheckbox" for="childTeenHomeLockDoors">home</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childTeenLockDoors" id="childTeenAlwaysLockDoors" value="always">
+									<label class="form-check-label userTypeLabelCheckbox" for="childTeenAlwaysLockDoors">always</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childTeenLockDoors" id="childTeenNeverLockDoors" value="never">
+									<label class="form-check-label userTypeLabelCheckbox" for="childTeenNeverLockDoors">never</label>
+								</div>
+							</div>
+						</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">child adult</div>
+							<div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childAdultLockDoors" id="childAdultLocalLockDoors" value="local">
+									<label class="form-check-label userTypeLabelCheckbox" for="childAdultLocalLockDoors">local</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childAdultLockDoors" id="childAdultHomeLockDoors" value="home">
+									<label class="form-check-label userTypeLabelCheckbox" for="childAdultHomeLockDoors">home</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childAdultLockDoors" id="childAdultAlwaysLockDoors" value="always">
+									<label class="form-check-label userTypeLabelCheckbox" for="childAdultAlwaysLockDoors">always</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childAdultLockDoors" id="childAdultNeverLockDoors" value="never">
+									<label class="form-check-label userTypeLabelCheckbox" for="childAdultNeverLockDoors">never</label>
+								</div>
+							</div>
+						</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">guest</div>
+							<div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="adultLockDoors" id="adultLocalLockDoors" value="local">
+									<label class="form-check-label userTypeLabelCheckbox" for="adultLocalLockDoors">local</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="adultLockDoors" id="adultHomeLockDoors" value="home">
+									<label class="form-check-label userTypeLabelCheckbox" for="adultHomeLockDoors">home</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="adultLockDoors" id="adultAlwaysLockDoors" value="always">
+									<label class="form-check-label userTypeLabelCheckbox" for="adultAlwaysLockDoors">always</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="adultLockDoors" id="adultNeverLockDoors" value="never">
+									<label class="form-check-label userTypeLabelCheckbox" for="adultNeverLockDoors">never</label>
+								</div>
+							</div>
+						</div>
+
+						<br />
+						<div class="userSidebarTitle permissionsModalSubtitle">turn on/off lights</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">child underage</div>
+							<div id="test">
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childUnderLights" id="childUnderLocalLights" value="local">
+									<label class="form-check-label userTypeLabelCheckbox" for="childUnderLocalLights">local</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childUnderLights" id="childUnderHomeLights" value="home">
+									<label class="form-check-label userTypeLabelCheckbox" for="childUnderHomeLights">home</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childUnderLights" id="childUnderAlwaysLights" value="always">
+									<label class="form-check-label userTypeLabelCheckbox" for="childUnderAlwaysLights">always</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childUnderLights" id="childUnderNeverLights" value="never">
+									<label class="form-check-label userTypeLabelCheckbox" for="childUnderNeverLights">never</label>
+								</div>
+							</div>
+						</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">child teenager</div>
+							<div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childTeenLights" id="childTeenLocalLights" value="local">
+									<label class="form-check-label userTypeLabelCheckbox" for="childTeenLocalLights">local</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childTeenLights" id="childTeenHomeLights" value="home">
+									<label class="form-check-label userTypeLabelCheckbox" for="childTeenHomeLights">home</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childTeenLights" id="childTeenAlwaysLights" value="always">
+									<label class="form-check-label userTypeLabelCheckbox" for="childTeenAlwaysLights">always</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childTeenLights" id="childTeenNeverLights" value="never">
+									<label class="form-check-label userTypeLabelCheckbox" for="childTeenNeverLights">never</label>
+								</div>
+							</div>
+						</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">child adult</div>
+							<div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childAdultLights" id="childAdultLocalLights" value="local">
+									<label class="form-check-label userTypeLabelCheckbox" for="childAdultLocalLights">local</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childAdultLights" id="childAdultHomeLights" value="home">
+									<label class="form-check-label userTypeLabelCheckbox" for="childAdultHomeLights">home</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childAdultLights" id="childAdultAlwaysLights" value="always">
+									<label class="form-check-label userTypeLabelCheckbox" for="childAdultAlwaysLockDoors">always</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childAdultLights" id="childAdultNeverLights" value="never">
+									<label class="form-check-label userTypeLabelCheckbox" for="childAdultNeverLights">never</label>
+								</div>
+							</div>
+						</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">guest</div>
+							<div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="adultLights" id="adultLocalLights" value="local">
+									<label class="form-check-label userTypeLabelCheckbox" for="adultLocalLights">local</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="adultLights" id="adultHomeLights" value="home">
+									<label class="form-check-label userTypeLabelCheckbox" for="adultHomeLights">home</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="adultLights" id="adultAlwaysLights" value="always">
+									<label class="form-check-label userTypeLabelCheckbox" for="adultAlwaysLights">always</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="adultLights" id="adultNeverLights" value="never">
+									<label class="form-check-label userTypeLabelCheckbox" for="adultNeverLights">never</label>
+								</div>
+							</div>
+						</div>
+
+						<br />
+						<div class="userSidebarTitle permissionsModalSubtitle">set lights to auto mode</div>
+						<div class="sidebarCaption">Allow the following user(s) to enable or disable the lights' auto mode</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">child underage</div>
+							<div id="test">
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childUnderLightsAuto" id="childUnderLocalLightsAuto" value="local">
+									<label class="form-check-label userTypeLabelCheckbox" for="childUnderLocalLightsAuto">local</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childUnderLightsAuto" id="childUnderHomeLightsAuto" value="home">
+									<label class="form-check-label userTypeLabelCheckbox" for="childUnderHomeLightsAuto">home</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childUnderLightsAuto" id="childUnderAlwaysLightsAuto" value="always">
+									<label class="form-check-label userTypeLabelCheckbox" for="childUnderAlwaysLightsAuto">always</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childUnderLightsAuto" id="childUnderNeverLightsAuto" value="never">
+									<label class="form-check-label userTypeLabelCheckbox" for="childUnderNeverLightsAuto">never</label>
+								</div>
+							</div>
+						</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">child teenager</div>
+							<div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childTeenLightsAuto" id="childTeenLocalLightsAuto" value="local">
+									<label class="form-check-label userTypeLabelCheckbox" for="childTeenLocalLightsAuto">local</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childTeenLightsAuto" id="childTeenHomeLightsAuto" value="home">
+									<label class="form-check-label userTypeLabelCheckbox" for="childTeenHomeLightsAuto">home</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childTeenLightsAuto" id="childTeenAlwaysLightsAuto" value="always">
+									<label class="form-check-label userTypeLabelCheckbox" for="childTeenAlwaysLightsAuto">always</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childTeenLightsAuto" id="childTeenNeverLightsAuto" value="never">
+									<label class="form-check-label userTypeLabelCheckbox" for="childTeenNeverLightsAuto">never</label>
+								</div>
+							</div>
+						</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">child adult</div>
+							<div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childAdultLightsAuto" id="childAdultLocalLightsAuto" value="local">
+									<label class="form-check-label userTypeLabelCheckbox" for="childAdultLocalLightsAuto">local</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childAdultLightsAuto" id="childAdultHomeLightsAuto" value="home">
+									<label class="form-check-label userTypeLabelCheckbox" for="childAdultHomeLightsAuto">home</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childAdultLightsAuto" id="childAdultAlwaysLightsAuto" value="always">
+									<label class="form-check-label userTypeLabelCheckbox" for="childAdultAlwaysLightsAuto">always</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="childAdultLightsAuto" id="childAdultNeverLightsAuto" value="never">
+									<label class="form-check-label userTypeLabelCheckbox" for="childAdultNeverLightsAuto">never</label>
+								</div>
+							</div>
+						</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">guest</div>
+							<div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="adultLightsAuto" id="adultLocalLightsAuto" value="local">
+									<label class="form-check-label userTypeLabelCheckbox" for="adultLocalLightsAuto">local</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="adultLightsAuto" id="adultHomeLightsAuto" value="home">
+									<label class="form-check-label userTypeLabelCheckbox" for="adultHomeLightsAuto">home</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="adultLightsAuto" id="adultAlwaysLightsAuto" value="always">
+									<label class="form-check-label userTypeLabelCheckbox" for="adultAlwaysLightsAuto">always</label>
+								</div>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" name="adultLightsAuto" id="adultNeverLightsAuto" value="never">
+									<label class="form-check-label userTypeLabelCheckbox" for="adultNeverLightsAuto">never</label>
+								</div>
+							</div>
+						</div>
+
+					</div> <!-- End Modal Body -->
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+						<button type="button" class="btn btn-primary">Save changes</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
 
     @* load existing users here *@
     <div id="tempUser" class="tempUser hidden" style="transition: 250ms">

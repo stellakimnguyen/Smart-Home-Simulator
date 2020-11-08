@@ -68,6 +68,57 @@
   position: relative;
 }
 
+.userSidebarTitle {
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  font-size: small;
+  margin-bottom: 10px;
+}
+
+.userPermissionsTitle {
+  color: #3253F1;
+}
+
+.permissionsModalTitle {
+  color: #ADD7F6;
+  font-size: large;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+}
+
+.permissionsModalSubtitle {
+  margin-bottom: 0;
+}
+
+.sidebarCaption {
+  font-size: small;
+}
+
+.userPermissionsContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.userTypePermissions {
+  display: flex;
+  flex-direction: row;
+  margin-top: 10px;
+  justify-content: space-between;
+}
+
+.userTypeTitleCheckbox {
+  font-size: small;
+  font-weight: 500;
+  margin-right: 30px;
+}
+
+.userTypeLabelCheckbox {
+  font-size: small;
+}
+
 .userSeparator {
   height: 2px;
   background-color: #EEEEEE;
@@ -118,6 +169,14 @@
   overflow-y: auto;
 }
 
+.layoutTitle {
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  font-size: small;
+  margin-bottom: 10px;
+}
+
 .metricsOverlay {
   position: fixed;
   bottom: calc(10em + 12px);
@@ -137,6 +196,21 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   right: 0;
   top: 0;
   width: auto;
+}
+
+.paramsTitle {
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  font-size: small;
+}
+
+.paramBackground {
+  background-color: #F5F5F5;
+  border-radius: 5px;
+  padding: 15px;
+  width: 100%;
+  margin: 10px 0 20px;
 }
 
 .temperatureParam {

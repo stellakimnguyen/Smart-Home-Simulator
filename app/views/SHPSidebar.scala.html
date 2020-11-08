@@ -1,21 +1,83 @@
 @import models.modules.SHS
 @()(implicit shs: SHS, dynamicForm: DynamicForm, request: Http.Request)
-<div class="formGroupBackground switchBackground">
+
+<link rel="stylesheet" media="screen" href="@routes.Assets.versioned("libraries/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css")">
+<script src="@routes.Assets.versioned("libraries/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js")" type="text/javascript"></script>
+
+<script>
+		// Date Picker
+		$(function() {
+			$('#starttimepicker').datetimepicker({
+				pickDate: false
+			});
+		});
+		// Time Picker
+		$(function() {
+			$('#endtimepicker').datetimepicker({
+				pickDate: false
+			});
+		});
+</script>
+
+@*<div class="formGroupBackground switchBackground">
 	<div class="textSubtitle">Away Mode</div>
 	<div class="custom-control custom-switch ml-auto">
 		<input onchange='toggleAwayMode()' type="checkbox" class="custom-control-input" id='switchAwayMode' @if(models.modules.SHP.getInstance().isAway) {checked}>
 	<label class="custom-control-label" for='switchAwayMode'>@if(models.modules.SHP.getInstance().isAway) {on} else {off}</label>
 	</div>
-</div>
+</div>*@
+
 <form>
-@for(locationEntry: (String, Location) <- shs.getHome) {
-	@if(!locationEntry._2.equals(SHS.getOutside)) {
-		<div class="locationTitle">@locationEntry._1</div>
-		@for(deviceEntry: (String, models.devices.Device) <- locationEntry._2.getDeviceMap) {
-			@if(deviceEntry._2.isInstanceOf[models.devices.Light]) {
-				@components.controlAwayLight(deviceEntry._2.asInstanceOf[models.devices.Light])
-			}
-		}
-	}
-}
+@*	@for(locationEntry: (String, Location) <- shs.getHome) {*@
+@*		@if(!locationEntry._2.equals(SHS.getOutside)) {*@
+@*			<div class="locationTitle">@locationEntry._1</div>*@
+@*			@for(deviceEntry: (String, models.devices.Device) <- locationEntry._2.getDeviceMap) {*@
+@*				@if(deviceEntry._2.isInstanceOf[models.devices.Light]) {*@
+@*					@components.controlAwayLight(deviceEntry._2.asInstanceOf[models.devices.Light])*@
+@*				}*@
+@*			}*@
+@*		}*@
+@*	}*@
+	<form name="awayMode" id="awayMode" method="post" action=''>
+		<fieldset hidden></fieldset>
+		<div class="layoutTitle">SHC</div>
+		<div class="userTypePermissions">
+			<div class="userSidebarTitle">Set Away Mode</div>
+			<div class="custom-control custom-switch">
+				<input type="checkbox" onchange='toggleAwayMode()' class="custom-control-input" id="awayModeSwitch">
+				<label class="custom-control-label" for="awayModeSwitch">enable</label>
+			</div>
+		</div>
+
+		<div class="paramsTitle">Lights Time</div>
+		<div class="sidebarCaption">Set the active time range for the lights</div>
+		<div class="paramBackground">
+			<div id="starttimepicker" class="input-group mb-3">
+				<input name="date" id="simulatorDate" class="form-control add-on bg-white" placeholder="hh:mm:ss" data-format="hh:mm:ss" type="text" aria-describedby="dateLabel" value='' readonly/>
+				<div class="input-group-append">
+					<span data-time-icon="icon-time" data-date-icon="icon-calendar" class="input-group-text" id="dateLabel">🔅</span>
+				</div>
+			</div>
+			<div id="endtimepicker" class="input-group mb-3">
+				<input name="time" id="simulatorTime" class="form-control add-on bg-white" placeholder="hh:mm:ss" data-format="hh:mm:ss" type="text" aria-describedby="timeLabel" value='' readonly/>
+				<div class="input-group-append">
+					<span data-time-icon="icon-time" data-date-icon="icon-calendar" class="input-group-text" id="timeLabel">🌃</span>
+				</div>
+			</div>
+		</div>
+
+		<div class="paramsTitle">Time Delay</div>
+		<div class="sidebarCaption">Set the time delay before alerting authorities</div>
+		<div class="paramBackground">
+			<div class="userTypePermissions">
+				<input class="form-control add-on bg-white" type="number" placeholder="in minutes" id="timeDelay">
+				<div class="input-group-append">
+					<span data-time-icon="icon-time" data-date-icon="icon-calendar" class="input-group-text" id="dateLabel">⏰</span>
+				</div>
+			</div>
+		</div>
+
+		<div class="paramsTitle">List of Lights</div>
+		<button type="submit" class="btn btn-primary">Submit</button>
+	</form>
 </form>
