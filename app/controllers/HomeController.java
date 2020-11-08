@@ -347,23 +347,23 @@ public class HomeController extends Controller {
                   throw new Exception();
               }
 
-              HashSet<User.UserType> newSet = new HashSet<>();
+              PermissionLocation permissionLocation = PermissionLocation.never;
               for (int i = 1; i < lineStringArray.length; i++) {
                 switch (lineStringArray[i]) {
+                  case "never":
+                    permissionLocation = PermissionLocation.never;
+                    break;
                   case "local":
-                    newSet = new HashSet<>();
-                    permission.setLocal(newSet);
+                    permissionLocation = PermissionLocation.local;
                     break;
                   case "home":
-                    newSet = new HashSet<>();
-                    permission.setHome(newSet);
+                    permissionLocation = PermissionLocation.home;
                     break;
                   case "always":
-                    newSet = new HashSet<>();
-                    permission.setAlways(newSet);
+                    permissionLocation = PermissionLocation.always;
                     break;
                   default:
-                    newSet.add(User.UserType.valueOf(lineStringArray[i]));
+                    permission.authorize(User.UserType.valueOf(lineStringArray[i]), permissionLocation);
                 }
               }
             }
@@ -408,34 +408,25 @@ public class HomeController extends Controller {
         switch (i) {
           case 0:
             permission = PermitDoorLockUnlock.getPermission();
-            writer.write("PermitDoorLockUnlock,always");
+            writer.write("PermitDoorLockUnlock");
             break;
           case 1:
             permission = PermitDoorOpenClose.getPermission();
-            writer.write("PermitDoorOpenClose,always");
+            writer.write("PermitDoorOpenClose");
             break;
           case 2:
             permission = PermitLightOnOff.getPermission();
-            writer.write("PermitLightOnOff,always");
+            writer.write("PermitLightOnOff");
             break;
           default:
             permission = PermitWindowOpenClose.getPermission();
-            writer.write("PermitWindowOpenClose,always");
+            writer.write("PermitWindowOpenClose");
             break;
         }
-        List<User.UserType> userTypes = new LinkedList<>(PermitDoorLockUnlock.getPermission().getAlways());
-        for (User.UserType userType : userTypes) {
-          writer.write("," + userType);
-        }
-        writer.write(",home");
-        userTypes = new LinkedList<>(PermitDoorLockUnlock.getPermission().getHome());
-        for (User.UserType userType : userTypes) {
-          writer.write("," + userType);
-        }
-        writer.write(",local");
-        userTypes = new LinkedList<>(PermitDoorLockUnlock.getPermission().getLocal());
-        for (User.UserType userType : userTypes) {
-          writer.write("," + userType);
+
+        Map<User.UserType, PermissionLocation> permissionLocationMap = permission.getPermissions();
+        for (User.UserType userType : User.UserType.values()) {
+          writer.write("," + permissionLocationMap.get(userType) + "," + userType);
         }
         writer.write("\n");
       }
@@ -890,6 +881,41 @@ public class HomeController extends Controller {
       }
     }
     return redirect(routes.HomeController.main("SHP"));
+  }
+
+  public Result editPermissions(Http.Request request) {
+    DynamicForm dynamicForm = formFactory.form().bindFromRequest(request);
+    for (User.UserType userType : User.UserType.values()) {
+      if ((userType != User.UserType.Parent) && (userType != User.UserType.Stranger)) {
+        String permissionValue;
+        String permissionName = "PermitAutoLightMode";
+
+
+        permissionName = "PermitAwayMode";
+        permissionValue = dynamicForm.get(permissionName + userType);
+        System.out.println("permissionValue = " + permissionValue);
+        if (permissionValue != null) {
+          PermitAwayMode.authorize(userType, PermissionLocation.always);
+        } else {
+          PermitAwayMode.authorize(userType, PermissionLocation.never);
+        }
+        permissionName = "PermitWindowOpenClose";
+        PermitWindowOpenClose.authorize(userType,PermissionLocation.valueOf(dynamicForm.get(permissionName + userType)));
+        permissionName = "PermitDoorOpenClose";
+        PermitDoorOpenClose.authorize(userType,PermissionLocation.valueOf(dynamicForm.get(permissionName + userType)));
+        permissionName = "PermitDoorLockUnlock";
+        PermitDoorLockUnlock.authorize(userType,PermissionLocation.valueOf(dynamicForm.get(permissionName + userType)));
+        permissionName = "PermitLightOnOff";
+        PermitLightOnOff.authorize(userType,PermissionLocation.valueOf(dynamicForm.get(permissionName + userType)));
+        permissionName = "PermitAutoLightMode";
+        PermitAutoLightMode.authorize(userType,PermissionLocation.valueOf(dynamicForm.get(permissionName + userType)));
+
+
+
+
+      }
+    }
+    return redirect(routes.HomeController.main("user"));
   }
 
   public Result loadSideBar(Http.Request request, String name) {

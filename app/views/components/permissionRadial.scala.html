@@ -1,0 +1,15 @@
+@import models.permissions.PermissionLocation
+@(userTypeName: String, userType: models.User.UserType, permissionName: String, permissionLocation: PermissionLocation, noLocal: Boolean = false)
+<div class="userTypePermissions">
+	<div class="userTypeTitleCheckbox">@userTypeName </div>
+	<div>
+		@for(location: PermissionLocation <- PermissionLocation.values()) {
+			@if((location == PermissionLocation.local) && (noLocal)) {}else{
+			<div class="form-check form-check-inline">
+				<input class="form-check-input" type="radio" name='@(permissionName + userType)' id='@(permissionName + userType + location)' value='@location' @if(location==permissionLocation){checked}>
+				<label class="form-check-label userTypeLabelCheckbox" for='@(permissionName + userTypeName + location)'>@location</label>
+			</div>
+			}
+		}
+	</div>
+</div>
