@@ -3,23 +3,6 @@
 @import models.modules.SHP
 @()(implicit shs: SHS, dynamicForm: DynamicForm, request: Http.Request)
 
-<link rel="stylesheet" media="screen" href="@routes.Assets.versioned("libraries/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css")">
-<script src="@routes.Assets.versioned("libraries/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js")" type="text/javascript"></script>
-
-<script>
-		// Date Picker
-		$(function() {
-			$('#starttimepicker').datetimepicker({
-				pickDate: false
-			});
-		});
-		// Time Picker
-		$(function() {
-			$('#endtimepicker').datetimepicker({
-				pickDate: false
-			});
-		});
-</script>
 <form name="awayMode" id="awayMode" method="post" action='@routes.HomeController.editAwayMode()'>
 	<fieldset hidden>@CSRF.formField</fieldset>
 	<div class="paramsTitle">SHC</div>
@@ -35,15 +18,15 @@
 	<div class="sidebarCaption">Set the active time range for the lights</div>
 	<div class="paramBackground">
 		<div id="starttimepicker" class="input-group mb-3">
-			<input name="awayLightStart" id="awayLightStart" class="form-control add-on bg-white" placeholder="hh:mm:ss" data-format="hh:mm:ss" type="text" aria-describedby="dateLabel" value='@SHP.getInstance().getAwayLightStartString' readonly/>
+			<input class="form-control add-on bg-white time-picker" type="time" name="awayLightStart" id="awayLightStart" aria-describedby="timeLabel"  step="1" value='@SHP.getInstance().getAwayLightStartString'>
 			<div class="input-group-append">
 				<span data-time-icon="icon-time" data-date-icon="icon-calendar" class="input-group-text" id="dateLabel">🔅</span>
 			</div>
 		</div>
 		<div id="endtimepicker" class="input-group mb-3">
-			<input name="awayLightEnd" id="awayLightEnd" class="form-control add-on bg-white" placeholder="hh:mm:ss" data-format="hh:mm:ss" type="text" aria-describedby="timeLabel" value='@SHP.getInstance().getAwayLightEndString' readonly/>
+			<input class="form-control add-on bg-white time-picker" type="time" name="awayLightEnd" id="awayLightEnd" aria-describedby="timeLabel"  step="1" value='@SHP.getInstance().getAwayLightEndString'>
 			<div class="input-group-append">
-				<span data-time-icon="icon-time" data-date-icon="icon-calendar" class="input-group-text" id="timeLabel">🌃</span>
+				<span data-time-icon="icon-time" data-date-icon="icon-calendar" class="input-group-text" id="dateLabel">🌃</span>
 			</div>
 		</div>
 	</div>
@@ -72,7 +55,7 @@
 
 	<button type="submit" class="btn btn-primary">Submit</button>
 </form>
-<form>
+@*<form>*@
 @*	@for(locationEntry: (String, Location) <- shs.getHome) {*@
 @*		@if(!locationEntry._2.equals(SHS.getOutside)) {*@
 @*			<div class="locationTitle">@locationEntry._1</div>*@
@@ -84,4 +67,4 @@
 @*		}*@
 @*	}*@
 
-</form>
+@*</form>*@
