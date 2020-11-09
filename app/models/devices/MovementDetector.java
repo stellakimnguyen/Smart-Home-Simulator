@@ -69,6 +69,7 @@ public class MovementDetector extends Device implements Observer, Observable {
     switch (action) {
       case actionOff:
         if (getStatus().equals(statusOff)) {
+          notifyObservers();
           throw new SameStatusException(this);
         }
         super.setStatus(Device.statusOff);
@@ -76,6 +77,7 @@ public class MovementDetector extends Device implements Observer, Observable {
         return true;
       case actionOn:
         if (getStatus().equals(statusOn)) {
+          notifyObservers();
           throw new SameStatusException(this);
         }
         super.setStatus(Device.statusOn);

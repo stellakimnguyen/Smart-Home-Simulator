@@ -49,6 +49,18 @@ public class HomeController extends Controller {
   }
 
   private void initialize() {
+    PermitAwayMode.authorize(User.UserType.Child_Adult,PermissionLocation.always);
+    PermitAwayMode.authorize(User.UserType.Child_Teenager,PermissionLocation.always);
+    PermitAwayMode.authorize(User.UserType.Child_Underage,PermissionLocation.always);
+    PermitWindowOpenClose.authorize(User.UserType.Child_Adult,PermissionLocation.local);
+    PermitWindowOpenClose.authorize(User.UserType.Child_Teenager,PermissionLocation.local);
+    PermitWindowOpenClose.authorize(User.UserType.Child_Underage,PermissionLocation.local);
+    PermitWindowOpenClose.authorize(User.UserType.Guest,PermissionLocation.local);
+    PermitDoorOpenClose.authorize(User.UserType.Child_Adult,PermissionLocation.local);
+    PermitDoorOpenClose.authorize(User.UserType.Child_Teenager,PermissionLocation.local);
+    PermitDoorOpenClose.authorize(User.UserType.Child_Underage,PermissionLocation.local);
+    PermitDoorOpenClose.authorize(User.UserType.Guest,PermissionLocation.local);
+
     logger.log(shs, "System initialized successfully.", Logger.MessageType.normal);
   }
 
@@ -225,7 +237,6 @@ public class HomeController extends Controller {
                     locationList.add(buffer);
                     Light newLight =new Light(buffer.getName() + " Light");
                     newLight.setLocation(buffer);
-                    System.out.println("newLight.getLocation().getName() = " + newLight.getLocation().getName());
                     (new MovementDetector(" Movement Detector")).setLocation(buffer);
                     newDoor.setSecondLocation(buffer);
                   } else {
@@ -926,7 +937,6 @@ public class HomeController extends Controller {
 
         permissionName = "PermitAwayMode";
         permissionValue = dynamicForm.get(permissionName + userType);
-        System.out.println("permissionValue = " + permissionValue);
         if (permissionValue != null) {
           PermitAwayMode.authorize(userType, PermissionLocation.always);
         } else {

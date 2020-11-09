@@ -3,5 +3,7 @@
 @(tab: String)(implicit shs: SHS, dynamicForm: DynamicForm, request: Http.Request)
 
 @layouts.main(tab){
+	<div id="houseLayout" class="layout">
   @house()
+	</div>
 }

@@ -231,6 +231,9 @@ public class HomeMapper {
         }
         break;
     }
+    if (door.isLocked()) {
+      return "<td class='" + doorClass + "' onClick='toggleDoorLock(\"" + door.getLocation().getName() + "\", \"" + door.getName() + "\", " + door.isLocked() + ")'><i class=\"fas fa-key\"></i></td>";
+    }
     return "<td class='" + doorClass + "' onClick='toggleDoorControl(\"" + door.getLocation().getName() + "\", \"" + door.getName() + "\", \"" + door.getStatus() + "\")'></td>";
     //return "<td class='" + doorClass + "' data-toggle='tooltip' data-placement='left' title='" + door.getName() + "' onClick='toggleDoorControl(\"" + door.getLocation().getName() + "\", \"" + door.getName() + "\", \"" + door.getStatus() + "\")'></td>";
   }
