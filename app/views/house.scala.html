@@ -1,0 +1,3 @@
+@()(implicit shs: models.modules.SHS)
+	@if(shs.getHome.size > 1) {@Html.apply(models.modules.HomeMapper.toHtml)} else {House Layout is missing!}
+	<div class="metricsOverlay" id="metricsOverlay">@constantMetrics()</div>

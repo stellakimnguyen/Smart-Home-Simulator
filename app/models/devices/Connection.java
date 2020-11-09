@@ -1,9 +1,13 @@
-package models;
+package models.devices;
+
+import models.Location;
+import models.devices.Device;
+import models.exceptions.DeviceException;
 
 /**
- * Extends a [[models.Device Device]]: joins two [[models.Location Locations]] together, without any barriers.
+ * Extends a [[models.devices.Device Device]]: joins two [[models.Location Locations]] together, without any barriers.
  * ===Attributes===
- * `secondLocation (private [[models.Location Location]]):` Location to be joined to the one this [[models.Device Device]] is located at.
+ * `secondLocation (private [[models.Location Location]]):` Location to be joined to the one this [[models.devices.Device Device]] is located at.
  *
  * @version 1
  * @author Rodrigo M. Zanini (40077727)
@@ -36,25 +40,17 @@ public class Connection extends Device {
       return false; // TODO throw some sort of exception once error handling is in place
     }
     // check if there is a location cycle
-    if (getLocation().equals(secondLocation)) {
+    if (secondLocation.equals(getLocation())) {
       return false; // TODO throw some sort of exception once error handling is in place
     }
     // if device is already at a location, remove it from that map.
     if (this.secondLocation != null) {
-      this.secondLocation.getDeviceMap().remove(getName());
+      this.secondLocation.removeDevice(this);
     }
     this.secondLocation = secondLocation;
-    this.secondLocation.getDeviceMap().put(getName(), this);
+    this.secondLocation.addDevice(this);
     return true;
   }
-
-  /**
-   * Overrides the default method, so as to do nothing instead.
-   * @param status ignored
-   */
-  @Override
-  public void setStatus(String status) {
-  } // do nothing
 
   /**
    * Overrides the default method, so as to do nothing instead.
@@ -62,7 +58,12 @@ public class Connection extends Device {
    * @return false
    */
   @Override
-  public boolean doAction(String action) {
-    return false; // By default, no action is performed
+  public boolean doAction(String action) throws DeviceException {
+    return false;
+  }
+
+  @Override
+  public String toString() {
+    return "[" + getLocation().getName() + ", " + getSecondLocation().getName() + "] " + getName();
   }
 }

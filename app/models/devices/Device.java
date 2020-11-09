@@ -1,4 +1,7 @@
-package models;
+package models.devices;
+
+import models.Location;
+import models.exceptions.DeviceException;
 
 /**
  * Template for all devices existing in a [[models.Location Location]]. Contains common attributes and a basic set of actions and statuses.
@@ -62,9 +65,16 @@ public abstract class Device {
   }
 
   /**
+   * Get the Device's full status.
+   */
+  public String getFullStatus() {
+    return status;
+  }
+
+  /**
    * Set the Device status.
    */
-  public void setStatus(String status) {
+  void setStatus(String status) {
     this.status = status;
   }
 
@@ -84,8 +94,7 @@ public abstract class Device {
     if (location == null) {
       return false; // TODO throw some sort of exception once error handling is in place
     }
-    // devices are not allowed on "Outside" locations
-    if (location.getLocationType() == Location.LocationType.Outside) {
+    if (!checkLocationTypeAllowed(location)) {
       return false; // TODO throw some sort of exception once error handling is in place
     }
     // check if device with name exists in new location
@@ -94,10 +103,10 @@ public abstract class Device {
     }
     // if device is already at a location, remove it from that map.
     if (this.location != null) {
-      this.location.getDeviceMap().remove(this.name);
+      this.location.removeDevice(this);
     }
     this.location = location;
-    this.location.getDeviceMap().put(this.name, this);
+    this.location.addDevice(this);
     return true;
   }
 
@@ -107,5 +116,20 @@ public abstract class Device {
    * @param action String with the action code to be performed.
    * @return true if the action was performed, false otherwise.
    */
-  public abstract boolean doAction(String action);
+  public abstract boolean doAction(String action) throws DeviceException;
+
+  /**
+   * setLocation Template Step, it verifies if the [[models.devices.Device Device]] is allowed at a given [[models.Location LocationType]].
+   * By default, devices are not allowed on "Outside" locations.
+   * @return true if the device is allowed to be in that [[models.Location LocationType]], false otherwise.
+   */
+  public boolean checkLocationTypeAllowed(Location location) {
+    // By default, devices are not allowed on "Outside" locations
+    return location.getLocationType() != Location.LocationType.Outside;
+  }
+
+  @Override
+  public String toString() {
+    return "[" + getLocation().getName() + "] " + getName();
+  }
 }

@@ -1,7 +1,13 @@
-package models;
+package models.devices;
+
+import models.Location;
+import models.exceptions.InvalidActionException;
+import models.exceptions.SameStatusException;
+import models.modules.SHS;
+import models.exceptions.WindowBlockedException;
 
 /**
- * Extends a [[models.Connection Connection]]: fixes the [[models.Location Location]] it connects to to [[models.SHS `Outside`]] and introduces a barrier between both [[models.Location Locations]], new statuses, and new actions.
+ * Extends a [[models.devices.Connection Connection]]: fixes the [[models.Location Location]] it connects to to [[models.modules.SHS `Outside`]] and introduces a barrier between both [[models.Location Locations]], new statuses, and new actions.
  * ===Attributes===
  * `isBlocked (private boolean):` the condition of the barrier.
  *
@@ -48,7 +54,7 @@ public class Window extends Connection {
    * @return a [[String]] that compounds the device status, a comma, and the condition of the barrier.
    */
   @Override
-  public String getStatus() {
+  public String getFullStatus() {
     return super.getStatus() + "," + (isBlocked?statusBlocked:statusNotBlocked);
   }
 
@@ -57,7 +63,7 @@ public class Window extends Connection {
    * @param status the new status.
    */
   @Override
-  public void setStatus(String status) {
+  void setStatus(String status) {
     if (status.equals(Device.statusOpen) || status.equals(Device.statusClosed)) {
       super.setStatus(status);
     }
@@ -70,30 +76,52 @@ public class Window extends Connection {
    * @return true if the action was performed, false otherwise.
    */
   @Override
-  public boolean doAction(String action) {
+  public boolean doAction(String action) throws WindowBlockedException, SameStatusException, InvalidActionException {
     switch (action) {
       case Device.actionOpen:
-        super.setStatus(Device.statusOpen);
+        if (getStatus().equals(Window.statusOpen)) {
+          throw new SameStatusException(this);
+        } else if (isBlocked) {
+          throw new WindowBlockedException(this);
+        }
+        setStatus(Device.statusOpen);
         return true;
       case Device.actionClose:
-        super.setStatus(Device.statusClosed);
+        if (getStatus().equals(Window.statusClosed)) {
+          throw new SameStatusException(this);
+        } else if (isBlocked) {
+          throw new WindowBlockedException(this);
+        }
+        setStatus(Device.statusClosed);
         return true;
       case actionBlock:
+        if (isBlocked) {
+          throw new SameStatusException(this);
+        }
         setBlocked(true);
         return true;
       case actionUnblock:
+        if (!isBlocked) {
+          throw new SameStatusException(this);
+        }
         setBlocked(false);
         return true;
-      default: return false;
+      default:
+        throw new InvalidActionException(this);
     }
   }
 
   /**
    * By design, a window always connects to Outside
-   * @return the [[models.SHS Outside]] instance registered in [[models.SHS SHS]]
+   * @return the [[models.modules.SHS Outside]] instance registered in [[models.modules.SHS SHS]]
    */
   @Override
   public Location getSecondLocation() {
     return SHS.getOutside();
+  }
+
+  @Override
+  public String toString() {
+    return "[" + getLocation().getName() + "] " + getName();
   }
 }

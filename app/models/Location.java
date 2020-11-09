@@ -1,7 +1,8 @@
 package models;
 
-import java.util.HashMap;
-import java.util.Map;
+import models.devices.Device;
+
+import java.util.*;
 
 /**
  * A physical location.
@@ -18,19 +19,23 @@ import java.util.Map;
  *
  * `locationType (private LocationType):` The type of the location.
  *
- * `deviceMap (private [[java.util.Map Map]]&#91;[[java.lang.String String]], [[models.Device Device]]&#93;):` The map of all [[models.Device Devices]] at this location.
+ * `deviceMap (private [[java.util.Map Map]]&#91;[[java.lang.String String]], [[models.devices.Device Device]]&#93;):` The map of all [[models.devices.Device Devices]] at this location.
+ *
+ * `userMap (private [[java.util.Map Map]]&#91;[[java.lang.String String]], [[models.User User]]&#93;):` The map of all [[models.User Users]] at this location.
  *
  * `defaultTemperature (private static final int):` The temperature that locations default to. Set to 20.00 Celsius.
  *
- * @version 1
+ * @version 2
  * @author Rodrigo M. Zanini (40077727)
  * @author Pierre-Alexis Barras (40022016)
  */
-public class Location {
+public class Location implements Observable {
   private String name;
   private int temperature;
-  private LocationType locationType;
-  private Map<String, Device> deviceMap;
+  private final LocationType locationType;
+  private final Map<String, Device> deviceMap = new HashMap<>();
+  private final Map<String, User> userMap = new HashMap<>();
+  private final Set<Observer> observers = new HashSet<>();
 
   public static final int defaultTemperature = 2000;
 
@@ -44,7 +49,6 @@ public class Location {
     this.name = name;
     this.temperature = defaultTemperature;
     this.locationType = locationType;
-    this.deviceMap = new HashMap<>();
   }
 
   /**
@@ -92,29 +96,69 @@ public class Location {
   }
 
   /**
-   * Set the Location type.
-   */
-  public void setLocationType(LocationType locationType) {
-    if (locationType == LocationType.Outside) {
-      this.locationType = LocationType.Outdoor;
-    } else if (locationType != null) {
-      this.locationType = locationType;
-    }
-  }
-
-  /**
-   * Get the [[java.util.Map Map]] of [[models.Device Devices]] at the Location.
+   * Get the [[java.util.Map Map]] of [[models.devices.Device Devices]] at the Location. It is a clone therefore modifying the
+   * returned map will not affect the location.
    */
   public Map<String, Device> getDeviceMap() {
-    return deviceMap;
+    return new TreeMap<>(deviceMap);
   }
 
   /**
-   * Set the [[java.util.Map Map]] of [[models.Device Devices]] at the Location.
+   * Add a [[models.devices.Device Device]] to the [[java.util.Map Map]] of [[models.devices.Device Devices]] of this location.
+   * @param device the [[models.devices.Device Device]] to be added
    */
-  public void setDeviceMap(Map<String, Device> deviceMap) {
-    if (deviceMap != null) {
-      this.deviceMap = deviceMap;
+  public void addDevice(Device device) {
+    this.deviceMap.put(device.getName(), device);
+  }
+
+  /**
+   * Remove a [[models.devices.Device Device]] from the [[java.util.Map Map]] of [[models.devices.Device Devices]] of this location.
+   * @param device the [[models.devices.Device Device]] to be removed
+   */
+  public void removeDevice(Device device) {
+    this.deviceMap.remove(device.getName());
+  }
+
+  /**
+   * Get a [[java.util.Map Map]] of [[models.User Users]] at the Location. It is a clone therefore modifying the
+   * returned map will not affect the location.
+   */
+  public Map<String, User> getUserMap() {
+    return new TreeMap<>(userMap);
+  }
+
+  /**
+   * Add a [[models.User User]] to the [[java.util.Map Map]] of [[models.User Users]] of this location.
+   * @param user the [[models.User User]] to be added
+   */
+  public void addUser(User user) {
+    this.userMap.put(user.getName(), user);
+    notifyObservers();
+  }
+
+  /**
+   * Remove a [[models.User User]] from the [[java.util.Map Map]] of [[models.User Users]] of this location.
+   * @param user the [[models.User User]] to be removed
+   */
+  public void removeUser(User user) {
+    this.userMap.remove(user.getName());
+    notifyObservers();
+  }
+
+  @Override
+  public void addObserver(Observer observer) {
+    this.observers.add(observer);
+  }
+
+  @Override
+  public void removeObserver(Observer observer) {
+    this.observers.remove(observer);
+  }
+
+  @Override
+  public void notifyObservers() {
+    for (Observer observer : observers) {
+      observer.observe(this);
     }
   }
 }

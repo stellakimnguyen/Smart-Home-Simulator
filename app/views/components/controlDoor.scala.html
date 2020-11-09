@@ -1,0 +1,18 @@
+@import models.devices.Device
+@import models.devices.Door
+@(door: Door)
+<div class="formGroupBackground switchBackground">
+	<div class="textSubtitle">[@door.getLocation.getName-@door.getSecondLocation.getName]<br/>@door.getName</div>
+	<div class="ml-auto">
+		<div class="custom-control custom-switch">
+			<input onchange='toggleDoorControl("@door.getLocation.getName", "@door.getName", "@door.getStatus")' type="checkbox" class="custom-control-input" id='switchDoor@door.toString' @if(door.getStatus.equals(Device.statusOpen)) {checked} @if(door.isLocked){disabled}>
+			<label class="custom-control-label" for='switchDoor@door.toString'>@if(door.getStatus.equals(Device.statusOpen)) {@Device.statusOpen}else{@Device.statusClosed}</label>
+		</div>
+		@if((door.getLocation.getLocationType == Location.LocationType.Outdoor) || (door.getSecondLocation.getLocationType == Location.LocationType.Outdoor) || (door.getSecondLocation.getLocationType == Location.LocationType.Outside)) {
+		<div class="custom-control custom-switch">
+			<input onchange='toggleDoorLock("@door.getLocation.getName", "@door.getName", @door.isLocked)' type="checkbox" class="custom-control-input" id='switchDoorLock@door.toString' @if(door.isLocked) {checked} @if(door.getStatus.equals(Device.statusOpen)){disabled}>
+			<label class="custom-control-label" for='switchDoorLock@door.toString'>@if(door.isLocked) {@Door.statusLocked}else{@Door.statusNotLocked}</label>
+		</div>
+		}
+	</div>
+</div>

@@ -1,0 +1,10 @@
+@import models.devices.Light
+@import models.modules.SHP
+@(light: Light)
+<div class="formGroupBackground switchBackground">
+	<div class="textSubtitle">@light.getName</div>
+	<div class="custom-control custom-switch ml-auto">
+		<input onclick="function toggle(){let isChecked = this.checked; this.checked = !(isChecked)}" type="checkbox" class="custom-control-input" name='@light.toString' id='@light.toString' @if(SHP.getInstance().isLightRegistered(light)){checked}>
+		<label class="custom-control-label" for='@light.toString'>@if(SHP.getInstance().isLightRegistered(light)){auto}else{off}</label>
+	</div>
+</div>

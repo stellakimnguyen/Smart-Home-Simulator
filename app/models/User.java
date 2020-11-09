@@ -1,5 +1,7 @@
 package models;
 
+import models.modules.SHS;
+
 /**
  * A virtual person that will interact with the Smart Home.
  * ===Inner Class===
@@ -14,9 +16,9 @@ package models;
  *
  * `userType (private UserType):` The type of user.
  *
- * `location (private [[models.Location Location]]):` The location the user is currently at, defaults to [[models.SHS Outside]].
+ * `location (private [[models.Location Location]]):` The location the user is currently at, defaults to [[models.modules.SHS Outside]].
  *
- * @version 1
+ * @version 2
  * @author Rodrigo M. Zanini (40077727)
  * @author Pierre-Alexis Barras (40022016)
  */
@@ -71,7 +73,6 @@ public class User {
     return name.replaceAll(" ","");
   }
 
-
   /**
    * Set the User name.
    */
@@ -107,6 +108,12 @@ public class User {
     if (location == null) {
       location = SHS.getOutside();
     }
+    // if user is already at a location, remove it from that map.
+    if (this.location != null) {
+      this.location.removeUser(this);
+    }
     this.location = location;
+    // add user to the map of the new location
+    this.location.addUser(this);
   }
 }

@@ -1,16 +1,126 @@
 @import views.html.helper.CSRF
+@import models.modules.SHS
+@import models.User.UserType
+@import models.permissions.PermitWindowOpenClose
+@import models.permissions.PermitDoorOpenClose
+@import models.permissions.PermitDoorLockUnlock
+@import models.permissions.PermitLightOnOff
+@import models.permissions.PermitAutoLightMode
+@import models.permissions.PermitAwayMode
+@import models.permissions.PermissionLocation
 @(activeUser: User)(implicit shs: SHS, dynamicForm: DynamicForm, request: Http.Request)
 
 <div class="userSidebar">
-	<div class="userSidebarTitle">current user</div>
-	@singleUser(activeUser)
+	<button type="button" class="bg-transparent border-0 userPermissionsContainer" data-toggle="modal" data-target="#permissionsModal">
+		<svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-key-fill" fill="#3253F1" xmlns="http://www.w3.org/2000/svg">
+			<path fill-rule="evenodd" d="M3.5 11.5a3.5 3.5 0 1 1 3.163-5H14L15.5 8 14 9.5l-1-1-1 1-1-1-1 1-1-1-1 1H6.663a3.5 3.5 0 0 1-3.163 2zM2.5 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+		</svg>
+		<div class="userSidebarTitle userPermissionsTitle">manage permissions</div>
+	</button>
 	<div class="userSeparator"></div>
-	<div class="userSidebarTitle">other users</div>
+
+	<div class="textTitle">current user</div>
+	@singleUser(activeUser)
+		<div class="userSeparator"></div>
+	<div class="textTitle">other users</div>
 	@for(entry: (String, User) <- shs.getUserMap) {
 		@if(!entry._1.equals(activeUser.getName)) {
 			@singleUser(entry._2)
 		}
 	}
+
+		<!-- Permissions Modal -->
+	<div class="modal fade" id="permissionsModal" tabindex="-1" role="dialog" aria-labelledby="permissionsModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="permissionsModalLabel">Manage User Permissions</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<form action='@routes.HomeController.editPermissions()' method="post">
+					<fieldset hidden>@CSRF.formField</fieldset>
+					<div class="modal-body">
+							<!-- SHP Module -->
+						<div class="permissionsModalTitle">SHP</div>
+						<div class="userSidebarTitle permissionsModalSubtitle">set away mode</div>
+						<div class="sidebarCaption">Allow the following user(s) to enable or disable the AWAY mode</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">child underage</div>
+							<div class="custom-control custom-switch">
+								<input type="checkbox" class="custom-control-input" id="childUnderSHP" name="PermitAwayModeChild_Underage" @if(PermitAwayMode.getPermission.getPermissions.get(UserType.Child_Underage).equals(PermissionLocation.always)){checked}>
+								<label class="custom-control-label userTypeLabelCheckbox" for="childUnderSHP">enable</label>
+							</div>
+						</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">child teenager</div>
+							<div class="custom-control custom-switch">
+								<input type="checkbox" class="custom-control-input" id="childTeenSHP" name="PermitAwayModeChild_Teenager" @if(PermitAwayMode.getPermission.getPermissions.get(UserType.Child_Teenager).equals(PermissionLocation.always)){checked}>
+								<label class="custom-control-label userTypeLabelCheckbox" for="childTeenSHP">enable</label>
+							</div>
+						</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">child adult</div>
+							<div class="custom-control custom-switch">
+								<input type="checkbox" class="custom-control-input" id="childAdult" name="PermitAwayModeChild_Adult" @if(PermitAwayMode.getPermission.getPermissions.get(UserType.Child_Adult).equals(PermissionLocation.always)){checked}>
+								<label class="custom-control-label userTypeLabelCheckbox" for="childAdult">enable</label>
+							</div>
+						</div>
+						<div class="userTypePermissions">
+							<div class="userTypeTitleCheckbox">guest</div>
+							<div class="custom-control custom-switch">
+								<input type="checkbox" class="custom-control-input" id="guestSHP" name="PermitAwayModeGuest" @if(PermitAwayMode.getPermission.getPermissions.get(UserType.Guest).equals(PermissionLocation.always)){checked}>
+								<label class="custom-control-label userTypeLabelCheckbox" for="guestSHP">enable</label>
+							</div>
+						</div>
+
+							<!-- SHC Module -->
+						<div class="userSeparator"></div>
+						<div class="permissionsModalTitle">SHC</div>
+						<div class="userSidebarTitle permissionsModalSubtitle">open/close windows</div>
+						@views.html.components.permissionRadial("child underage",UserType.Child_Underage,"PermitWindowOpenClose",PermitWindowOpenClose.getPermission.getPermissions.get(UserType.Child_Underage))
+						@views.html.components.permissionRadial("child teenager",UserType.Child_Teenager,"PermitWindowOpenClose",PermitWindowOpenClose.getPermission.getPermissions.get(UserType.Child_Teenager))
+						@views.html.components.permissionRadial("child adult",UserType.Child_Adult,"PermitWindowOpenClose",PermitWindowOpenClose.getPermission.getPermissions.get(UserType.Child_Adult))
+						@views.html.components.permissionRadial("guest",UserType.Guest,"PermitWindowOpenClose",PermitWindowOpenClose.getPermission.getPermissions.get(UserType.Guest))
+
+						<br />
+						<div class="userSidebarTitle permissionsModalSubtitle">open/close doors</div>
+						@views.html.components.permissionRadial("child underage",UserType.Child_Underage,"PermitDoorOpenClose",PermitDoorOpenClose.getPermission.getPermissions.get(UserType.Child_Underage))
+						@views.html.components.permissionRadial("child teenager",UserType.Child_Teenager,"PermitDoorOpenClose",PermitDoorOpenClose.getPermission.getPermissions.get(UserType.Child_Teenager))
+						@views.html.components.permissionRadial("child adult",UserType.Child_Adult,"PermitDoorOpenClose",PermitDoorOpenClose.getPermission.getPermissions.get(UserType.Child_Adult))
+						@views.html.components.permissionRadial("guest",UserType.Guest,"PermitDoorOpenClose",PermitDoorOpenClose.getPermission.getPermissions.get(UserType.Guest))
+
+						<br />
+						<div class="userSidebarTitle permissionsModalSubtitle">lock/unlock doors</div>
+						@views.html.components.permissionRadial("child underage",UserType.Child_Underage,"PermitDoorLockUnlock",PermitDoorLockUnlock.getPermission.getPermissions.get(UserType.Child_Underage))
+						@views.html.components.permissionRadial("child teenager",UserType.Child_Teenager,"PermitDoorLockUnlock",PermitDoorLockUnlock.getPermission.getPermissions.get(UserType.Child_Teenager))
+						@views.html.components.permissionRadial("child adult",UserType.Child_Adult,"PermitDoorLockUnlock",PermitDoorLockUnlock.getPermission.getPermissions.get(UserType.Child_Adult))
+						@views.html.components.permissionRadial("guest",UserType.Guest,"PermitDoorLockUnlock",PermitDoorLockUnlock.getPermission.getPermissions.get(UserType.Guest))
+
+						<br />
+						<div class="userSidebarTitle permissionsModalSubtitle">turn on/off lights</div>
+						@views.html.components.permissionRadial("child underage",UserType.Child_Underage,"PermitLightOnOff",PermitLightOnOff.getPermission.getPermissions.get(UserType.Child_Underage))
+						@views.html.components.permissionRadial("child teenager",UserType.Child_Teenager,"PermitLightOnOff",PermitLightOnOff.getPermission.getPermissions.get(UserType.Child_Teenager))
+						@views.html.components.permissionRadial("child adult",UserType.Child_Adult,"PermitLightOnOff",PermitLightOnOff.getPermission.getPermissions.get(UserType.Child_Adult))
+						@views.html.components.permissionRadial("guest",UserType.Guest,"PermitLightOnOff",PermitLightOnOff.getPermission.getPermissions.get(UserType.Guest))
+
+						<br />
+						<div class="userSidebarTitle permissionsModalSubtitle">change the lights' auto mode</div>
+						@views.html.components.permissionRadial("child underage",UserType.Child_Underage,"PermitAutoLightMode",PermitAutoLightMode.getPermission.getPermissions.get(UserType.Child_Underage), noLocal = true)
+						@views.html.components.permissionRadial("child teenager",UserType.Child_Teenager,"PermitAutoLightMode",PermitAutoLightMode.getPermission.getPermissions.get(UserType.Child_Teenager), noLocal = true)
+						@views.html.components.permissionRadial("child adult",UserType.Child_Adult,"PermitAutoLightMode",PermitAutoLightMode.getPermission.getPermissions.get(UserType.Child_Adult), noLocal = true)
+						@views.html.components.permissionRadial("guest",UserType.Guest,"PermitAutoLightMode",PermitAutoLightMode.getPermission.getPermissions.get(UserType.Guest), noLocal = true)
+
+					</div> <!-- End Modal Body -->
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+						<button type="submit" class="btn btn-primary">Save changes</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
 
     @* load existing users here *@
     <div id="tempUser" class="tempUser hidden" style="transition: 250ms">

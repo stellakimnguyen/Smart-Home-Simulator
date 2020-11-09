@@ -1,0 +1,70 @@
+@import views.html.helper.CSRF
+@import models.modules.SHS
+@import models.modules.SHP
+@()(implicit shs: SHS, dynamicForm: DynamicForm, request: Http.Request)
+
+<form name="awayMode" id="awayMode" method="post" action='@routes.HomeController.editAwayMode()'>
+	<fieldset hidden>@CSRF.formField</fieldset>
+	<div class="paramsTitle">SHC</div>
+	<div class="userTypePermissions">
+		<div class="userSidebarTitle">Set Away Mode</div>
+		<div class="custom-control custom-switch">
+			<input type="checkbox" onchange='toggleAwayMode()' class="custom-control-input" id="awayModeSwitch" @if(SHP.getInstance().isAway){checked}>
+			<label class="custom-control-label" for="awayModeSwitch">@if(SHP.getInstance().isAway) {on} else {off}</label>
+		</div>
+	</div>
+
+	<div class="paramsTitle">Lights Time</div>
+	<div class="sidebarCaption">Set the active time range for the lights</div>
+	<div class="paramBackground">
+		<div id="starttimepicker" class="input-group mb-3">
+			<input class="form-control add-on bg-white time-picker" type="time" name="awayLightStart" id="awayLightStart" aria-describedby="timeLabel"  step="1" value='@SHP.getInstance().getAwayLightStartString'>
+			<div class="input-group-append">
+				<span data-time-icon="icon-time" data-date-icon="icon-calendar" class="input-group-text" id="dateLabel">🔅</span>
+			</div>
+		</div>
+		<div id="endtimepicker" class="input-group mb-3">
+			<input class="form-control add-on bg-white time-picker" type="time" name="awayLightEnd" id="awayLightEnd" aria-describedby="timeLabel"  step="1" value='@SHP.getInstance().getAwayLightEndString'>
+			<div class="input-group-append">
+				<span data-time-icon="icon-time" data-date-icon="icon-calendar" class="input-group-text" id="dateLabel">🌃</span>
+			</div>
+		</div>
+	</div>
+
+	<div class="paramsTitle">Time Delay</div>
+	<div class="sidebarCaption">Set the time delay before alerting authorities</div>
+	<div class="paramBackground">
+		<div class="userTypePermissions">
+			<input class="form-control add-on bg-white" type="number" placeholder="in minutes" id="timeDelay" name="timeDelay" value='@SHP.getInstance().getTimeBeforeAuthorities' min="0">
+			<div class="input-group-append">
+				<span data-time-icon="icon-time" data-date-icon="icon-calendar" class="input-group-text" id="dateLabel">⏰</span>
+			</div>
+		</div>
+	</div>
+
+	<div class="paramsTitle">List of Lights</div>
+		@for(locationEntry: (String, Location) <- shs.getHome) {
+			@if(!locationEntry._2.equals(SHS.getOutside)) {
+				@for(deviceEntry: (String, models.devices.Device) <- locationEntry._2.getDeviceMap) {
+					@if(deviceEntry._2.isInstanceOf[models.devices.Light]) {
+						@components.controlAwayLight(deviceEntry._2.asInstanceOf[models.devices.Light])
+					}
+				}
+			}
+		}
+
+	<button type="submit" class="btn btn-primary">Submit</button>
+</form>
+@*<form>*@
+@*	@for(locationEntry: (String, Location) <- shs.getHome) {*@
+@*		@if(!locationEntry._2.equals(SHS.getOutside)) {*@
+@*			<div class="locationTitle">@locationEntry._1</div>*@
+@*			@for(deviceEntry: (String, models.devices.Device) <- locationEntry._2.getDeviceMap) {*@
+@*				@if(deviceEntry._2.isInstanceOf[models.devices.Light]) {*@
+@*					@components.controlAwayLight(deviceEntry._2.asInstanceOf[models.devices.Light])*@
+@*				}*@
+@*			}*@
+@*		}*@
+@*	}*@
+
+@*</form>*@
