@@ -1,8 +1,10 @@
 package models.permissions;
 
+import models.Location;
 import models.User;
 import models.devices.Device;
 import models.devices.Light;
+import models.modules.SHS;
 
 public abstract class PermitAwayMode {
   private static final Permission permission = new Permission();
@@ -11,11 +13,14 @@ public abstract class PermitAwayMode {
     permission.authorize(userType, permissionLocation);
   }
 
-  public static boolean isAuthorized(User user, Device device) {
-    if (device instanceof Light) {
-      return permission.isAuthorized(user, device.getLocation());
+  public static boolean isAuthorized(User user) {
+    //Get a random Inside Location
+    for(Location location : SHS.getInstance().getHome().values()) {
+      if (!location.getLocationType().equals(Location.LocationType.Outside)) {
+        return permission.isAuthorized(user, location);
+      }
     }
-    return false;
+    return permission.isAuthorized(user, user.getLocation());
   }
 
   public static Permission getPermission() {

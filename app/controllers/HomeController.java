@@ -49,21 +49,6 @@ public class HomeController extends Controller {
   }
 
   private void initialize() {
-    PermissionLocation local = PermissionLocation.local;
-    PermissionLocation home = PermissionLocation.home;
-    PermissionLocation always = PermissionLocation.always;
-    User.UserType childAdult = User.UserType.Child_Adult;
-    User.UserType childTeenager = User.UserType.Child_Teenager;
-    User.UserType childUnderage = User.UserType.Child_Underage;
-    User.UserType guest = User.UserType.Guest;
-    PermitDoorOpenClose.authorize(childAdult,local);
-    PermitDoorOpenClose.authorize(childTeenager,local);
-    PermitDoorOpenClose.authorize(childUnderage,local);
-    PermitDoorOpenClose.authorize(guest,local);
-    PermitWindowOpenClose.authorize(childAdult,local);
-    PermitWindowOpenClose.authorize(childTeenager,local);
-    PermitWindowOpenClose.authorize(childAdult,home);
-
     logger.log(shs, "System initialized successfully.", Logger.MessageType.normal);
   }
 
@@ -105,6 +90,11 @@ public class HomeController extends Controller {
    * <Device Class Type>,<Device Name>,<Device Location Name>,<Device Subclass Properties>
    * ...
    * }
+   * Map {
+   * <House Room Width>x<House Room Height>
+   * <Location index of the Location in this position><Location index of the Location in this position>...
+   * ...
+   * }
    * }}}
    * Location names must be unique. Device names must be unique for that location. No location may have devices of the same name.
    * For each [[models.devices.Device Device]] subclass, extra properties may need to be specified. refer to the list below for each subclass format:
@@ -114,23 +104,43 @@ public class HomeController extends Controller {
    *  - `[[models.devices.Window Window]],<Window Name>,<Window Location Name>,<Window secondLocation Name>`
    *
    * @example {{{
-   *     Locations {
-   *     Kitchen,Indoor
-   *     LivingRoom,Indoor
-   *     Bedroom,Indoor
-   *     Patio,Outdoor
-   *     }
-   *     Devices {
-   *     Light,KitchenLights,Kitchen
-   *     Window,KitchenWindow,Kitchen
-   *     Door,KitchenPatioDoor,Kitchen,Outside
-   *     Connection,KitchenLivingRoomConnection,Kitchen,LivingRoom
-   *     Light,LivingRoomLights,LivingRoom
-   *     Door,EntryLivingRoomDoor,LivingRoom,Outside
-   *     Door,LivingRoomBedroomDoor,LivingRoom,Bedroom
-   *     Window,BedroomWindow,Bedroom
-   *     Light,BedroomLights,Bedroom
-   *     }
+   * Locations {
+   * Kitchen,Indoor
+   * LivingRoom,Indoor
+   * DiningRoom,Indoor
+   * Bedroom,Indoor
+   * KidRoom,Indoor
+   * GuestRoom,Indoor
+   * Patio,Outdoor
+   * WashRoom,Indoor
+   * Garage,Indoor
+   * Hallway,Indoor
+   * }
+   * Devices {
+   * Window,KitchenWindow,Kitchen
+   * Window,BedroomWindow,Bedroom
+   * Connection,KitchenDiningRoomConnection,Kitchen,DiningRoom
+   * Connection,DiningRoomLivingRoomConnection,DiningRoom,LivingRoom
+   * Door,KitchenPatioDoor,Kitchen,Patio
+   * Door,DiningRoomHallwayDoor,DiningRoom,Hallway
+   * Door,HallwayBedroomDoor,Hallway,Bedroom
+   * Door,HallwayKidRoomDoor,Hallway,KidRoom
+   * Door,HallwayGuestRoomDoor,Hallway,GuestRoom
+   * Door,HallwayWashRoomDoor,Hallway,WashRoom
+   * Door,HallwayOutsideDoor,Hallway,Outside
+   * Door,HallwayGarageDoor,Hallway,Garage
+   * Door,BedroomPatioDoor,Bedroom,Patio
+   * Door,KidRoomPatioDoor,KidRoom,Patio
+   * Door,GuestRoomPatioDoor,GuestRoom,Patio
+   * Door,GarageOutsideDoor,Garage,Outside
+   * }
+   * Map {
+   * 4x4
+   * 7,5,10,8
+   * 7,6,10,0
+   * 7,4,10,9
+   * 7,1,3,2
+   * }
    * }}}
    * @param request the http header from the user.
    * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successfully loading the file data into the SHS or a redirection to another method if there was an error while reading the file.
@@ -806,8 +816,12 @@ public class HomeController extends Controller {
    * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successfully starting/stopping the simulation or a redirection to another method if the pre-requisites are not satisfied.
    */
   public Result toggleAutoLight(Http.Request request) {
-    shc.toggleAutoLights();
-    logger.log("Auto light mode has been turned " + (shc.isAutoLights()?"on":"off"), Logger.MessageType.success);
+    if (PermitAutoLightMode.isAuthorized(shs.getActiveUser())) {
+      shc.toggleAutoLights();
+      logger.log("Auto light mode has been turned " + (shc.isAutoLights()?"on":"off"), Logger.MessageType.success);
+    } else {
+      logger.log(shs.getActiveUser(), "You don't have the permissions necessary to '" + (shc.isAutoLights()?"turn off":"turn on") +"' the 'Auto Light Mode'", Logger.MessageType.warning);
+    }
     return redirect(routes.HomeController.main("SHC0"));
   }
 
@@ -817,7 +831,12 @@ public class HomeController extends Controller {
    * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successfully starting/stopping the simulation or a redirection to another method if the pre-requisites are not satisfied.
    */
   public Result toggleAwayMode(Http.Request request) {
-    shp.toggleAway();
+    if (PermitAwayMode.isAuthorized(shs.getActiveUser())) {
+      shp.toggleAway();
+      logger.log("Away mode has been turned " + (shc.isAutoLights()?"on":"off"), Logger.MessageType.success);
+    } else {
+      logger.log(shs.getActiveUser(), "You don't have the permissions necessary to '" + (shp.isAway()?"turn off":"turn on") +"' the 'Away Mode'", Logger.MessageType.warning);
+    }
     return redirect(routes.HomeController.main("SHP"));
   }
 

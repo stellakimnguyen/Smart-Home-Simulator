@@ -2,13 +2,12 @@ package models.modules;
 
 import models.Location;
 import models.User;
-import models.devices.Connection;
-import models.devices.Device;
-import models.devices.Door;
-import models.devices.Light;
+import models.devices.*;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class HomeMapper {
   private static Node[][] map;
@@ -61,7 +60,7 @@ public class HomeMapper {
                 Location secondLocation = door.getSecondLocation();
                 if (locationList.contains(secondLocation) && secondLocation.getLocationType().equals(Location.LocationType.Outside)) {
                   locationList.remove(secondLocation);
-                  map[i][j+1].location = secondLocation;
+                  map[i][j+1].updateLocation(secondLocation);
                   map[i][j].right = Element.door;
                   map[i][j+1].leftDoor = (Door)device;
                 }
@@ -94,7 +93,7 @@ public class HomeMapper {
                 Location secondLocation = door.getSecondLocation();
                 if (locationList.contains(secondLocation) && secondLocation.getLocationType().equals(Location.LocationType.Outside)) {
                   locationList.remove(secondLocation);
-                  map[i+1][j].location = secondLocation;
+                  map[i+1][j].updateLocation(secondLocation);
                   map[i][j].bottom = Element.door;
                   map[i+1][j].topDoor = (Door)device;
                 }
@@ -160,13 +159,34 @@ public class HomeMapper {
     Door leftDoor;
     Element right;
     Location location;
+    Set<Window> windows;
+    Light light;
 
     Node(Location location) {
+      windows = new HashSet<>();
       this.location = location;
       top = Element.wall;
       bottom = Element.wall;
       left = Element.wall;
       right = Element.wall;
+      for (Device device : location.getDeviceMap().values()) {
+        if (device instanceof Window) {
+          windows.add((Window)device);
+        } else if (device instanceof Light) {
+          light = (Light)device;
+        }
+      }
+    }
+
+    void updateLocation(Location location) {
+      this.location = location;
+      for (Device device : location.getDeviceMap().values()) {
+        if (device instanceof Window) {
+          windows.add((Window)device);
+        } else if (device instanceof Light) {
+          light = (Light)device;
+        }
+      }
     }
   }
   private enum Element {
@@ -245,7 +265,6 @@ public class HomeMapper {
       }
     }
 
-    Light light = (Light)node.location.getDeviceMap().get(node.location.getName() + " Light");
     StringBuilder stringBuilder = new StringBuilder();
 
     stringBuilder.append("<td");
@@ -258,14 +277,77 @@ public class HomeMapper {
       stringBuilder.append(node.top != Element.connection? "wall-top'>" : "wall-left'>");
     }
     stringBuilder.append("<i class='fas fa-lightbulb");
-    stringBuilder.append(light.getStatus().equals(Light.statusOn)? " text-warning" : " text-secondary");
+    stringBuilder.append(node.light.getStatus().equals(Light.statusOn)? " text-warning" : " text-secondary");
     stringBuilder.append("' onclick='toggleLightControl(\"");
     stringBuilder.append(node.location.getName());
     stringBuilder.append("\", \"");
-    stringBuilder.append(light.getName());
+    stringBuilder.append(node.light.getName());
     stringBuilder.append("\", \"");
-    stringBuilder.append(light.getStatus());
-    stringBuilder.append("\")'></i>");
+    stringBuilder.append(node.light.getStatus());
+    stringBuilder.append("\")'></i></td>");
+    return stringBuilder.toString();
+  }
+
+  private static String getWindowOpen(Node node) {
+    if (node.location == SHS.getOutside()) {
+      return node.left == Element.connection? noWall : leftWall;
+    }
+    StringBuilder stringBuilder = new StringBuilder();
+
+    stringBuilder.append("<td");
+    if (node.left != Element.connection) {
+      stringBuilder.append(" class='wall-left'>");
+    } else {
+      stringBuilder.append(">");
+    }
+    boolean isWindowOpen = false;
+    for (Window window : node.windows) {
+      if (window.getStatus().equals(Window.statusOpen)){
+        isWindowOpen = true;
+        break;
+      }
+    }
+    if (isWindowOpen) {
+      stringBuilder.append("<i class='fas fa-chalkboard text-secondary' data-toggle='tooltip' data-html='true' title='");
+      for (Window window : node.windows) {
+        if (window.getStatus().equals(Window.statusOpen)) {
+          stringBuilder.append(window.getName());
+          stringBuilder.append("<br />");
+        }
+      }
+      stringBuilder.append("'></i>");
+    }
+    stringBuilder.append("</td>");
+    return stringBuilder.toString();
+  }
+
+  private static String getHouseWarnings(Node node) {
+    if (node.location == SHS.getOutside()) {
+      return noWall;
+    }
+    StringBuilder stringBuilder = new StringBuilder();
+
+    stringBuilder.append("<td>");
+    boolean isWindowBlocked = false;
+    for (Window window : node.windows) {
+      if (window.isBlocked()){
+        isWindowBlocked = true;
+        break;
+      }
+    }
+    if (isWindowBlocked) {
+      stringBuilder.append("<i class='fas fa-house-damage text-danger' data-toggle='tooltip' data-html='true' title='");
+      for (Window window : node.windows) {
+        if (window.isBlocked()) {
+          stringBuilder.append(window.getName());
+          stringBuilder.append(" is ");
+          stringBuilder.append(Window.statusBlocked);
+          stringBuilder.append("<br />");
+        }
+      }
+      stringBuilder.append("'></i>");
+    }
+    stringBuilder.append("</td>");
     return stringBuilder.toString();
   }
 
@@ -285,14 +367,8 @@ public class HomeMapper {
           stringBuilder.append(map[i][j].location.getName());
           stringBuilder.append("\"><tr>");
         }
+
         stringBuilder.append(getLight(map[i][j]));
- /*       if ((map[i][j].top == Element.connection) && (map[i][j].left == Element.connection)) {
-          stringBuilder.append(noWall);
-        } else if ((map[i][j].top != Element.connection) && (map[i][j].left != Element.connection)) {
-          stringBuilder.append(topLeftWall);
-        } else {
-          stringBuilder.append(map[i][j].top != Element.connection? topWall : leftWall);
-        }*/
         if (map[i][j].top == Element.connection) {
           stringBuilder.append(noWall);
         } else if (map[i][j].top == Element.wall) {
@@ -326,18 +402,19 @@ public class HomeMapper {
         }
 
         stringBuilder.append("</tr><tr>");
+        /*
         if (map[i][j].left != Element.connection) {
           stringBuilder.append(leftWall);
         } else {
           stringBuilder.append(noWall);
-        }
-        //stringBuilder.append(noWall);
+        }*/
+        stringBuilder.append(getWindowOpen(map[i][j]));
         if (map[i][j].bottom == Element.door) {
           stringBuilder.append(getDoor(map[i+1][j].topDoor, 'B'));
         } else {
           stringBuilder.append(noWall);
         }
-        stringBuilder.append(noWall);
+        stringBuilder.append(getHouseWarnings(map[i][j]));
 
 
 

@@ -3,6 +3,7 @@ package models.permissions;
 import models.Location;
 import models.User;
 import models.User.UserType;
+import models.modules.SHS;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +35,7 @@ public class Permission {
     Location userLocation = user.getLocation();
     int weight = permissions.get(user.getType()).weight;
     return ((userLocation == location) && (weight > 0) // User is in the same Location as the device
-            || (userLocation.getLocationType() == Location.LocationType.Outside) && (weight > 2) // User is outside of Home
-            || (weight > 1)); //User is in Home but not the same Location as the device
+            || ((userLocation == SHS.getOutside()) && (weight > 2)) // User is outside of Home
+            || ((userLocation != SHS.getOutside()) && (weight > 1))); //User is in Home but not the same Location as the device
   }
 }

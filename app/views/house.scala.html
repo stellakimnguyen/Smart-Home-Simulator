@@ -1,19 +1,5 @@
 @()(implicit shs: models.modules.SHS)
 <div id="houseLayout" class="layout">
-	@if(shs.getHome.size > 1) {
-		<br />
-		@*
-		@for(locationEntry: (String, Location) <- shs.getHome) {
-			<div class="textTitle">@locationEntry._1 : @locationEntry._2.getTemperatureString °C</div>
-			@for(deviceEntry: (String, models.devices.Device) <- locationEntry._2.getDeviceMap) {
-				<div class="textTitle"> - @deviceEntry._1 : @deviceEntry._2.getFullStatus</div>
-			}
-		}*@
-		@Html.apply(models.modules.HomeMapper.toHtml)
-	} else {
-		House Layout is missing!
-	}
-	<div class="metricsOverlay" id="metricsOverlay">
-		@constantMetrics()
-	</div>
+	@if(shs.getHome.size > 1) {@Html.apply(models.modules.HomeMapper.toHtml)} else {House Layout is missing!}
+	<div class="metricsOverlay" id="metricsOverlay">@constantMetrics()</div>
 </div>
