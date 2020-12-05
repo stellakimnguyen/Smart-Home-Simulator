@@ -191,8 +191,8 @@
 						    sidebar($('#icon' + '@tab.charAt(0).toUpper' + '@tab.substring(1)'), '@tab');
 						    // TIMER when simulation is active
 						    @if(shs.isRunning){
-						    setInterval(function(){metrics()}, 500);
-						    setInterval(function(){console()}, 500);
+						    setInterval(function(){metrics()}, @models.modules.Clock.refreshRate);
+						    setInterval(function(){console()}, @models.modules.Clock.refreshRate);
 						    }
 						    // TOOLTIP
 						    $('[data-toggle="tooltip"]').tooltip();

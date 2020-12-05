@@ -14,15 +14,16 @@ public class ClockThread extends Thread {
     running = true;
     long startTime = System.currentTimeMillis();
     long elapsedTime = System.currentTimeMillis() - startTime;
-    long timeTillNextDisplayChange = 500 - (elapsedTime % 500);
+    long refreshRate = Clock.refreshRate;
+    long timeTillNextDisplayChange = refreshRate - (elapsedTime % refreshRate);
 
     while (running) {
       try {
         Thread.sleep(timeTillNextDisplayChange);
         startTime = System.currentTimeMillis();
-        clock.setTime(clock.getTime().plusNanos(clock.getTimeMultiplier() * 500000000L));
+        Clock.advanceTime();
         elapsedTime = System.currentTimeMillis() - startTime;
-        timeTillNextDisplayChange = 500 - elapsedTime;
+        timeTillNextDisplayChange = refreshRate - elapsedTime;
       } catch (InterruptedException e) {
         running = false;
       }
