@@ -637,9 +637,10 @@ public class HomeController extends Controller {
     int newTemperature;
     try {
       newTemperature = parseTemperature(newTemperatureString);
-      if (SHS.getOutside().getTemperature() != newTemperature) {
+      Temperature outsideTemperature = SHS.getOutside().getTemperature();
+      if (outsideTemperature.getTemperature() != newTemperature) {
         shs.setOutsideTemperature(newTemperature);
-        logger.log("Outside and Outdoor temperature changed to " + SHS.getOutside().getTemperatureString() + '.', Logger.MessageType.success);
+        logger.log("Outside and Outdoor temperature changed to " + outsideTemperature.getTemperatureString() + '.', Logger.MessageType.success);
       }
     } catch (NumberFormatException e) {
       logger.log("Attempted to change Outside and Outdoor temperature to an invalid value.", Logger.MessageType.warning);

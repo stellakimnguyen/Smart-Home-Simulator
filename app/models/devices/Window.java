@@ -17,9 +17,11 @@ import models.exceptions.WindowBlockedException;
  * ===Class Statuses `(public)`===
  * `statusBlocked, statusNotBlocked`
  *
- * @version 1
+ * @version 3
  * @author Rodrigo M. Zanini (40077727)
  * @author Pierre-Alexis Barras (40022016)
+ * @author Mohamed Amine Kihal (40046046)
+ * @author Stella Nguyen (40065803)
  */
 public class Window extends Connection {
   private boolean isBlocked;
@@ -32,7 +34,8 @@ public class Window extends Connection {
   public Window(String name) {
     super(name);
     this.isBlocked = false;
-    super.setStatus(Device.statusClosed);
+    permitStatus(statusClosed);
+    setStatus(statusClosed);
   }
 
   /**
@@ -56,17 +59,6 @@ public class Window extends Connection {
   @Override
   public String getFullStatus() {
     return super.getStatus() + "," + (isBlocked?statusBlocked:statusNotBlocked);
-  }
-
-  /**
-   * Set the Device status. Only accepts `statusOpen, statusClose`
-   * @param status the new status.
-   */
-  @Override
-  void setStatus(String status) {
-    if (status.equals(Device.statusOpen) || status.equals(Device.statusClosed)) {
-      super.setStatus(status);
-    }
   }
 
   /**
@@ -121,7 +113,7 @@ public class Window extends Connection {
   }
 
   @Override
-  public String toString() {
-    return "[" + getLocation().getName() + "] " + getName();
+  public String getLocationString() {
+    return (getLocation()!=null? getLocation().getName() : "");
   }
 }
