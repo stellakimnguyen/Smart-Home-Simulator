@@ -1,9 +1,6 @@
 package models.modules;
 
-import models.Location;
-import models.Observable;
-import models.Observer;
-import models.User;
+import models.*;
 import models.devices.Light;
 import models.devices.MovementDetector;
 import models.exceptions.DeviceException;
@@ -34,9 +31,9 @@ public class SHP extends Module implements Observer {
   private LocalDateTime timeToContactAuthorities;
   private boolean isUnderInvasion;
   private int timeBeforeAuthorities;
+  private boolean isAutoLightsInAwayMode;
   private final Set<Light> awayLights = new HashSet<>();
-  private LocalTime awayLightStart = LocalTime.of(21,0,0);
-  private LocalTime awayLightEnd = LocalTime.of(5,15,0);
+  private final TimePeriod awayLightPeriod = new TimePeriod();
   private boolean isTimeForLightsOn = false;
 
   private static final SHP instance = new SHP();
@@ -52,6 +49,7 @@ public class SHP extends Module implements Observer {
     super("SHP");
     isAway = false;
     isUnderInvasion = false;
+    isAutoLightsInAwayMode = false;
     timeBeforeAuthorities = 10;
   }
 
@@ -122,37 +120,41 @@ public class SHP extends Module implements Observer {
   }
 
   public boolean isAutoLightsInAwayMode() {
-    return !awayLightStart.equals(awayLightEnd);
+    return isAutoLightsInAwayMode;
+  }
+
+  public void toggleAutoLightsInAwayMode() {
+    isAutoLightsInAwayMode = !isAutoLightsInAwayMode;
   }
 
   /**
    * Get the Auto Light Start time String.
    */
   public String getAwayLightStartString() {
-    return awayLightStart.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+    return getAwayLightStart().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
   }
 
   public LocalTime getAwayLightStart() {
-    return awayLightStart;
+    return awayLightPeriod.getStart();
   }
 
   public void setAwayLightStart(LocalTime awayLightStart) {
-    this.awayLightStart = awayLightStart;
+    this.awayLightPeriod.setStart(awayLightStart);
   }
 
   /**
    * Get the Auto Light End time String.
    */
   public String getAwayLightEndString() {
-    return awayLightEnd.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+    return getAwayLightEnd().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
   }
 
   public LocalTime getAwayLightEnd() {
-    return awayLightEnd;
+    return awayLightPeriod.getEnd();
   }
 
   public void setAwayLightEnd(LocalTime awayLightEnd) {
-    this.awayLightEnd = awayLightEnd;
+    awayLightPeriod.setEnd(awayLightEnd);
   }
 
   @Override
@@ -179,11 +181,10 @@ public class SHP extends Module implements Observer {
             toggleAway();
           }
         }
-        if (isAutoLightsInAwayMode()) {
+        if (isAutoLightsInAwayMode) {
           LocalTime simulationTime = clock.getTime().toLocalTime();
           // Converse check for simulation time: check for case where start and end are on different days.
-          if (((awayLightEnd.isBefore(awayLightStart)) && ((simulationTime.isBefore(awayLightEnd)) || (simulationTime.isAfter(awayLightStart))))
-                  || ((awayLightStart.isBefore(awayLightEnd)) && ((simulationTime.isBefore(awayLightEnd)) && (simulationTime.isAfter(awayLightStart))))) {
+          if (awayLightPeriod.isInPeriod(simulationTime)) {
             isTimeForLightsOn = true;
             for (Light light : awayLights) {
               try {

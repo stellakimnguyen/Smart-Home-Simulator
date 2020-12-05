@@ -14,7 +14,13 @@
 		</div>
 	</div>
 
-	<div class="paramsTitle">Lights Time</div>
+	<div class="userTypePermissions">
+		<div class="userSidebarTitle">Auto Lights in Away Mode</div>
+		<div class="custom-control custom-switch">
+			<input type="checkbox" onchange='toggleAutoLightsInAwayMode()' class="custom-control-input" id="awayLightSwitch" @if(SHP.getInstance().isAutoLightsInAwayMode){checked}>
+			<label class="custom-control-label" for="awayLightSwitch">@if(SHP.getInstance().isAutoLightsInAwayMode) {on} else {off}</label>
+		</div>
+	</div>
 	<div class="sidebarCaption">Set the active time range for the lights</div>
 	<div class="paramBackground">
 		<div id="starttimepicker" class="input-group mb-3">

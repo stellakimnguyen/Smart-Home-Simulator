@@ -844,9 +844,24 @@ public class HomeController extends Controller {
   public Result toggleAwayMode(Http.Request request) {
     if (PermitAwayMode.isAuthorized(shs.getActiveUser())) {
       shp.toggleAway();
-      logger.log("Away mode has been turned " + (shc.isAutoLights()?"on":"off"), Logger.MessageType.success);
+      logger.log("Away mode has been turned " + (shp.isAway()?"on":"off"), Logger.MessageType.success);
     } else {
       logger.log(shs.getActiveUser(), "You don't have the permissions necessary to '" + (shp.isAway()?"turn off":"turn on") +"' the 'Away Mode'", Logger.MessageType.warning);
+    }
+    return redirect(routes.HomeController.main("SHP"));
+  }
+
+  /**
+   * Starts or stops the [[models.modules.SHP SHP]]'s Away mode.
+   * @param request the http header from the user.
+   * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successfully starting/stopping the simulation or a redirection to another method if the pre-requisites are not satisfied.
+   */
+  public Result toggleAutoLightsInAwayMode(Http.Request request) {
+    if (!PermitAwayMode.isAuthorized(shs.getActiveUser())) {
+      logger.log(shs.getActiveUser(), "You don't have the permissions necessary to manage the 'Away Mode'", Logger.MessageType.warning);
+    } else {
+      shp.toggleAutoLightsInAwayMode();
+      logger.log("Auto lights in 'Away mode' has been turned " + (shp.isAutoLightsInAwayMode()?"on":"off"), Logger.MessageType.success);
     }
     return redirect(routes.HomeController.main("SHP"));
   }
@@ -857,20 +872,24 @@ public class HomeController extends Controller {
    * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successfully starting/stopping the simulation or a redirection to another method if the pre-requisites are not satisfied.
    */
   public Result toggleAwayModeLight(Http.Request request, String locationString, String name, boolean register) {
-    Location location = shs.getHome().get(locationString);
-    if (location == null) {
-      logger.log("The location specified does not exist.", Logger.MessageType.warning);
-      return redirect(routes.HomeController.main("SHP"));
-    }
-    Device device = location.getDeviceMap().get(name);
-    if (!(device instanceof Light)) {
-      logger.log("The device specified is not a Light.", Logger.MessageType.warning);
-      return redirect(routes.HomeController.main("SHP"));
-    }
-    if (register) {
-      shp.registerLight((Light)device);
+    if (!PermitAwayMode.isAuthorized(shs.getActiveUser())) {
+      logger.log(shs.getActiveUser(), "You don't have the permissions necessary to manage the 'Away Mode'", Logger.MessageType.warning);
     } else {
-      shp.unregisterLight((Light)device);
+      Location location = shs.getHome().get(locationString);
+      if (location == null) {
+        logger.log("The location specified does not exist.", Logger.MessageType.warning);
+        return redirect(routes.HomeController.main("SHP"));
+      }
+      Device device = location.getDeviceMap().get(name);
+      if (!(device instanceof Light)) {
+        logger.log("The device specified is not a Light.", Logger.MessageType.warning);
+        return redirect(routes.HomeController.main("SHP"));
+      }
+      if (register) {
+        shp.registerLight((Light) device);
+      } else {
+        shp.unregisterLight((Light) device);
+      }
     }
     return redirect(routes.HomeController.main("SHP"));
   }

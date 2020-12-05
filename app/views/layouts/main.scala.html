@@ -130,6 +130,9 @@
 		          function toggleAwayMode() {
 			          window.location.href='@routes.HomeController.toggleAwayMode()';
 		          }
+		          function toggleAutoLightsInAwayMode() {
+			          window.location.href='@routes.HomeController.toggleAutoLightsInAwayMode()';
+		          }
 		          function toggleAwayLightControl(location, name, status) {
 			          if(status){
 				          window.location.href = '@routes.HomeController.deviceActionHelper("SHC0")' + location + "/" + name + "/" + '@Device.actionOff';

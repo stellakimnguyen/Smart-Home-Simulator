@@ -6,6 +6,7 @@
 GET     /toggleSimulationStatus                           controllers.HomeController.toggleSimulationStatus(request: Request)
 GET     /toggleAutoLight                           controllers.HomeController.toggleAutoLight(request: Request)
 GET     /toggleAwayMode                           controllers.HomeController.toggleAwayMode(request: Request)
+GET     /toggleAwayModeLight                           controllers.HomeController.toggleAutoLightsInAwayMode(request: Request)
 POST    /editAwayMode                           controllers.HomeController.editAwayMode(request: Request)
 POST    /editPermissions                           controllers.HomeController.editPermissions(request: Request)
 GET     /loadMetrics                           controllers.HomeController.loadMetrics()
