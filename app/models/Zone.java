@@ -7,6 +7,8 @@ import java.util.Set;
 
 public class Zone {
   private final Set<TemperatureControl> locations = new HashSet<>();
+  private Temperature targetTemperature = new Temperature();
+  private Temperature defaultTemperature = new Temperature();
   private Temperature periodTemperature1 = new Temperature();
   private Temperature periodTemperature2 = new Temperature();
   private Temperature periodTemperature3 = new Temperature();
@@ -27,6 +29,22 @@ public class Zone {
 
   public Set<TemperatureControl> getLocations() {
     return locations;
+  }
+
+  public Temperature getTargetTemperature() {
+    return targetTemperature;
+  }
+
+  public void setTargetTemperature(Temperature targetTemperature) {
+    this.targetTemperature = targetTemperature;
+  }
+
+  public Temperature getDefaultTemperature() {
+    return defaultTemperature;
+  }
+
+  public void setDefaultTemperature(Temperature defaultTemperature) {
+    this.defaultTemperature = defaultTemperature;
   }
 
   public Temperature getPeriodTemperature1() {
@@ -51,5 +69,21 @@ public class Zone {
 
   public void setPeriodTemperature3(Temperature periodTemperature3) {
     this.periodTemperature3 = periodTemperature3;
+  }
+
+  public void changePeriod(int period) {
+    switch (period) {
+      case 1:
+        targetTemperature = periodTemperature1;
+        return;
+      case 2:
+        targetTemperature = periodTemperature2;
+        return;
+      case 3:
+        targetTemperature = periodTemperature3;
+        return;
+      default:
+        targetTemperature = defaultTemperature;
+    }
   }
 }

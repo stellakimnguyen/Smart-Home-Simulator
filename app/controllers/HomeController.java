@@ -60,6 +60,7 @@ public class HomeController extends Controller {
     PermitDoorOpenClose.authorize(User.UserType.Child_Teenager,PermissionLocation.local);
     PermitDoorOpenClose.authorize(User.UserType.Child_Underage,PermissionLocation.local);
     PermitDoorOpenClose.authorize(User.UserType.Guest,PermissionLocation.local);
+    PermitTemperatureControl.authorize(User.UserType.Guest,PermissionLocation.local);
 
     logger.log(shs, "System initialized successfully.", Logger.MessageType.normal);
   }

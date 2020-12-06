@@ -21,7 +21,7 @@ import models.modules.SHS;
  */
 public class TemperatureControl extends Sensor {
   private boolean isOnManualMode;
-  private final Temperature targetTemperature;
+  private Temperature targetTemperature;
   private Zone zone;
 
   public static final String actionPause = "pause";
@@ -37,7 +37,7 @@ public class TemperatureControl extends Sensor {
     permitStatus(statusPaused);
     permitStatus(statusHeating);
     permitStatus(statusCooling);
-    setStatus(statusPaused);
+    setStatus(statusOff);
     isOnManualMode = false;
     targetTemperature = new Temperature();
     Clock.getInstance().addObserver(this);
@@ -56,8 +56,8 @@ public class TemperatureControl extends Sensor {
     return targetTemperature;
   }
 
-  public void setTargetTemperature(int temperature) {
-    targetTemperature.setTemperature(temperature);
+  public void setTargetTemperature(Temperature targetTemperature) {
+    this.targetTemperature = targetTemperature;
   }
 
   public Zone getZone() {
@@ -107,6 +107,13 @@ public class TemperatureControl extends Sensor {
   @Override
   public void observe(Observable observable) {
     if (observable instanceof Clock) {
+      //Hide targetTemperature with a local scope variable
+      Temperature targetTemperature = this.targetTemperature;
+      if (!isOnManualMode) {
+        // if location is not overridden, grab the target temperature from the Zone
+        targetTemperature = zone.getTargetTemperature();
+      }
+
       Temperature locationTemperature = getLocation().getTemperature();
       int temperatureOffset = Clock.getInstance().getTimeMultiplier();
       int difference = locationTemperature.compareTo(targetTemperature);
@@ -141,6 +148,16 @@ public class TemperatureControl extends Sensor {
           } else if (difference > 0){
             locationTemperature.offsetTemperature(-temperatureOffset);
           }
+      }
+      if (getStatus().equals(statusOff)) {
+        difference = locationTemperature.compareTo(targetTemperature);
+        if (difference > 100) {
+          if (!(SHS.getInstance().isSummer() && (locationTemperature.compareTo(SHS.getOutside().getTemperature()) > 0))) {
+            setStatus(statusCooling);
+          }
+        } else if (difference < -100) {
+          setStatus(statusHeating);
+        }
       }
       notifyObservers();
     }

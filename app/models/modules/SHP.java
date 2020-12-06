@@ -64,6 +64,7 @@ public class SHP extends Module {
       isAway = true;
       setRegistrationForAll("MovementDetector", true);
       clock.addObserver(this);
+      notifyObservers();
       SHC.logger.log(this, "Away mode has been turned on.", Logger.MessageType.normal);
       SHC.lockAllDoors();
       SHC.closeAllWindows();
@@ -73,6 +74,7 @@ public class SHP extends Module {
       clock.removeObserver(this);
       isUnderInvasion = false;
       timeToContactAuthorities = null;
+      notifyObservers();
       SHC.logger.log(this, "Away mode has been turned off.", Logger.MessageType.normal);
     }
 
