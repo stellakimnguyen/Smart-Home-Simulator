@@ -70,6 +70,8 @@
 							          break;
 						          case "SHP": expansion.load('@routes.HomeController.loadSideBar("SHP")');
 							          break;
+								  case "SHH": expansion.load('@routes.HomeController.loadSideBar("SHH")');
+									  break;
 					          }
 					          e.attr("style", "fill: #fff");
 				          }
@@ -247,6 +249,9 @@
 		        <svg width="3em" height="1.5em" fill="#849FFF" onclick='sidebar($(this), "SHP")' id="iconSHP" class="bi mb-1" data-toggle="tooltip" data-placement="right" title="Smart Home Security">
 			        <text x="50%" y="50%" font-weight="bold" text-anchor="middle">SHP</text>
 		        </svg>
+				<svg width="3em" height="1.5em" fill="#849FFF" onclick='sidebar($(this), "SHH")' id="iconSHP" class="bi mb-1" data-toggle="tooltip" data-placement="right" title="Smart Home Security">
+					<text x="50%" y="50%" font-weight="bold" text-anchor="middle">SHH</text>
+				</svg>
 
 	        </div>
 	        <div id="expansion">this is the expansion content</div>

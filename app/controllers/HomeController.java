@@ -40,6 +40,7 @@ public class HomeController extends Controller {
   public final SHS shs = SHS.getInstance();
   public final SHC shc = SHC.getInstance();
   public final SHP shp = SHP.getInstance();
+  public final SHH shh = SHH.getInstance();
   public final Logger logger = SHC.logger;
 
   @Inject
@@ -1004,6 +1005,8 @@ public class HomeController extends Controller {
         return ok(views.html.SHCSidebar.render(2, shs, dynamicForm, request));
       case "SHP":
         return ok(views.html.SHPSidebar.render(shs, dynamicForm, request));
+      case "SHH":
+        return ok(views.html.SHHSidebar.render());
     }
     return ok();
   }
