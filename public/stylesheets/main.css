@@ -223,6 +223,31 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   right: 0;
 }
 
+.paramSeasonPeriod {
+  width: 70px;
+}
+
+.paramSeasonContainer {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.paramSeasonContainer > div:nth-of-type(2) {
+  margin-left: 10px;
+}
+
+.paramSeasonMonth {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  text-transform: lowercase;
+}
+
 .metricsTemperature {
   display: flex;
   flex-direction: column;;
@@ -276,7 +301,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .switchBackground > .custom-switch {
   margin-left: auto;
 }
-.textTitle, .userTitle {
+.textTitle, .userTitle, .paramSeasonTitle {
   text-transform: uppercase;
   font-weight: 700;
   letter-spacing: 0.2em;
