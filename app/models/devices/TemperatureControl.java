@@ -3,10 +3,12 @@ package models.devices;
 import models.Location;
 import models.Observable;
 import models.Temperature;
-import models.exceptions.DeviceException;
+import models.Zone;
 import models.exceptions.InvalidActionException;
 import models.exceptions.SameStatusException;
 import models.modules.Clock;
+import models.modules.SHH;
+import models.modules.SHS;
 
 /**
  * Extends a [[models.devices.Sensor Sensor]]: represents a HVAC system (thermostat, heater and AC).
@@ -20,21 +22,26 @@ import models.modules.Clock;
 public class TemperatureControl extends Sensor {
   private boolean isOnManualMode;
   private final Temperature targetTemperature;
+  private Zone zone;
 
+  public static final String actionPause = "pause";
   public static final String actionHeat = "start heating";
   public static final String actionCool = "start cooling";
+  public static final String statusPaused = "paused";
   public static final String statusHeating = "heating";
   public static final String statusCooling = "cooling";
 
   public TemperatureControl(String name) {
     super(name);
     permitStatus(statusOff);
+    permitStatus(statusPaused);
     permitStatus(statusHeating);
     permitStatus(statusCooling);
-    setStatus(statusOff);
+    setStatus(statusPaused);
     isOnManualMode = false;
     targetTemperature = new Temperature();
     Clock.getInstance().addObserver(this);
+    addObserver(SHH.getInstance());
   }
 
   public boolean isOnManualMode() {
@@ -51,6 +58,18 @@ public class TemperatureControl extends Sensor {
 
   public void setTargetTemperature(int temperature) {
     targetTemperature.setTemperature(temperature);
+  }
+
+  public Zone getZone() {
+    return zone;
+  }
+
+  public void setZone(Zone zone) {
+    zone.addLocation(this);
+    if (this.zone != null) {
+      this.zone.removeLocation(this);
+    }
+    this.zone = zone;
   }
 
   /**
@@ -87,9 +106,44 @@ public class TemperatureControl extends Sensor {
 
   @Override
   public void observe(Observable observable) {
-    //TODO handle the heating/cooling on the SHH at every tick of the clock.
-
-
+    if (observable instanceof Clock) {
+      Temperature locationTemperature = getLocation().getTemperature();
+      int temperatureOffset = Clock.getInstance().getTimeMultiplier();
+      int difference = locationTemperature.compareTo(targetTemperature);
+      switch (getStatus()) {
+        case statusCooling:
+          temperatureOffset = Math.min(Math.abs(difference), temperatureOffset * 10);
+          if (difference > 0) {
+            locationTemperature.offsetTemperature(-temperatureOffset);
+          } else {
+            setStatus(statusPaused);
+          }
+          break;
+        case statusHeating:
+          temperatureOffset = Math.min(Math.abs(difference), temperatureOffset * 10);
+          if (difference < 0) {
+            locationTemperature.offsetTemperature(temperatureOffset);
+          } else {
+            setStatus(statusPaused);
+          }
+          break;
+        case statusPaused:
+          if (difference > 20) {
+            setStatus(statusCooling);
+          } else if (difference < -20) {
+            setStatus(statusHeating);
+          }
+        case statusOff:
+          difference = locationTemperature.compareTo(SHS.getOutside().getTemperature());
+          temperatureOffset = Math.min(Math.abs(difference), temperatureOffset * 5);
+          if (difference < 0) {
+            locationTemperature.offsetTemperature(temperatureOffset);
+          } else if (difference > 0){
+            locationTemperature.offsetTemperature(-temperatureOffset);
+          }
+      }
+      notifyObservers();
+    }
   }
 
   /**

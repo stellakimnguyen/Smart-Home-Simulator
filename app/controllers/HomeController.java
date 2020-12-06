@@ -212,7 +212,10 @@ public class HomeController extends Controller {
             if(section == 0){ //create a location instance
               Location newLocation = new Location(lineStringArray[0], Location.LocationType.valueOf(lineStringArray[1]));
               (new Light(newLocation.getName() + " Light")).setLocation(newLocation);
-              (new MovementDetector(" Movement Detector")).setLocation(newLocation);
+              (new MovementDetector("Movement Detector")).setLocation(newLocation);
+              if (newLocation.getLocationType().equals(Location.LocationType.Indoor)) {
+                (new TemperatureControl("Heat Pump")).setLocation(newLocation);
+              }
               newHouseMap.put(newLocation.getName(), newLocation); //split into two steps for readability
               locationList.add(newLocation);
             } else  if (section == 1) {  //create Device instance

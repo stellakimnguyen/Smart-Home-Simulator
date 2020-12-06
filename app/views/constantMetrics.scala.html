@@ -5,12 +5,12 @@
     <div id="simDate">@shs.getSimulationTime.format(DateTimeFormatter.ofPattern("ccc MMM dd, yyyy"))</div>
     <div id="simTime">@shs.getSimulationTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"))</div>
     <div id="simExtTemp" class="metricsTemperature">
-        <div>@SHS.getOutside.getTemperatureString °C</div>
+        <div>@SHS.getOutside.getTemperature.getTemperatureString °C</div>
         <div>Outside</div>
     </div>
 	@if(shs.getActiveUser.getLocation != SHS.getOutside) {
 		<div id="simIntTemp" class="metricsTemperature">
-			<div>@shs.getActiveUser.getLocation.getTemperatureString °C</div>
+			<div>@shs.getActiveUser.getLocation.getTemperature.getTemperatureString °C</div>
 			<div>@shs.getActiveUser.getLocation.getName</div>
 		</div>
 	}

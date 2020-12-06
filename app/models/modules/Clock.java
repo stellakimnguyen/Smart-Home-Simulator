@@ -29,9 +29,9 @@ public class Clock implements Observable {
     return instance;
   }
 
-
   public static void advanceTime() {
     instance.time = instance.time.plusNanos(instance.timeSkip);
+    instance.notifyObservers();
   }
 
   public void startClock() {

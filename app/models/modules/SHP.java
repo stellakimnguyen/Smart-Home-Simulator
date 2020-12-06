@@ -11,7 +11,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Smart Home security module, it handles permissions and alarms. It is a Singleton Class.
@@ -26,7 +25,7 @@ import java.util.TreeSet;
  * @author Stella Nguyen (40065803)
  */
 @Singleton
-public class SHP extends Module implements Observer {
+public class SHP extends Module {
   private boolean isAway;
   private LocalDateTime timeToContactAuthorities;
   private boolean isUnderInvasion;
