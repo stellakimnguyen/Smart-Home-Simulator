@@ -1004,8 +1004,12 @@ public class HomeController extends Controller {
         return ok(views.html.SHCSidebar.render(2, shs, dynamicForm, request));
       case "SHP":
         return ok(views.html.SHPSidebar.render(shs, dynamicForm, request));
-      case "SHH":
-        return ok(views.html.SHHSidebar.render());
+      case "SHH0":
+        return ok(views.html.SHHSidebar.render(0, shh, dynamicForm, request));
+      case "SHH1":
+        return ok(views.html.SHHSidebar.render(1, shh, dynamicForm, request));
+      case "SHH2":
+        return ok(views.html.SHHSidebar.render(2, shh, dynamicForm, request));
     }
     return ok();
   }
