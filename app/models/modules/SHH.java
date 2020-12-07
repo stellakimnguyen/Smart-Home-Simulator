@@ -12,6 +12,7 @@ import javax.inject.Singleton;
 import java.time.LocalTime;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Smart Home Heating functionality module, it handles HVAC functionality. It is a Singleton Class.
@@ -61,6 +62,8 @@ public class SHH extends Module {
     maxThreshold = new Temperature();
     maxThreshold.setTemperature(10000);
     SHP.getInstance().addObserver(this);
+    zones = new TreeMap<>();
+    zones.put(0,new Zone());
   }
 
   public Map<Integer, Zone> getZones() {

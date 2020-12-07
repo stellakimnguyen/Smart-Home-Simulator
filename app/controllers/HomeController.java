@@ -277,6 +277,10 @@ public class HomeController extends Controller {
       shp.setRegistrationForAll("MovementDetector", shp.isAway());
       //Register new layout for Auto Light Mode
       shc.setRegistrationForAll("MovementDetector", shc.isAutoLights());
+      //Register new Zone map
+      TreeMap<Integer,Zone> newZones = new TreeMap<>();
+      newZones.put(0,newZone);
+      shh.setZones(newZones);
 
 
     } catch (FileNotFoundException e) {

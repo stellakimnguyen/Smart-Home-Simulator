@@ -1,6 +1,7 @@
 @import models.modules.SHH
 @import models.modules.SHS
 @import views.html.helper.CSRF
+@import models.Location.LocationType
 @(selector: Int)(implicit shs: SHS, dynamicForm: DynamicForm, request: Http.Request)
 <script>
     $(function (){
@@ -53,9 +54,11 @@
 
     <div class="tab-pane fade @if(selector==1){show active}" id="room" role="tabpanel" aria-labelledby="room-tab">
         Rooms
-        <form>
-            @SHHSingleRoom()
-        </form>
+	    @for(location:Location <- shs.getHome.values) {
+		    @if(location.getLocationType == LocationType.Indoor){
+			    @components.SHHSingleRoom(location)
+        }
+	    }
     </div>
 
     <div class="tab-pane fade @if(selector==2){show active}" id="period" role="tabpanel" aria-labelledby="period-tab">

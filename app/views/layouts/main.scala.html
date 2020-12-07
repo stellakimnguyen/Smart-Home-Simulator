@@ -119,6 +119,12 @@
 			          // Update current user
 		          }
 
+		          function toggleLocationSettings(locationName) {
+			          document.getElementById("room_" + locationName + "Temp").disabled = !document.getElementById("room_" + locationName + "Temp").disabled;
+			          document.getElementById("room_" + locationName + "Zone").disabled = !document.getElementById("room_" + locationName + "Zone").disabled;
+			          document.getElementById("room_" + locationName + "SubmitInfo").classList.toggle('hidden');
+		          }
+
 		          function toggleLightControl(location, name, status) {
 			          if(status === '@Device.statusOn'){
 				          window.location.href = '@routes.HomeController.deviceActionHelper("SHC0")' + location + "/" + name + "/" + '@Device.actionOff';
