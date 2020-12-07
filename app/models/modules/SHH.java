@@ -38,6 +38,8 @@ public class SHH extends Module {
   private Temperature summerTemperature;
   private Temperature winterTemperature;
   private boolean isAway;
+  private Temperature minThreshold;
+  private Temperature maxThreshold;
 
   private static final SHH instance = new SHH("SHH");
 
@@ -54,6 +56,10 @@ public class SHH extends Module {
     currentPeriod = 0;
     summerTemperature = new Temperature();
     winterTemperature = new Temperature();
+    minThreshold = new Temperature();
+    minThreshold.setTemperature(0);
+    maxThreshold = new Temperature();
+    maxThreshold.setTemperature(10000);
     SHP.getInstance().addObserver(this);
   }
 
@@ -113,6 +119,38 @@ public class SHH extends Module {
     isPeriod3Active = !isPeriod3Active;
   }
 
+  public Temperature getSummerTemperature() {
+    return summerTemperature;
+  }
+
+  public void setSummerTemperature(Temperature summerTemperature) {
+    this.summerTemperature = summerTemperature;
+  }
+
+  public Temperature getWinterTemperature() {
+    return winterTemperature;
+  }
+
+  public void setWinterTemperature(Temperature winterTemperature) {
+    this.winterTemperature = winterTemperature;
+  }
+
+  public Temperature getMinThreshold() {
+    return minThreshold;
+  }
+
+  public void setMinThreshold(Temperature minThreshold) {
+    this.minThreshold = minThreshold;
+  }
+
+  public Temperature getMaxThreshold() {
+    return maxThreshold;
+  }
+
+  public void setMaxThreshold(Temperature maxThreshold) {
+    this.maxThreshold = maxThreshold;
+  }
+
   @Override
   public void observe(Observable observable) {
     if (observable instanceof TemperatureControl) {
@@ -144,6 +182,11 @@ public class SHH extends Module {
             }
           }
         }
+      }
+      if (toObserve.getLocation().getTemperature().compareTo(minThreshold) <= 0) {
+        SHC.logger.log(this,"The temperature at " + toObserve.getLocation().getName() + " is at or below " + minThreshold.getTemperatureString() + " °C", Logger.MessageType.danger);
+      } else if (toObserve.getLocation().getTemperature().compareTo(maxThreshold) >= 0) {
+        SHC.logger.log(this,"The temperature at " + toObserve.getLocation().getName() + " is at or above " + maxThreshold.getTemperatureString() + " °C", Logger.MessageType.danger);
       }
     }
 

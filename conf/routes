@@ -28,6 +28,7 @@ GET     /:tab/deleteUser/:name         controllers.HomeController.deleteUser(req
 GET     /:tab/setActiveUser/:name         controllers.HomeController.setActiveUser(request: Request, tab: String, name: String)
 POST    /:tab/newUser/         controllers.HomeController.createUser(request: Request, tab: String)
 POST    /:tab/editSimulationParameters/         controllers.HomeController.editSimulationParameters(request: Request, tab: String)
+POST    /:tab/editThresholdTemperatures/         controllers.HomeController.editThresholdTemperatures(request: Request, tab: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

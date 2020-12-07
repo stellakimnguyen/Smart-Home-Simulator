@@ -28,7 +28,7 @@
         }
     }
     $(function (){
-    	$("#externalTemp").inputmask("9{1,4}.9{2}")
+    	$(".temperature-control").inputmask("9{1,4}.9{2}")
     });
 </script>
 
@@ -40,7 +40,7 @@
 	<div class="formGroupBackground inputBackground">
 		<div class="input-group temperatureParam">
             External:
-			<input name="temperature" id="externalTemp" type="text" class="form-control" aria-label="External Temperature" aria-describedby="temperatureLabel" style="margin: 0 0 0 18px;" value='@SHS.getOutside.getTemperature.getTemperatureString'>
+			<input name="temperature" id="externalTemp" type="text" class="form-control temperature-control" aria-label="External Temperature" aria-describedby="temperatureLabel" style="margin: 0 0 0 18px;" value='@SHS.getOutside.getTemperature.getTemperatureString'>
 			<div class="input-group-append">
 				<span class="input-group-text" id="temperatureLabel">°C</span>
 			</div>

@@ -1008,6 +1008,37 @@ public class HomeController extends Controller {
     return redirect(routes.HomeController.main("user"));
   }
 
+  public Result editThresholdTemperatures(Http.Request request, String tab) {
+    DynamicForm dynamicForm = formFactory.form().bindFromRequest(request);
+    String minTempString = dynamicForm.get("minTemp");
+    String maxTempString = dynamicForm.get("maxTemp");
+    int minTemp;
+    try {
+      minTemp = parseTemperature(minTempString);
+      Temperature minThreshold = shh.getMinThreshold();
+      if (minThreshold.getTemperature() != minTemp) {
+        minThreshold.setTemperature(minTemp);
+        logger.log("You will now be alerted when indoor temperature is below " + minThreshold.getTemperatureString() + " °C.", Logger.MessageType.success);
+      }
+    } catch (NumberFormatException e) {
+      logger.log("Attempted to change Min Threshold temperature to an invalid value.", Logger.MessageType.warning);
+      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));
+    }
+    int maxTemp;
+    try {
+      maxTemp = parseTemperature(maxTempString);
+      Temperature maxThreshold = shh.getMaxThreshold();
+      if (maxThreshold.getTemperature() != maxTemp) {
+        maxThreshold.setTemperature(maxTemp);
+        logger.log("You will now be alerted when indoor temperature is above " + maxThreshold.getTemperatureString() + " °C.", Logger.MessageType.success);
+      }
+    } catch (NumberFormatException e) {
+      logger.log("Attempted to change Max Threshold temperature to an invalid value.", Logger.MessageType.warning);
+      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));
+    }
+    return redirect(routes.HomeController.main(tab));
+  }
+
   public Result loadSideBar(Http.Request request, String name) {
     DynamicForm dynamicForm = formFactory.form();
     switch (name) {
@@ -1028,11 +1059,11 @@ public class HomeController extends Controller {
       case "SHP":
         return ok(views.html.SHPSidebar.render(shs, dynamicForm, request));
       case "SHH0":
-        return ok(views.html.SHHSidebar.render(0, shh, dynamicForm, request));
+        return ok(views.html.SHHSidebar.render(0, shs, dynamicForm, request));
       case "SHH1":
-        return ok(views.html.SHHSidebar.render(1, shh, dynamicForm, request));
+        return ok(views.html.SHHSidebar.render(1, shs, dynamicForm, request));
       case "SHH2":
-        return ok(views.html.SHHSidebar.render(2, shh, dynamicForm, request));
+        return ok(views.html.SHHSidebar.render(2, shs, dynamicForm, request));
     }
     return ok();
   }

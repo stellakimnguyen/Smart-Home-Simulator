@@ -1,27 +1,33 @@
 @import models.modules.SHH
-@(selector: Int)(implicit shs: SHH, dynamicForm: DynamicForm, request: Http.Request)
+@import models.modules.SHS
+@import views.html.helper.CSRF
+@(selector: Int)(implicit shs: SHS, dynamicForm: DynamicForm, request: Http.Request)
+<script>
+    $(function (){
+    	$(".temperature-control").inputmask("-{0,1}9{1,4}.9{2}")
+    });
+</script>
 
-<form name="SHH" id="parameters" method="post" action=''>
-    <div class="textTitle">Threshold Temperatures</div>
-    <div class="formGroupBackground inputBackground">
-        <div class="input-group temperatureParam">
-            Max:
-            <input name="temperature" id="thresholdMaxTemp" type="text" class="form-control" aria-label="Max Threshold Temperature"
-                aria-describedby="temperatureLabel" style="margin: 0 0 0 18px;" value=''>
-            <div class="input-group-append">
-                <span class="input-group-text" id="temperatureLabel">°C</span>
-            </div>
-        </div>
-        <div class="input-group temperatureParam">
-            Min:
-            <input name="temperature" id="thresholdMinTemp" type="text" class="form-control" aria-label="Min Threshold Temperature"
-            aria-describedby="temperatureLabel" style="margin: 0 0 0 18px;" value=''>
-            <div class="input-group-append">
-                <span class="input-group-text" id="temperatureLabel">°C</span>
-            </div>
-        </div>
-    </div>
-    <button type="submit" class="btn btn-primary btn-sm paddingBottomButton">submit</button>
+<form name="SHH" id="SHH" method="post" action='@routes.HomeController.editThresholdTemperatures("SHH0")'>
+	<fieldset hidden>@CSRF.formField</fieldset>
+	<div class="textTitle">Threshold Temperatures</div>
+	<div class="formGroupBackground inputBackground">
+		<div class="input-group temperatureParam mb-1">
+			Min:
+			<input name="minTemp" id="minTemp" type="text" class="form-control temperature-control" aria-label="Max Threshold Temperature" aria-describedby="maxTempLabel" style="margin: 0 0 0 18px;" value='@SHH.getInstance.getMinThreshold.getTemperatureString'>
+			<div class="input-group-append">
+				<span class="input-group-text" id="temperatureLabel">°C</span>
+			</div>
+		</div>
+		<div class="input-group temperatureParam">
+			Max:
+			<input name="maxTemp" id="maxTemp" type="text" class="form-control temperature-control" aria-label="Max Threshold Temperature" aria-describedby="maxTempLabel" style="margin: 0 0 0 18px;" value='@SHH.getInstance.getMaxThreshold.getTemperatureString'>
+			<div class="input-group-append">
+				<span class="input-group-text" id="temperatureLabel">°C</span>
+			</div>
+		</div>
+	</div>
+	<button type="submit" class="btn btn-primary btn-sm paddingBottomButton">submit</button>
 </form>
 
 @*    TABS      *@
