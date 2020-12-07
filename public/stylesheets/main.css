@@ -224,7 +224,8 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 }
 
 .paramSeasonPeriod {
-  width: 70px;
+  width: 100px;
+  margin-left: 10px;
 }
 
 .paramSeasonContainer {
@@ -249,7 +250,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 }
 
 .periodContainer {
-  padding: 0.5em 1em;
+  padding: 15px;
 }
 
 .heatingZone {

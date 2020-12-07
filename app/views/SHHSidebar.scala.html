@@ -46,7 +46,10 @@
     </div>
 
     <div class="tab-pane fade @if(selector==1){show active}" id="room" role="tabpanel" aria-labelledby="room-tab">
-        Doors
+        Rooms
+        <form>
+            @SHHSingleRoom()
+        </form>
     </div>
 
     <div class="tab-pane fade @if(selector==2){show active}" id="period" role="tabpanel" aria-labelledby="period-tab">
