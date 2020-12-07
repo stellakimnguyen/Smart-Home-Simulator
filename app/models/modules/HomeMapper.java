@@ -309,13 +309,13 @@ public class HomeMapper {
     if (temperatureControl!=null) {
       switch (temperatureControl.getStatus()) {
         case TemperatureControl.statusCooling:
-          stringBuilder.append("<i class='far fa-snowflake text-primary'");
+          stringBuilder.append("<i class='far fa-snowflake text-primary'>");
           break;
         case TemperatureControl.statusHeating:
-          stringBuilder.append("<i class='fas fa-burn text-danger'");
+          stringBuilder.append("<i class='fas fa-burn text-danger'>");
           break;
         case TemperatureControl.statusPaused:
-          stringBuilder.append("<i class='fas fa-fan text-secondary'");
+          stringBuilder.append("<i class='fas fa-fan text-secondary'>");
           break;
       }
       /*
@@ -326,8 +326,8 @@ public class HomeMapper {
       stringBuilder.append(node.location.getTemperature().getTemperatureString());
       stringBuilder.append(" °C<br />Target: ");
       stringBuilder.append(temperatureControl.getTargetTemperature().getTemperatureString());
-      stringBuilder.append(" °C'");*/
-      stringBuilder.append("></i>");
+      stringBuilder.append(" °C'");
+      stringBuilder.append("></i>");*/
     }
 
     stringBuilder.append("</td>");

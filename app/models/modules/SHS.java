@@ -245,13 +245,15 @@ public class SHS extends Module {
     return summer;
   }
 
-  public void setSummer(MonthPeriod summer) {
+  public boolean setSummer(MonthPeriod summer) {
     if (summer==null) {
-      return;
+      return false;
     }
     if (!winter.isInPeriod(summer.getStart()) && !winter.isInPeriod(summer.getEnd())) {
       this.summer = summer;
+      return true;
     }
+    return false;
   }
 
   public boolean isSummer() {
@@ -262,13 +264,24 @@ public class SHS extends Module {
     return winter;
   }
 
-  public void setWinter(MonthPeriod winter) {
+  public boolean setWinter(MonthPeriod winter) {
     if (winter==null) {
-      return;
+      return false;
     }
     if (!summer.isInPeriod(winter.getStart()) && !summer.isInPeriod(winter.getEnd())) {
       this.winter = winter;
+      return true;
     }
+    return false;
+  }
+
+  public boolean setSeasons(MonthPeriod summer, MonthPeriod winter) {
+    if (summer == null || summer.isOverlapping(winter)) {
+      return false;
+    }
+    this.summer = summer;
+    this.winter = winter;
+    return true;
   }
 
   public boolean isWinter() {

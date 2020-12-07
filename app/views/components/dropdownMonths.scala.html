@@ -1,0 +1,6 @@
+@(name: String, value: Int)
+<select name='@name' class="form-control-sm mt-0 w-100" id='@name'>
+	@for(month <- 1 to 12) {
+	<option value=@month @if(value==month){ selected}>@models.MonthPeriod.getMonth(month)</option>
+	}
+</select>

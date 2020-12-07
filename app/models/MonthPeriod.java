@@ -40,4 +40,52 @@ public class MonthPeriod {
     return ((end<start) && ((time<=end) || (time>=start)))
             || ((start<end) && ((time<=end) && (time>=start)));
   }
+
+  public boolean isOverlapping(MonthPeriod o) {
+    if (o == null) {
+      return false;
+    }
+    return (isInPeriod(o.start) || isInPeriod(o.end));
+  }
+
+  public static String getMonth(int month) {
+    switch (month) {
+      case 1:
+        return "January";
+      case 2:
+        return "February";
+      case 3:
+        return "March";
+      case 4:
+        return "April";
+      case 5:
+        return "May";
+      case 6:
+        return "June";
+      case 7:
+        return "July";
+      case 8:
+        return "August";
+      case 9:
+        return "September";
+      case 10:
+        return "October";
+      case 11:
+        return "November";
+      default:
+        return "December";
+    }
+  }
+
+  @Override
+  public String toString() {
+    return getMonth(start) + " to " + getMonth(end);
+  }
+
+  public boolean equals(MonthPeriod o) {
+    if (o == null) {
+      return false;
+    }
+    return ((start == o.start) && (end == o.end));
+  }
 }

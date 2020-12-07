@@ -223,13 +223,9 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   right: 0;
 }
 
-.paramSeasonPeriod {
-  width: 70px;
-}
-
 .paramSeasonContainer {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   font-weight: 700;
   letter-spacing: 0.2em;
@@ -238,14 +234,13 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 }
 
 .paramSeasonContainer > div:nth-of-type(2) {
-  margin-left: 10px;
+  margin-left: 0.8em;
 }
 
 .paramSeasonMonth {
   display: flex;
   flex-direction: row;
-  align-items: baseline;
-  text-transform: lowercase;
+  align-items: center;
 }
 
 .metricsTemperature {

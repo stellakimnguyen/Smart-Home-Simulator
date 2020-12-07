@@ -186,6 +186,7 @@ public class HomeController extends Controller {
       String fileLine;
       String[] lineStringArray;
       Map<String, Location> newHouseMap = new HashMap<>();
+      Zone newZone = new Zone();
       int doorwayCount = 1;
 
       while (in.hasNextLine()) {
@@ -216,7 +217,9 @@ public class HomeController extends Controller {
               (new Light(newLocation.getName() + " Light")).setLocation(newLocation);
               (new MovementDetector("Movement Detector")).setLocation(newLocation);
               if (newLocation.getLocationType().equals(Location.LocationType.Indoor)) {
-                (new TemperatureControl("Heat Pump")).setLocation(newLocation);
+                TemperatureControl temperatureControl = new TemperatureControl("Heat Pump");
+                temperatureControl.setLocation(newLocation);
+                temperatureControl.setZone(newZone);
               }
               newHouseMap.put(newLocation.getName(), newLocation); //split into two steps for readability
               locationList.add(newLocation);
@@ -664,7 +667,26 @@ public class HomeController extends Controller {
     } catch (Exception e) {
       //Do nothing. It happens when the simulation is running.
     }
-    return redirect(routes.HomeController.main(tab));
+    MonthPeriod summer = new MonthPeriod();
+    summer.setStart(Integer.parseInt(dynamicForm.get("summerStart")));
+    summer.setEnd(Integer.parseInt(dynamicForm.get("summerEnd")));
+    MonthPeriod winter = new MonthPeriod();
+    winter.setStart(Integer.parseInt(dynamicForm.get("winterStart")));
+    winter.setEnd(Integer.parseInt(dynamicForm.get("winterEnd")));
+    boolean isSummerChanged = !summer.equals(shs.getSummer());
+    boolean isWinterChanged = !winter.equals(shs.getWinter());
+    if (shs.setSeasons(summer, winter)) {
+      if (isSummerChanged) {
+        logger.log("Simulation Summer changed to: " + summer + '.', Logger.MessageType.success);
+      }
+      if (isWinterChanged) {
+        logger.log("Simulation Winter changed to: " + winter + '.', Logger.MessageType.success);
+      }
+      return redirect(routes.HomeController.main(tab));
+    } else {
+      logger.log("Simulation seasons could not be changed because they overlap.", Logger.MessageType.warning);
+      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));
+    }
   }
 
   private Result unauthorizedAction(String action, Device device, String tab) {
