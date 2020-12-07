@@ -1,0 +1,41 @@
+@import views.html.helper.CSRF
+@import models.modules.SHS
+@import models.modules.SHH
+@import models.devices.TemperatureControl
+@(location: Location)(implicit shs: SHS, dynamicForm: DynamicForm, request: Http.Request)
+@temperatureControl = @{location.getDeviceMap.get("Heat Pump").asInstanceOf[TemperatureControl]}
+<div style="width: 22em">
+	<div class="flex-container formGroupBackground switchBackground" id="locationBackground">
+		<div class="col" style="position: relative">
+			<svg onclick='toggleLocationSettings("@location.getName")' height="1em" viewBox="0 0 16 16" class="bi bi-gear-fill userGear" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+				<path fill-rule="evenodd" d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 0 0-5.86 2.929 2.929 0 0 0 0 5.858z"/>
+			</svg>
+			@* READ-ONLY STATE *@
+			<form class="form-group" id='@("room_" + location.getName + "Form")' style='margin-top: 15px' method="post" action='@routes.HomeController.editLocation("SHH1", location.getName)'>
+				<fieldset hidden>@CSRF.formField</fieldset>
+				<div class="userTitle form-inline mb-2">
+					@location.getName
+				</div>
+				<div class="input-group temperatureParam">
+					Temp:
+					<input name="temperature" id='@("room_" + location.getName + "Temp")' type="text" class="form-control temperature-control" aria-label="Room Temperature" aria-describedby="temperatureLabel" style="margin: 0 0 0 18px;" value='@location.getTemperature.getTemperatureString' disabled>
+					<div class="input-group-append">
+						<span class="input-group-text" id="temperatureLabel">°C</span>
+					</div>
+				</div>
+				<div class="input-group temperatureParam mt-1">
+					Zone:
+					<select name="index" class="form-control-sm paramSeasonPeriod mt-0" id='@("room_" + location.getName + "Zone")' disabled>
+						@for(map:(Integer,Zone) <- SHH.getInstance().getZones) {
+							<option value='@map._1' @if(temperatureControl.getZone.equals(map._2)){selected}>@map._1</option>
+						}
+					</select>
+				</div>
+				<div class="input-group temperatureParam mt-1">
+					Status: @temperatureControl.getStatus
+				</div>
+				<button id="@("room_" + location.getName + "SubmitInfo")" class="btn btn-primary btn-sm hidden" style="float: right; margin-top: 10px;">submit</button>
+			</form>
+		</div>
+	</div>
+</div>

@@ -12,19 +12,26 @@ import java.util.Set;
 @Singleton
 public class Clock implements Observable {
   private static final Clock instance = new Clock();
+  public static final long refreshRate = 1000; //Clock refresh rate in milliseconds
 
   private ClockThread thread;
   private final Set<Observer> observers = new HashSet<>();
   private LocalDateTime time;
   private int timeMultiplier;
+  private long timeSkip; // Amount of time advanced every refresh rate
 
   private Clock() {
     time = LocalDateTime.now().withNano(0);
-    timeMultiplier = 1;
+    setTimeMultiplier(1);
   }
 
   public static Clock getInstance() {
     return instance;
+  }
+
+  public static void advanceTime() {
+    instance.time = instance.time.plusNanos(instance.timeSkip);
+    instance.notifyObservers();
   }
 
   public void startClock() {
@@ -56,6 +63,7 @@ public class Clock implements Observable {
 
   public void setTimeMultiplier(int timeMultiplier) {
     this.timeMultiplier = timeMultiplier;
+    this.timeSkip = timeMultiplier * refreshRate * 1000000L;
   }
 
   @Override

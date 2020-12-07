@@ -291,6 +291,49 @@ public class HomeMapper {
     return stringBuilder.toString();
   }
 
+  private static String getHVAC(Node node) {
+    if (node.location.getLocationType() != Location.LocationType.Indoor) {
+      return node.top != Element.connection? topWall : noWall;
+    }
+
+    StringBuilder stringBuilder = new StringBuilder();
+
+    stringBuilder.append("<td");
+    stringBuilder.append(node.top != Element.connection? " class='wall-top'>" : ">");
+    TemperatureControl temperatureControl = null;
+    for (Device device : node.location.getDeviceMap().values()) {
+      if (device instanceof TemperatureControl) {
+        temperatureControl = (TemperatureControl)device;
+      }
+    }
+    if (temperatureControl!=null) {
+      switch (temperatureControl.getStatus()) {
+        case TemperatureControl.statusCooling:
+          stringBuilder.append("<i class='far fa-snowflake text-primary'>");
+          break;
+        case TemperatureControl.statusHeating:
+          stringBuilder.append("<i class='fas fa-burn text-danger'>");
+          break;
+        case TemperatureControl.statusPaused:
+          stringBuilder.append("<i class='fas fa-fan text-secondary'>");
+          break;
+      }
+      /*
+      stringBuilder.append(" data-toggle='tooltip' data-html='true' title='");
+      stringBuilder.append("<em>Zone ");
+      //TODO add Zone
+      stringBuilder.append("</em><br />Current: ");
+      stringBuilder.append(node.location.getTemperature().getTemperatureString());
+      stringBuilder.append(" °C<br />Target: ");
+      stringBuilder.append(temperatureControl.getTargetTemperature().getTemperatureString());
+      stringBuilder.append(" °C'");
+      stringBuilder.append("></i>");*/
+    }
+
+    stringBuilder.append("</td>");
+    return stringBuilder.toString();
+  }
+
   private static String getWindowOpen(Node node) {
     if (node.location == SHS.getOutside()) {
       return node.left == Element.connection? noWall : leftWall;
@@ -377,14 +420,16 @@ public class HomeMapper {
         } else if (map[i][j].top == Element.wall) {
           stringBuilder.append(topWall);
         } else {
-          //stringBuilder.append((map[i][j].topDoor.getStatus().equals(Door.statusOpen))? leftDoor : topDoor);
           stringBuilder.append(getDoor(map[i][j].topDoor, 'T'));
         }
+
+        stringBuilder.append(getHVAC(map[i][j])); // TODO
+       /*
         if (map[i][j].top != Element.connection) {
           stringBuilder.append(topWall);
         } else {
           stringBuilder.append(noWall);
-        }
+        }*/
 
         stringBuilder.append("</tr><tr>");
         if (map[i][j].left == Element.connection) {

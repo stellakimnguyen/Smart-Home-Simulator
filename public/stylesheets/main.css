@@ -31,7 +31,7 @@
   transition: 250ms;
 }
 
-.sidebar > svg, .sidebar > div {
+.sidebar > svg, .sidebar > div, .paddingBottomButton {
   margin-bottom: 15px;
   cursor: pointer;
   transition: 200ms;
@@ -223,6 +223,56 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   right: 0;
 }
 
+.paramSeasonPeriod {
+  width: 100px;
+  margin-left: 10px;
+}
+
+.paramSeasonContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.paramSeasonContainer > div:nth-of-type(2) {
+  margin-left: 0.8em;
+}
+
+.paramSeasonMonth {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.periodContainer {
+  padding: 15px;
+}
+
+.heatingZone {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5em 1em;
+  background: white;
+  border-radius: 5px;
+}
+
+.zoneInlineCenter {
+  display: flex;
+  align-items: center;
+  padding-top: 10px;
+}
+
+.targetTemp {
+  width: 100px;
+  margin-bottom: 0 !important;
+}
+
 .metricsTemperature {
   display: flex;
   flex-direction: column;;
@@ -276,7 +326,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .switchBackground > .custom-switch {
   margin-left: auto;
 }
-.textTitle, .userTitle {
+.textTitle, .userTitle, .paramSeasonTitle {
   text-transform: uppercase;
   font-weight: 700;
   letter-spacing: 0.2em;
@@ -367,6 +417,22 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
   float: right;
   margin: 0 15px 15px 0;
+}
+
+.deleteZoneBtn {
+  border-radius: 100px;
+  background: #FF432E;
+  padding: 5px;
+  height: 22px;
+  width: 22px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 250ms;
+  cursor: pointer;
+  margin-left: calc(100% - 22px);
+  margin-top: 10px;
 }
 
 .deleteExpanded {

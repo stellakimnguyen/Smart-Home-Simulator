@@ -1,8 +1,10 @@
 package models.modules;
 
-import models.ClockThread;
 import models.Location;
+import models.MonthPeriod;
 import models.User;
+import models.devices.Device;
+import models.devices.Window;
 
 import javax.inject.Singleton;
 import java.time.LocalDateTime;
@@ -38,6 +40,8 @@ public class SHS extends Module {
   private boolean isRunning;
   private User activeUser;
   private final Clock clock = Clock.getInstance();
+  private MonthPeriod summer;
+  private MonthPeriod winter;
 
   private Map<String, User> userMap;
   private List<Module> moduleList;
@@ -60,6 +64,19 @@ public class SHS extends Module {
     return outside;
   }
 
+  /**
+   * Helper method to obtain all windows in a given location
+   */
+  public static Set<Window> getWindows(Location location) {
+    Set<Window> answer = new HashSet<>();
+    for (Device device : location.getDeviceMap().values()) {
+      if (device instanceof Window) {
+        answer.add((Window)device);
+      }
+    }
+    return answer;
+  }
+
   private SHS(String name) {
     super(name);
     this.userMap = new HashMap<>();
@@ -70,6 +87,8 @@ public class SHS extends Module {
     this.home = new HashMap<>();
     this.isRunning = false;
     this.home.put(outside.getName(), outside);
+    this.summer = new MonthPeriod(7, 9);
+    this.winter = new MonthPeriod(1, 3);
   }
 
   /**
@@ -220,5 +239,52 @@ public class SHS extends Module {
 
   public void stopClock() {
     clock.stopClock();
+  }
+
+  public MonthPeriod getSummer() {
+    return summer;
+  }
+
+  public boolean setSummer(MonthPeriod summer) {
+    if (summer==null) {
+      return false;
+    }
+    if (!winter.isInPeriod(summer.getStart()) && !winter.isInPeriod(summer.getEnd())) {
+      this.summer = summer;
+      return true;
+    }
+    return false;
+  }
+
+  public boolean isSummer() {
+    return summer.isInPeriod(clock.getTime());
+  }
+
+  public MonthPeriod getWinter() {
+    return winter;
+  }
+
+  public boolean setWinter(MonthPeriod winter) {
+    if (winter==null) {
+      return false;
+    }
+    if (!summer.isInPeriod(winter.getStart()) && !summer.isInPeriod(winter.getEnd())) {
+      this.winter = winter;
+      return true;
+    }
+    return false;
+  }
+
+  public boolean setSeasons(MonthPeriod summer, MonthPeriod winter) {
+    if (summer == null || summer.isOverlapping(winter)) {
+      return false;
+    }
+    this.summer = summer;
+    this.winter = winter;
+    return true;
+  }
+
+  public boolean isWinter() {
+    return winter.isInPeriod(clock.getTime());
   }
 }

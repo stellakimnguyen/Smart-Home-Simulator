@@ -15,7 +15,7 @@ import java.util.*;
  * ===Attributes===
  * `name (private [[java.lang.String String]]):` Unique identifier for the Location.
  *
- * `temperature (private int):` The temperature at the location. Represents a two digit precision decimal.
+ * `temperature (private [[models.Temperature Temperature]]):` The temperature at the location. Represents a two digit precision decimal.
  *
  * `locationType (private LocationType):` The type of the location.
  *
@@ -25,19 +25,19 @@ import java.util.*;
  *
  * `defaultTemperature (private static final int):` The temperature that locations default to. Set to 20.00 Celsius.
  *
- * @version 2
+ * @version 3
  * @author Rodrigo M. Zanini (40077727)
  * @author Pierre-Alexis Barras (40022016)
+ * @author Mohamed Amine Kihal (40046046)
+ * @author Stella Nguyen (40065803)
  */
 public class Location implements Observable {
   private String name;
-  private int temperature;
+  private final Temperature temperature;
   private final LocationType locationType;
   private final Map<String, Device> deviceMap = new HashMap<>();
   private final Map<String, User> userMap = new HashMap<>();
   private final Set<Observer> observers = new HashSet<>();
-
-  public static final int defaultTemperature = 2000;
 
   public enum LocationType {
     Outdoor, // A room that is still part of the house, but is not enclosed.
@@ -47,7 +47,7 @@ public class Location implements Observable {
 
   public Location(String name, LocationType locationType) {
     this.name = name;
-    this.temperature = defaultTemperature;
+    this.temperature = new Temperature();
     this.locationType = locationType;
   }
 
@@ -68,24 +68,15 @@ public class Location implements Observable {
   /**
    * Get the Location temperature.
    */
-  public int getTemperature() {
+  public Temperature getTemperature() {
     return temperature;
-  }
-
-  /**
-   * Get the Location temperature String.
-   */
-  public String getTemperatureString() {
-    int base = temperature/100;
-    int decimal = temperature%100;
-    return base + "." + (decimal<10?"0"+decimal:decimal);
   }
 
   /**
    * Set the Location temperature.
    */
   public void setTemperature(int temperature) {
-    this.temperature = temperature;
+    this.temperature.setTemperature(temperature);
   }
 
   /**

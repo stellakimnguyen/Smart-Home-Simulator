@@ -9,16 +9,19 @@ import models.exceptions.DeviceException;
  * ===Attributes===
  * `secondLocation (private [[models.Location Location]]):` Location to be joined to the one this [[models.devices.Device Device]] is located at.
  *
- * @version 1
+ * @version 3
  * @author Rodrigo M. Zanini (40077727)
  * @author Pierre-Alexis Barras (40022016)
+ * @author Mohamed Amine Kihal (40046046)
+ * @author Stella Nguyen (40065803)
  */
 public class Connection extends Device {
   private Location secondLocation;
 
   public Connection(String name) {
     super(name);
-    super.setStatus(Device.statusOpen);
+    permitStatus(statusOpen);
+    setStatus(statusOpen);
   }
 
   /**
@@ -49,6 +52,7 @@ public class Connection extends Device {
     }
     this.secondLocation = secondLocation;
     this.secondLocation.addDevice(this);
+    setDisplayName();
     return true;
   }
 
@@ -63,7 +67,7 @@ public class Connection extends Device {
   }
 
   @Override
-  public String toString() {
-    return "[" + getLocation().getName() + ", " + getSecondLocation().getName() + "] " + getName();
+  public String getLocationString() {
+    return super.getLocationString() + ", " + (secondLocation!=null? secondLocation.getName() : "");
   }
 }

@@ -15,7 +15,9 @@ import javax.inject.Singleton;
  * Smart Home Core functionality module, it handles Device functionality and access. It is a Singleton Class.
  *
  * ===Attributes===
- * `currentTime (private [[java.time.LocalDateTime LocalDateTime]]):` Simulation's current time.
+ * `autoLights (private boolean):` Condition of the 'Movement Controlled' light system.
+ *
+ * `logger (private [[models.modules.Logger Logger]]):` Console log instance.
  *
  * @version 2
  * @author Rodrigo M. Zanini (40077727)
@@ -31,7 +33,7 @@ public class SHC extends Module {
   private static final SHC instance = new SHC("SHC");
 
   /**
-   * Get the Singleton Class instance for SHS.
+   * Get the Singleton Class instance for SHC.
    */
   public static SHC getInstance(){
     return instance;

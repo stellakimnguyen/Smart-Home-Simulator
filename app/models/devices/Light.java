@@ -7,24 +7,18 @@ import models.exceptions.SameStatusException;
 /**
  * Extends a [[models.devices.Device Device]]: represents a light source.
  *
- * @version 1
+ * @version 3
  * @author Rodrigo M. Zanini (40077727)
  * @author Pierre-Alexis Barras (40022016)
+ * @author Mohamed Amine Kihal (40046046)
+ * @author Stella Nguyen (40065803)
  */
 public class Light extends Device {
   public Light(String name) {
     super(name);
-    setStatus(Device.statusOff);
-  }
-
-  /**
-   * Set the Device status. Only accepts `statusOn, statusOff`
-   */
-  @Override
-  void setStatus(String status) {
-    if (status.equals(Device.statusOff) || status.equals(Device.statusOn)) {
-      super.setStatus(status);
-    }
+    permitStatus(statusOn);
+    permitStatus(statusOff);
+    setStatus(statusOff);
   }
 
   /**

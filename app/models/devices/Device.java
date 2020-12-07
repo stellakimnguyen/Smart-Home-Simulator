@@ -3,14 +3,21 @@ package models.devices;
 import models.Location;
 import models.exceptions.DeviceException;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Template for all devices existing in a [[models.Location Location]]. Contains common attributes and a basic set of actions and statuses.
  * ===Attributes===
  * `name (private [[java.lang.String String]]):` Identifier for the device. Unique within the [[models.Location Location]] that contains it.
  *
+ * `displayName (private [[java.lang.String String]]):` [[java.lang.String String]] representation of the device. Unique, as it includes the [[models.Location Location]] that contains it.
+ *
  * `status (private [[java.lang.String String]]):` Current condition of the device.
  *
  * `location (private [[models.Location Location]]):` [[models.Location Location]] this Device is in.
+ *
+ * `permittedStatus (private [[java.util.Set Set]]&#91;[[java.lang.String String]]&#93;):` The [[java.util.Set Set]] of statuses the device accepts.
  *
  * ===Common Actions `(public)`===
  * `actionOn, actionOff, actionOpen, actionClose`
@@ -18,14 +25,18 @@ import models.exceptions.DeviceException;
  * ===Common Statuses `(public)`===
  * `statusOn, statusOff, statusOpen, statusClose`
  *
- * @version 1
+ * @version 3
  * @author Rodrigo M. Zanini (40077727)
  * @author Pierre-Alexis Barras (40022016)
+ * @author Mohamed Amine Kihal (40046046)
+ * @author Stella Nguyen (40065803)
  */
 public abstract class Device {
   private String name;
+  private String displayName;
   private String status;
   private Location location;
+  private final Set<String> permittedStatus;
 
   // Common strings
   public static final String actionOn = "turn on";
@@ -41,6 +52,8 @@ public abstract class Device {
     this.name = name;
     this.location = null;
     this.status = "";
+    this.permittedStatus = new HashSet<>();
+    setDisplayName();
   }
 
   /**
@@ -72,10 +85,20 @@ public abstract class Device {
   }
 
   /**
-   * Set the Device status.
+   * Set the Device status, if the new status is in `permittedStatus`.
    */
-  void setStatus(String status) {
-    this.status = status;
+  public void setStatus(String status) {
+    if (permittedStatus.contains(status)) {
+      this.status = status;
+    }
+  }
+
+  /**
+   * Add a status to the [[java.util.Set Set]] of statuses this device accepts.
+   * Statuses added can not be withdrawn
+   */
+  void permitStatus(String status) {
+    permittedStatus.add(status);
   }
 
   /**
@@ -107,6 +130,7 @@ public abstract class Device {
     }
     this.location = location;
     this.location.addDevice(this);
+    setDisplayName();
     return true;
   }
 
@@ -128,8 +152,29 @@ public abstract class Device {
     return location.getLocationType() != Location.LocationType.Outside;
   }
 
+  /**
+   * toString Template Step, it returns the [[java.lang.String String]] representation of the [[models.Location Location]] linked to this device.
+   */
+  public String getLocationString() {
+    return (location!=null? location.getName() : "");
+  }
+
+  /**
+   * Get the Unique display name of the Device
+   */
+  public String getDisplayName() {
+    return displayName;
+  }
+
+  /**
+   * Helper method that refreshes the `displayName` attribute
+   */
+  public void setDisplayName() {
+    displayName = "[" + getLocationString() + "] " + getName();
+  }
+
   @Override
   public String toString() {
-    return "[" + getLocation().getName() + "] " + getName();
+    return displayName;
   }
 }

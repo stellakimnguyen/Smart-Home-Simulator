@@ -5,6 +5,7 @@ import models.Observable;
 import models.Observer;
 import models.devices.Device;
 import models.devices.MovementDetector;
+import models.devices.TemperatureControl;
 
 import java.util.Set;
 import java.util.HashSet;
@@ -71,6 +72,15 @@ public abstract class Module implements Observer, Observable {
                 ((MovementDetector) device).addObserver(this);
               } else {
                 ((MovementDetector) device).removeObserver(this);
+              }
+            }
+            break;
+          case "TemperatureControl":
+            if (device instanceof TemperatureControl) {
+              if (isRegistering) {
+                ((TemperatureControl) device).addObserver(this);
+              } else {
+                ((TemperatureControl) device).removeObserver(this);
               }
             }
             break;

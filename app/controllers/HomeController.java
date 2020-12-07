@@ -40,6 +40,7 @@ public class HomeController extends Controller {
   public final SHS shs = SHS.getInstance();
   public final SHC shc = SHC.getInstance();
   public final SHP shp = SHP.getInstance();
+  public final SHH shh = SHH.getInstance();
   public final Logger logger = SHC.logger;
 
   @Inject
@@ -60,6 +61,7 @@ public class HomeController extends Controller {
     PermitDoorOpenClose.authorize(User.UserType.Child_Teenager,PermissionLocation.local);
     PermitDoorOpenClose.authorize(User.UserType.Child_Underage,PermissionLocation.local);
     PermitDoorOpenClose.authorize(User.UserType.Guest,PermissionLocation.local);
+    PermitTemperatureControl.authorize(User.UserType.Guest,PermissionLocation.local);
 
     logger.log(shs, "System initialized successfully.", Logger.MessageType.normal);
   }
@@ -184,6 +186,7 @@ public class HomeController extends Controller {
       String fileLine;
       String[] lineStringArray;
       Map<String, Location> newHouseMap = new HashMap<>();
+      Zone newZone = new Zone();
       int doorwayCount = 1;
 
       while (in.hasNextLine()) {
@@ -212,7 +215,12 @@ public class HomeController extends Controller {
             if(section == 0){ //create a location instance
               Location newLocation = new Location(lineStringArray[0], Location.LocationType.valueOf(lineStringArray[1]));
               (new Light(newLocation.getName() + " Light")).setLocation(newLocation);
-              (new MovementDetector(" Movement Detector")).setLocation(newLocation);
+              (new MovementDetector("Movement Detector")).setLocation(newLocation);
+              if (newLocation.getLocationType().equals(Location.LocationType.Indoor)) {
+                TemperatureControl temperatureControl = new TemperatureControl("Heat Pump");
+                temperatureControl.setLocation(newLocation);
+                temperatureControl.setZone(newZone);
+              }
               newHouseMap.put(newLocation.getName(), newLocation); //split into two steps for readability
               locationList.add(newLocation);
             } else  if (section == 1) {  //create Device instance
@@ -269,6 +277,10 @@ public class HomeController extends Controller {
       shp.setRegistrationForAll("MovementDetector", shp.isAway());
       //Register new layout for Auto Light Mode
       shc.setRegistrationForAll("MovementDetector", shc.isAutoLights());
+      //Register new Zone map
+      TreeMap<Integer,Zone> newZones = new TreeMap<>();
+      newZones.put(0,newZone);
+      shh.setZones(newZones);
 
 
     } catch (FileNotFoundException e) {
@@ -637,9 +649,10 @@ public class HomeController extends Controller {
     int newTemperature;
     try {
       newTemperature = parseTemperature(newTemperatureString);
-      if (SHS.getOutside().getTemperature() != newTemperature) {
+      Temperature outsideTemperature = SHS.getOutside().getTemperature();
+      if (outsideTemperature.getTemperature() != newTemperature) {
         shs.setOutsideTemperature(newTemperature);
-        logger.log("Outside and Outdoor temperature changed to " + SHS.getOutside().getTemperatureString() + '.', Logger.MessageType.success);
+        logger.log("Outside and Outdoor temperature changed to " + outsideTemperature.getTemperatureString() + '.', Logger.MessageType.success);
       }
     } catch (NumberFormatException e) {
       logger.log("Attempted to change Outside and Outdoor temperature to an invalid value.", Logger.MessageType.warning);
@@ -658,7 +671,26 @@ public class HomeController extends Controller {
     } catch (Exception e) {
       //Do nothing. It happens when the simulation is running.
     }
-    return redirect(routes.HomeController.main(tab));
+    MonthPeriod summer = new MonthPeriod();
+    summer.setStart(Integer.parseInt(dynamicForm.get("summerStart")));
+    summer.setEnd(Integer.parseInt(dynamicForm.get("summerEnd")));
+    MonthPeriod winter = new MonthPeriod();
+    winter.setStart(Integer.parseInt(dynamicForm.get("winterStart")));
+    winter.setEnd(Integer.parseInt(dynamicForm.get("winterEnd")));
+    boolean isSummerChanged = !summer.equals(shs.getSummer());
+    boolean isWinterChanged = !winter.equals(shs.getWinter());
+    if (shs.setSeasons(summer, winter)) {
+      if (isSummerChanged) {
+        logger.log("Simulation Summer changed to: " + summer + '.', Logger.MessageType.success);
+      }
+      if (isWinterChanged) {
+        logger.log("Simulation Winter changed to: " + winter + '.', Logger.MessageType.success);
+      }
+      return redirect(routes.HomeController.main(tab));
+    } else {
+      logger.log("Simulation seasons could not be changed because they overlap.", Logger.MessageType.warning);
+      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));
+    }
   }
 
   private Result unauthorizedAction(String action, Device device, String tab) {
@@ -844,9 +876,24 @@ public class HomeController extends Controller {
   public Result toggleAwayMode(Http.Request request) {
     if (PermitAwayMode.isAuthorized(shs.getActiveUser())) {
       shp.toggleAway();
-      logger.log("Away mode has been turned " + (shc.isAutoLights()?"on":"off"), Logger.MessageType.success);
+      logger.log("Away mode has been turned " + (shp.isAway()?"on":"off"), Logger.MessageType.success);
     } else {
       logger.log(shs.getActiveUser(), "You don't have the permissions necessary to '" + (shp.isAway()?"turn off":"turn on") +"' the 'Away Mode'", Logger.MessageType.warning);
+    }
+    return redirect(routes.HomeController.main("SHP"));
+  }
+
+  /**
+   * Starts or stops the [[models.modules.SHP SHP]]'s Away mode.
+   * @param request the http header from the user.
+   * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successfully starting/stopping the simulation or a redirection to another method if the pre-requisites are not satisfied.
+   */
+  public Result toggleAutoLightsInAwayMode(Http.Request request) {
+    if (!PermitAwayMode.isAuthorized(shs.getActiveUser())) {
+      logger.log(shs.getActiveUser(), "You don't have the permissions necessary to manage the 'Away Mode'", Logger.MessageType.warning);
+    } else {
+      shp.toggleAutoLightsInAwayMode();
+      logger.log("Auto lights in 'Away mode' has been turned " + (shp.isAutoLightsInAwayMode()?"on":"off"), Logger.MessageType.success);
     }
     return redirect(routes.HomeController.main("SHP"));
   }
@@ -857,20 +904,24 @@ public class HomeController extends Controller {
    * @return a [[play.mvc.Result Result]]. It contains the webpage the user will see upon successfully starting/stopping the simulation or a redirection to another method if the pre-requisites are not satisfied.
    */
   public Result toggleAwayModeLight(Http.Request request, String locationString, String name, boolean register) {
-    Location location = shs.getHome().get(locationString);
-    if (location == null) {
-      logger.log("The location specified does not exist.", Logger.MessageType.warning);
-      return redirect(routes.HomeController.main("SHP"));
-    }
-    Device device = location.getDeviceMap().get(name);
-    if (!(device instanceof Light)) {
-      logger.log("The device specified is not a Light.", Logger.MessageType.warning);
-      return redirect(routes.HomeController.main("SHP"));
-    }
-    if (register) {
-      shp.registerLight((Light)device);
+    if (!PermitAwayMode.isAuthorized(shs.getActiveUser())) {
+      logger.log(shs.getActiveUser(), "You don't have the permissions necessary to manage the 'Away Mode'", Logger.MessageType.warning);
     } else {
-      shp.unregisterLight((Light)device);
+      Location location = shs.getHome().get(locationString);
+      if (location == null) {
+        logger.log("The location specified does not exist.", Logger.MessageType.warning);
+        return redirect(routes.HomeController.main("SHP"));
+      }
+      Device device = location.getDeviceMap().get(name);
+      if (!(device instanceof Light)) {
+        logger.log("The device specified is not a Light.", Logger.MessageType.warning);
+        return redirect(routes.HomeController.main("SHP"));
+      }
+      if (register) {
+        shp.registerLight((Light) device);
+      } else {
+        shp.unregisterLight((Light) device);
+      }
     }
     return redirect(routes.HomeController.main("SHP"));
   }
@@ -961,6 +1012,131 @@ public class HomeController extends Controller {
     return redirect(routes.HomeController.main("user"));
   }
 
+  public Result editThresholdTemperatures(Http.Request request, String tab) {
+    DynamicForm dynamicForm = formFactory.form().bindFromRequest(request);
+    String minTempString = dynamicForm.get("minTemp");
+    String maxTempString = dynamicForm.get("maxTemp");
+    int minTemp;
+    try {
+      minTemp = parseTemperature(minTempString);
+      Temperature minThreshold = shh.getMinThreshold();
+      if (minThreshold.getTemperature() != minTemp) {
+        minThreshold.setTemperature(minTemp);
+        logger.log("You will now be alerted when indoor temperature is below " + minThreshold.getTemperatureString() + " °C.", Logger.MessageType.success);
+      }
+    } catch (NumberFormatException e) {
+      logger.log("Attempted to change Min Threshold temperature to an invalid value.", Logger.MessageType.warning);
+      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));
+    }
+    int maxTemp;
+    try {
+      maxTemp = parseTemperature(maxTempString);
+      Temperature maxThreshold = shh.getMaxThreshold();
+      if (maxThreshold.getTemperature() != maxTemp) {
+        maxThreshold.setTemperature(maxTemp);
+        logger.log("You will now be alerted when indoor temperature is above " + maxThreshold.getTemperatureString() + " °C.", Logger.MessageType.success);
+      }
+    } catch (NumberFormatException e) {
+      logger.log("Attempted to change Max Threshold temperature to an invalid value.", Logger.MessageType.warning);
+      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));
+    }
+    return redirect(routes.HomeController.main(tab));
+  }
+
+  public Result editZone(Http.Request request, String tab) {
+    DynamicForm dynamicForm = formFactory.form().bindFromRequest(request);
+    String tempString = dynamicForm.get("temperature");
+    int index = Integer.parseInt(dynamicForm.get("index"));
+    Zone zone = shh.getZones().get(index);
+    if (zone == null) {
+      logger.log("That Zone does not exist.", Logger.MessageType.warning);
+      return redirect(routes.HomeController.main(tab));
+    }
+    int temp;
+    try {
+      temp = parseTemperature(tempString);
+      if (zone.getDefaultTemperature().getTemperature() != temp) {
+        zone.getDefaultTemperature().setTemperature(temp);
+        shh.changePeriod(0);
+        logger.log("Zone " + index + " will now default to " + tempString + " °C.", Logger.MessageType.success);
+      }
+    } catch (NumberFormatException e) {
+      logger.log("Attempted to change temperature to an invalid value.", Logger.MessageType.warning);
+      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));
+    }
+    return redirect(routes.HomeController.main(tab));
+  }
+  public Result createZone(Http.Request request, String tab) {
+    Zone newZone = new Zone();
+    Map<Integer,Zone> zones = shh.getZones();
+    zones.put(zones.size(), newZone);
+    return redirect(routes.HomeController.main(tab));
+  }
+  public Result togglePeriodStatus(Http.Request request, int period) {
+    switch (period) {
+      case 1:
+        shh.togglePeriod1();
+        logger.log("Period 1 is now " + shh.isPeriod1Active() + ".", Logger.MessageType.warning);
+        return redirect(routes.HomeController.main("SHH20"));
+      case 2:
+        shh.togglePeriod1();
+        logger.log("Period 2 is now " + shh.isPeriod2Active() + ".", Logger.MessageType.warning);
+        return redirect(routes.HomeController.main("SHH21"));
+      case 3:
+        shh.togglePeriod3();
+        logger.log("Period 3 is now " + shh.isPeriod3Active() + ".", Logger.MessageType.warning);
+        return redirect(routes.HomeController.main("SHH22"));
+      default:
+        logger.log("That Period does not exist.", Logger.MessageType.warning);
+        return redirect(routes.HomeController.main("SHH20"));
+    }
+  }
+  public Result togglePeriodStatusHelper(){
+    return ok();
+  }
+
+  public Result editLocation(Http.Request request, String tab, String locationName) {
+    DynamicForm dynamicForm = formFactory.form().bindFromRequest(request);
+    int index = Integer.parseInt(dynamicForm.get("index"));
+    Zone zone = shh.getZones().get(index);
+    if (zone == null) {
+      logger.log("That Zone does not exist.", Logger.MessageType.warning);
+      return redirect(routes.HomeController.main(tab));
+    }
+    Location location = shs.getHome().get(locationName);
+    if (location == null) {
+      logger.log("That Room does not exist.", Logger.MessageType.warning);
+      return redirect(routes.HomeController.main(tab));
+    }
+    TemperatureControl temperatureControl = (TemperatureControl) location.getDeviceMap().get("Heat Pump");
+    if (zone != temperatureControl.getZone()) {
+      temperatureControl.setZone(zone);
+      logger.log("Location " + locationName + " is now in Zone " + index + ".", Logger.MessageType.success);
+      return redirect(routes.HomeController.main(tab));
+    }
+
+
+    String tempString = dynamicForm.get("temperature");
+    int temp;
+    try {
+      temp = parseTemperature(tempString);
+      if (zone.getTargetTemperature().getTemperature() != temp) {
+        temperatureControl.setOnManualMode(true);
+        temperatureControl.getTargetTemperature().setTemperature(temp);
+        logger.log("Location " + locationName + " is now overridden to " + tempString + " °C.", Logger.MessageType.success);
+      } else {
+        temperatureControl.setOnManualMode(false);
+        temperatureControl.getTargetTemperature().setTemperature(temp);
+        logger.log("Location " + locationName + " is now back to zone defaults.", Logger.MessageType.success);
+
+      }
+    } catch (NumberFormatException e) {
+      logger.log("Attempted to change temperature to an invalid value.", Logger.MessageType.warning);
+      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));
+    }
+    return redirect(routes.HomeController.main(tab));
+  }
+
   public Result loadSideBar(Http.Request request, String name) {
     DynamicForm dynamicForm = formFactory.form();
     switch (name) {
@@ -980,6 +1156,18 @@ public class HomeController extends Controller {
         return ok(views.html.SHCSidebar.render(2, shs, dynamicForm, request));
       case "SHP":
         return ok(views.html.SHPSidebar.render(shs, dynamicForm, request));
+      case "SHH0":
+        return ok(views.html.SHHSidebar.render(0, shs, dynamicForm, request));
+      case "SHH1":
+        return ok(views.html.SHHSidebar.render(1, shs, dynamicForm, request));
+      case "SHH20":
+        return ok(views.html.SHHSidebar.render(20, shs, dynamicForm, request));
+      case "SHH21":
+        return ok(views.html.SHHSidebar.render(21, shs, dynamicForm, request));
+      case "SHH22":
+        return ok(views.html.SHHSidebar.render(22, shs, dynamicForm, request));
+      case "SHH23":
+        return ok(views.html.SHHSidebar.render(23, shs, dynamicForm, request));
     }
     return ok();
   }

@@ -1,0 +1,14 @@
+@(name: String, period: MonthPeriod)
+<div class="paramSeasonTitle">@name:</div>
+<div class="input-group">
+	<div class="paramSeasonContainer">
+		<div class="paramSeasonMonth">
+			<div>Start:</div>
+			@views.html.components.dropdownMonths.apply(name + "Start", period.getStart)
+			</div>
+		<div class="paramSeasonMonth">
+			<div>End:</div>
+			@views.html.components.dropdownMonths.apply(name + "End", period.getEnd)
+		</div>
+	</div>
+</div>

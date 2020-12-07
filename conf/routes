@@ -4,8 +4,11 @@
 
 # An example controller showing a sample home page
 GET     /toggleSimulationStatus                           controllers.HomeController.toggleSimulationStatus(request: Request)
+GET     /togglePeriodStatus/                           controllers.HomeController.togglePeriodStatusHelper()
+GET     /togglePeriodStatus/:period                           controllers.HomeController.togglePeriodStatus(request: Request, period: Int)
 GET     /toggleAutoLight                           controllers.HomeController.toggleAutoLight(request: Request)
 GET     /toggleAwayMode                           controllers.HomeController.toggleAwayMode(request: Request)
+GET     /toggleAwayModeLight                           controllers.HomeController.toggleAutoLightsInAwayMode(request: Request)
 POST    /editAwayMode                           controllers.HomeController.editAwayMode(request: Request)
 POST    /editPermissions                           controllers.HomeController.editPermissions(request: Request)
 GET     /loadMetrics                           controllers.HomeController.loadMetrics()
@@ -27,6 +30,10 @@ GET     /:tab/deleteUser/:name         controllers.HomeController.deleteUser(req
 GET     /:tab/setActiveUser/:name         controllers.HomeController.setActiveUser(request: Request, tab: String, name: String)
 POST    /:tab/newUser/         controllers.HomeController.createUser(request: Request, tab: String)
 POST    /:tab/editSimulationParameters/         controllers.HomeController.editSimulationParameters(request: Request, tab: String)
+POST    /:tab/editThresholdTemperatures/         controllers.HomeController.editThresholdTemperatures(request: Request, tab: String)
+POST    /:tab/editZone/         controllers.HomeController.editZone(request: Request, tab: String)
+GET     /:tab/createZone/         controllers.HomeController.createZone(request: Request, tab: String)
+POST    /:tab/editLocation/:locationName         controllers.HomeController.editLocation(request: Request, tab: String, locationName: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

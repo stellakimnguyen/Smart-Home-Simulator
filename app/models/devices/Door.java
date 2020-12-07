@@ -14,9 +14,11 @@ import models.exceptions.*;
  * ===Class Statuses `(public)`===
  * `statusLocked, statusNotLocked`
  *
- * @version 1
+ * @version 3
  * @author Rodrigo M. Zanini (40077727)
  * @author Pierre-Alexis Barras (40022016)
+ * @author Mohamed Amine Kihal (40046046)
+ * @author Stella Nguyen (40065803)
  */
 public class Door extends Connection {
   private boolean isLocked;
@@ -29,7 +31,8 @@ public class Door extends Connection {
   public Door(String name) {
     super(name);
     this.isLocked = false;
-    super.setStatus(Device.statusClosed);
+    permitStatus(statusClosed);
+    setStatus(statusClosed);
   }
 
   /**
@@ -71,16 +74,6 @@ public class Door extends Connection {
   @Override
   public String getFullStatus() {
     return super.getStatus() + "," + (isLocked?statusLocked:statusNotLocked);
-  }
-
-  /**
-   * Set the Device status. Only accepts `statusOpen, statusClose`
-   */
-  @Override
-  void setStatus(String status) {
-    if (status.equals(Device.statusOpen) || status.equals(Device.statusClosed)) {
-      super.setStatus(status);
-    }
   }
 
   /**
