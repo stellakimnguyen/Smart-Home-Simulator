@@ -219,7 +219,7 @@ public class SHH extends Module {
     }
   }
 
-  private void changePeriod(int period) {
+  public void changePeriod(int period) {
     currentPeriod = period;
     if (period == -1) {
       changeTargetTemperature(summerTemperature);

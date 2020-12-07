@@ -1,36 +1,32 @@
-@()
+@import models.modules.SHS
+@import views.html.helper.CSRF
+@(index:Int, zone: Zone)(implicit shs: SHS, dynamicForm: DynamicForm, request: Http.Request)
+<div style="width: 25em">
+	<form class="form-group" id='@("zone_" + index + "Form")' method="post" action='@routes.HomeController.editZone("SHH0")'>
+		<fieldset hidden>@CSRF.formField <input name="index" value='@index'> </fieldset>
+		<div class="formGroupBackground periodContainer" id="zoneBackground">
+			<div style="position: relative">
+				<svg onclick='toggleZoneSettings("@index")' width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-gear-fill userGear" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+					<path fill-rule="evenodd" d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 0 0-5.86 2.929 2.929 0 0 0 0 5.858z"/>
+				</svg>
 
-<form class="form-group" id='newZoneForm' method="post" action=''>
-    <div class="formGroupBackground periodContainer" id="zoneBackground">
-        <div style="position: relative">
-            <svg onclick='' width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-gear-fill userGear" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd" d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 0 0-5.86 2.929 2.929 0 0 0 0 5.858z"/>
-            </svg>
+				<div class="userTitle form-inline zoneInlineCenter">
+					<div>Zone @index</div>
+				</div>
 
-            <div class="userTitle form-inline zoneInlineCenter">
-                <div>Name:</div>
-                <input name="name" type="text" class="form-control form-control-sm" id='' placeholder="Zone 1" value='' readonly>
-            </div>
+				<div class="input-group zoneInlineCenter">
+					<div class="userTitle">Default Temperature:</div>
+					<input name="temperature" id='@("zone_" + index + "Temp")' type="text" class="form-control temperature-control" aria-label="Room Temperature" aria-describedby="temperatureLabel" style="margin: 0 0 0 18px;" value='@zone.getDefaultTemperature.getTemperatureString' disabled>
+					<div class="input-group-append">
+						<span class="input-group-text" id="temperatureLabel">°C</span>
+					</div>
+				</div>
 
-            <div class="input-group zoneInlineCenter">
-                <div class="userTitle">Default Temperature:</div>
-                <input name="temperature" id="newZoneTemp" type="text" class="form-control" aria-label="New Zone Temperature" aria-describedby="temperatureLabel" style="margin: 0 0 0 18px;" value='' readonly>
-                <div class="input-group-append">
-                    <span class="input-group-text" id="temperatureLabel">°C</span>
-                </div>
-            </div>
-
-            <div class="userTitle form-inline">
-                <div>Number of Rooms:</div>
-                <input name="name" type="text" class="form-control form-control-sm" id='nbRoomsInZone' placeholder="0" value='' readonly>
-            </div>
-
-            <div id='@("zone_" + /*zone.getId + */ "DeleteButton")' onclick='' class="deleteZoneBtn"> @* onclick='confirmDelete(_,_) *@
-                <div id='@("zone_" + /*zone.getId + */ "deleteTitle")' class="deleteTitle hidden">delete</div>
-                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash-fill" fill="white" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5a.5.5 0 0 0-1 0v7a.5.5 0 0 0 1 0v-7z"/>
-                </svg>
-            </div>
-        </div>
-    </div>
-</form>
+				<div class="userTitle">
+					<div>@zone.getLocations.size() Rooms in this zone</div>
+				</div>
+			</div>
+			<button id="@("zone_" + index + "SubmitInfo")" class="btn btn-primary btn-sm hidden" style="float: right; margin-top: 10px;">submit</button>
+		</div>
+	</form>
+</div>

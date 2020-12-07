@@ -48,6 +48,10 @@ public class TemperatureControl extends Sensor {
     return isOnManualMode;
   }
 
+  public void setOnManualMode(boolean onManualMode) {
+    isOnManualMode = onManualMode;
+  }
+
   public void toggleOnManualMode() {
     isOnManualMode = !isOnManualMode;
   }

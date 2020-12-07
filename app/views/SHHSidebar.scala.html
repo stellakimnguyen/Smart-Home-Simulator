@@ -40,16 +40,18 @@
         <a class="nav-link @if(selector==1){active}" id="room-tab" data-toggle="tab" href="#room" role="tab" aria-controls="room" aria-selected="@if(selector==1){true}else{false}">Rooms</a>
     </li>
     <li class="nav-item" role="presentation">
-        <a class="nav-link @if(selector==2){active}" id="period-tab" data-toggle="tab" href="#period" role="tab" aria-controls="period" aria-selected="@if(selector==2){true}else{false}">Periods</a>
+        <a class="nav-link @if(selector>=20 && selector<30){active}" id="period-tab" data-toggle="tab" href="#period" role="tab" aria-controls="period" aria-selected="@if(selector>=20 && selector<30){true}else{false}">Periods</a>
     </li>
 </ul>
 
 @*    TABS CONTENT     *@
 <div class="tab-content mt-2" id="myTabContent">
     <div class="tab-pane fade @if(selector==0){show active}" id="heating" role="tabpanel" aria-labelledby="heating-tab">
-        @singleHeatingZone()
+      @for(map:(Integer,Zone) <- SHH.getInstance().getZones) {
+	      @singleHeatingZone(map._1, map._2)
+      }
         <div class="textTitle">add heating zone</div>
-        <div class="addUserButton" data-toggle="modal" data-target="#staticBackdrop">
+        <div class="addUserButton" onclick="window.location.href='@routes.HomeController.createZone("SHH0")';">
             <svg width="2.5em" height="2.5em" viewBox="0 0 16 16" class="bi bi-plus-circle-fill" fill="#3253F1" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"/>
             </svg>
@@ -57,7 +59,6 @@
     </div>
 
     <div class="tab-pane fade @if(selector==1){show active}" id="room" role="tabpanel" aria-labelledby="room-tab">
-        Rooms
 	    @for(location:Location <- shs.getHome.values) {
 		    @if(location.getLocationType == LocationType.Indoor){
 			    @components.SHHSingleRoom(location)
@@ -65,7 +66,7 @@
 	    }
     </div>
 
-    <div class="tab-pane fade @if(selector==2){show active}" id="period" role="tabpanel" aria-labelledby="period-tab">
+    <div class="tab-pane fade @if(selector>=20 && selector<30){show active}" id="period" role="tabpanel" aria-labelledby="period-tab">
         <ul class="nav nav-tabs" id="shhPeriodTab" role="tablist">
             <li class="nav-item" role="presentation">
                 <a class="nav-link @if(selector==20){active}" id="morning-tab" data-toggle="tab" href="#morning" role="tab" aria-controls="morning" aria-selected="@if(selector==20){true}else{false}">Morning</a>
@@ -80,209 +81,174 @@
                 <a class="nav-link @if(selector==23){active}" id="away-tab" data-toggle="tab" href="#away" role="tab" aria-controls="away" aria-selected="@if(selector==23){true}else{false}">Away</a>
             </li>
         </ul>
+	    @*    PERIODS TABS CONTENT     *@
+	    <div class="tab-content mt-2" id="periodsTabContent">
+		    <div class="tab-pane fade @if(selector==20){show active}" id="morning" role="tabpanel" aria-labelledby="morning-tab">
+			    <form id="morningPeriodForm">
+				    <div class="switchBackground">
+					    <div class="textSubtitle">Morning Period</div>
+					    <div class="custom-control custom-switch">
+						    <input type="checkbox" class="custom-control-input" id="morningPeriodSwitch" onclick="togglePeriodStatus(1)"@if(SHH.getInstance.isPeriod1Active){ checked}>
+						    <label class="custom-control-label" for="morningPeriodSwitch">on</label>
+					    </div>
+				    </div>
+				    @if(SHH.getInstance.isPeriod1Active){
+				    <div class="formGroupBackground periodContainer" id="morningPeriod">
+					    <div class="textTitle">Time Range</div>
+					    <div class="form-group row">
+						    <label for="example-time-input" class="col-2 col-form-label">Start</label>
+						    <div class="col-10">
+							    <input class="form-control" type="time" value="13:45:00" id="startMorningPeriod">
+						    </div>
+
+						    <label for="example-time-input" class="col-2 col-form-label">End</label>
+						    <div class="col-10">
+							    <input class="form-control" type="time" value="13:45:00" id="endMorningPeriod">
+						    </div>
+					    </div>
+
+					    <div class="textTitle">Heating Zones</div>
+					    <div class="heatingZone">
+						    <div class="textSubtitle">Zone 1</div>
+						    <div class="input-group input-group-sm mb-3 targetTemp">
+							    <input id="zoneTargetTemp" type="number" step=".01" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+							    <div class="input-group-append">
+								    <span class="input-group-text" id="inputGroup-sizing-sm">°C</span>
+							    </div>
+						    </div>
+						    <div class="custom-control custom-switch">
+							    <input type="checkbox" class="custom-control-input" id="heatingZone1">
+							    <label class="custom-control-label" for="heatingZone1">on</label>
+						    </div>
+					    </div>
+				    </div>
+				    <button type="submit" class="btn btn-primary btn-sm paddingBottomButton">submit</button>
+				    }
+			    </form>
+		    </div>
+
+		    <div class="tab-pane fade @if(selector==21){show active}" id="day" role="tabpanel" aria-labelledby="day-tab">
+			    <form id="dayPeriodZone">
+				    <div class="switchBackground">
+					    <div class="textSubtitle">Day Period</div>
+					    <div class="custom-control custom-switch">
+						    <input type="checkbox" class="custom-control-input" id="dayPeriodSwitch" onclick="togglePeriodStatus(2)"@if(SHH.getInstance.isPeriod2Active){ checked}>
+						    <label class="custom-control-label" for="dayPeriodSwitch">on</label>
+					    </div>
+				    </div>
+				    @if(SHH.getInstance.isPeriod2Active){
+				    <div class="formGroupBackground periodContainer" id="dayPeriod">
+					    <div class="textTitle">Time Range</div>
+					    <div class="form-group row">
+						    <label for="example-time-input" class="col-2 col-form-label">Start</label>
+						    <div class="col-10">
+							    <input class="form-control" type="time" value="13:45:00" id="startDayPeriod">
+						    </div>
+
+						    <label for="example-time-input" class="col-2 col-form-label">End</label>
+						    <div class="col-10">
+							    <input class="form-control" type="time" value="13:45:00" id="endDayPeriod">
+						    </div>
+					    </div>
+
+					    <div class="textTitle">Heating Zones</div>
+					    <div class="heatingZone">
+						    <div class="textSubtitle">Zone 1</div>
+						    <div class="input-group input-group-sm mb-3 targetTemp">
+							    <input id="zoneTargetTemp" type="number" step=".01" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+							    <div class="input-group-append">
+								    <span class="input-group-text" id="inputGroup-sizing-sm">°C</span>
+							    </div>
+						    </div>
+						    <div class="custom-control custom-switch">
+							    <input type="checkbox" class="custom-control-input" id="heatingZone1">
+							    <label class="custom-control-label" for="heatingZone1">on</label>
+						    </div>
+					    </div>
+				    </div>
+				    <button type="submit" class="btn btn-primary btn-sm paddingBottomButton">submit</button>
+				    }
+			    </form>
+		    </div>
+
+		    <div class="tab-pane fade @if(selector==22){show active}" id="night" role="tabpanel" aria-labelledby="night-tab">
+			    <form id="nightPeriodZone">
+				    <div class="switchBackground">
+					    <div class="textSubtitle">Night Period</div>
+					    <div class="custom-control custom-switch">
+						    <input type="checkbox" class="custom-control-input" id="nightPeriodSwitch" onclick="togglePeriodStatus(3)"@if(SHH.getInstance.isPeriod3Active){ checked}>
+						    <label class="custom-control-label" for="nightPeriodSwitch">on</label>
+					    </div>
+				    </div>
+				    @if(SHH.getInstance.isPeriod3Active){
+				    <div class="formGroupBackground periodContainer" id="nightPeriod">
+					    <div class="textTitle">Time Range</div>
+					    <div class="form-group row">
+						    <label for="example-time-input" class="col-2 col-form-label">Start</label>
+						    <div class="col-10">
+							    <input class="form-control" type="time" value="13:45:00" id="startNightPeriod">
+						    </div>
+
+						    <label for="example-time-input" class="col-2 col-form-label">End</label>
+						    <div class="col-10">
+							    <input class="form-control" type="time" value="13:45:00" id="endNightPeriod">
+						    </div>
+					    </div>
+
+					    <div class="textTitle">Heating Zones</div>
+					    <div class="heatingZone">
+						    <div class="textSubtitle">Zone 1</div>
+						    <div class="input-group input-group-sm mb-3 targetTemp">
+							    <input id="zoneTargetTemp" type="number" step=".01" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+							    <div class="input-group-append">
+								    <span class="input-group-text" id="inputGroup-sizing-sm">°C</span>
+							    </div>
+						    </div>
+						    <div class="custom-control custom-switch">
+							    <input type="checkbox" class="custom-control-input" id="heatingZone1">
+							    <label class="custom-control-label" for="heatingZone1">on</label>
+						    </div>
+					    </div>
+				    </div>
+				    <button type="submit" class="btn btn-primary btn-sm paddingBottomButton">submit</button>
+				    }
+			    </form>
+		    </div>
+
+		    <div class="tab-pane fade @if(selector==23){show active}" id="away" role="tabpanel" aria-labelledby="away-tab">
+			    <form id="awayPeriodZone">
+				    <div class="switchBackground">
+					    <div class="textSubtitle">Away Mode</div>
+					    <div class="custom-control custom-switch">
+						    <input type="checkbox" class="custom-control-input" id="awayPeriodSwitch">
+						    <label class="custom-control-label" for="awayPeriodSwitch">on</label>
+					    </div>
+				    </div>
+				    <div class="formGroupBackground periodContainer" id="awayPeriod">
+					    <div class="textTitle">Seasons Temperature</div>
+					    <div class="paramSeasonContainer">
+						    <div class="textSubtitle">Summer</div>
+						    <div class="input-group">
+							    <input id="awaySummerTempPeriod" type="number" step=".01" class="form-control">
+							    <div class="input-group-append">
+								    <span class="input-group-text">°C</span>
+							    </div>
+						    </div>
+					    </div>
+
+					    <div class="paramSeasonContainer">
+						    <div class="textSubtitle">Winter</div>
+						    <div class="input-group">
+							    <input id="awayWinterTempPeriod" type="number" step=".01" class="form-control">
+							    <div class="input-group-append">
+								    <span class="input-group-text">°C</span>
+							    </div>
+						    </div>
+					    </div>
+				    </div>
+				    <button type="submit" class="btn btn-primary btn-sm paddingBottomButton">submit</button>
+			    </form>
+		    </div>
+	    </div>
     </div>
 </div>
-
-@*    PERIODS TABS CONTENT     *@
-<div class="tab-content mt-2" id="periodsTabContent">
-    <div class="tab-pane fade @if(selector==20){show active}" id="morning" role="tabpanel" aria-labelledby="morning-tab">
-        <form id="morningPeriodForm">
-            <div class="switchBackground">
-                <div class="textSubtitle">Morning Period</div>
-                <div class="custom-control custom-switch">
-                    <input type="checkbox" class="custom-control-input" id="morningPeriodSwitch">
-                    <label class="custom-control-label" for="morningPeriodSwitch">on</label>
-                </div>
-            </div>
-            <div class="formGroupBackground periodContainer" id="morningPeriod">
-                <div class="textTitle">Time Range</div>
-                <div class="form-group row">
-                    <label for="example-time-input" class="col-2 col-form-label">Start</label>
-                    <div class="col-10">
-                        <input class="form-control" type="time" value="13:45:00" id="startMorningPeriod">
-                    </div>
-
-                    <label for="example-time-input" class="col-2 col-form-label">End</label>
-                    <div class="col-10">
-                        <input class="form-control" type="time" value="13:45:00" id="endMorningPeriod">
-                    </div>
-                </div>
-
-                <div class="textTitle">Heating Zones</div>
-                <div class="heatingZone">
-                    <div class="textSubtitle">Zone 1</div>
-                    <div class="input-group input-group-sm mb-3 targetTemp">
-                        <input id="zoneTargetTemp" type="number" step=".01" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
-                        <div class="input-group-append">
-                            <span class="input-group-text" id="inputGroup-sizing-sm">°C</span>
-                        </div>
-                    </div>
-                    <div class="custom-control custom-switch">
-                        <input type="checkbox" class="custom-control-input" id="heatingZone1">
-                        <label class="custom-control-label" for="heatingZone1">on</label>
-                    </div>
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary btn-sm paddingBottomButton">submit</button>
-        </form>
-    </div>
-
-    <div class="tab-pane fade @if(selector==21){show active}" id="day" role="tabpanel" aria-labelledby="day-tab">
-        <form id="dayPeriodZone">
-            <div class="switchBackground">
-                <div class="textSubtitle">Day Period</div>
-                <div class="custom-control custom-switch">
-                    <input type="checkbox" class="custom-control-input" id="dayPeriodSwitch">
-                    <label class="custom-control-label" for="dayPeriodSwitch">on</label>
-                </div>
-            </div>
-            <div class="formGroupBackground periodContainer" id="dayPeriod">
-                <div class="textTitle">Time Range</div>
-                <div class="form-group row">
-                    <label for="example-time-input" class="col-2 col-form-label">Start</label>
-                    <div class="col-10">
-                        <input class="form-control" type="time" value="13:45:00" id="startDayPeriod">
-                    </div>
-
-                    <label for="example-time-input" class="col-2 col-form-label">End</label>
-                    <div class="col-10">
-                        <input class="form-control" type="time" value="13:45:00" id="endDayPeriod">
-                    </div>
-                </div>
-
-                <div class="textTitle">Heating Zones</div>
-                <div class="heatingZone">
-                    <div class="textSubtitle">Zone 1</div>
-                    <div class="input-group input-group-sm mb-3 targetTemp">
-                        <input id="zoneTargetTemp" type="number" step=".01" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
-                        <div class="input-group-append">
-                            <span class="input-group-text" id="inputGroup-sizing-sm">°C</span>
-                        </div>
-                    </div>
-                    <div class="custom-control custom-switch">
-                        <input type="checkbox" class="custom-control-input" id="heatingZone1">
-                        <label class="custom-control-label" for="heatingZone1">on</label>
-                    </div>
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary btn-sm paddingBottomButton">submit</button>
-        </form>
-    </div>
-
-    <div class="tab-pane fade @if(selector==22){show active}" id="night" role="tabpanel" aria-labelledby="night-tab">
-        <form id="nightPeriodZone">
-            <div class="switchBackground">
-                <div class="textSubtitle">Night Period</div>
-                <div class="custom-control custom-switch">
-                    <input type="checkbox" class="custom-control-input" id="nightPeriodSwitch">
-                    <label class="custom-control-label" for="nightPeriodSwitch">on</label>
-                </div>
-            </div>
-            <div class="formGroupBackground periodContainer" id="nightPeriod">
-                <div class="textTitle">Time Range</div>
-                <div class="form-group row">
-                    <label for="example-time-input" class="col-2 col-form-label">Start</label>
-                    <div class="col-10">
-                        <input class="form-control" type="time" value="13:45:00" id="startNightPeriod">
-                    </div>
-
-                    <label for="example-time-input" class="col-2 col-form-label">End</label>
-                    <div class="col-10">
-                        <input class="form-control" type="time" value="13:45:00" id="endNightPeriod">
-                    </div>
-                </div>
-
-                <div class="textTitle">Heating Zones</div>
-                <div class="heatingZone">
-                    <div class="textSubtitle">Zone 1</div>
-                    <div class="input-group input-group-sm mb-3 targetTemp">
-                        <input id="zoneTargetTemp" type="number" step=".01" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
-                        <div class="input-group-append">
-                            <span class="input-group-text" id="inputGroup-sizing-sm">°C</span>
-                        </div>
-                    </div>
-                    <div class="custom-control custom-switch">
-                        <input type="checkbox" class="custom-control-input" id="heatingZone1">
-                        <label class="custom-control-label" for="heatingZone1">on</label>
-                    </div>
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary btn-sm paddingBottomButton">submit</button>
-        </form>
-    </div>
-
-    <div class="tab-pane fade @if(selector==23){show active}" id="away" role="tabpanel" aria-labelledby="away-tab">
-        <form id="awayPeriodZone">
-            <div class="switchBackground">
-                <div class="textSubtitle">Away Mode</div>
-                <div class="custom-control custom-switch">
-                    <input type="checkbox" class="custom-control-input" id="awayPeriodSwitch">
-                    <label class="custom-control-label" for="awayPeriodSwitch">on</label>
-                </div>
-            </div>
-            <div class="formGroupBackground periodContainer" id="awayPeriod">
-                <div class="textTitle">Seasons Temperature</div>
-                <div class="paramSeasonContainer">
-                    <div class="textSubtitle">Summer</div>
-                    <div class="input-group">
-                        <input id="awaySummerTempPeriod" type="number" step=".01" class="form-control">
-                        <div class="input-group-append">
-                            <span class="input-group-text">°C</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="paramSeasonContainer">
-                    <div class="textSubtitle">Winter</div>
-                    <div class="input-group">
-                        <input id="awayWinterTempPeriod" type="number" step=".01" class="form-control">
-                        <div class="input-group-append">
-                            <span class="input-group-text">°C</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary btn-sm paddingBottomButton">submit</button>
-        </form>
-    </div>
-</div>
-
-@* MODAL *@
-<div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="staticBackdropLabel">Add Heating Zone</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <form class="form-group" id='newZoneForm' method="post" action=''>
-                <div class="modal-body">
-                    <div class="userTitle form-inline zoneInlineCenter">
-                        <div>Name:</div>
-                        <input name="name" type="text" class="form-control form-control-sm" id='' placeholder="Zone 1" value='' readonly>
-                    </div>
-
-                    <div class="input-group zoneInlineCenter">
-                        <div class="userTitle">Default Temperature:</div>
-                        <input name="temperature" id="newZoneTemp" type="text" class="form-control" aria-label="New Zone Temperature" aria-describedby="temperatureLabel" style="margin: 0 0 0 18px;" value=''>
-                        <div class="input-group-append">
-                            <span class="input-group-text" id="temperatureLabel">°C</span>
-                        </div>
-                    </div>
-
-                    <div class="userTitle form-inline">
-                        <div>Number of Rooms:</div>
-                        <input name="name" type="text" class="form-control form-control-sm" id='nbRoomsInZone' placeholder="0" value='' readonly>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-

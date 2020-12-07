@@ -1043,6 +1043,100 @@ public class HomeController extends Controller {
     return redirect(routes.HomeController.main(tab));
   }
 
+  public Result editZone(Http.Request request, String tab) {
+    DynamicForm dynamicForm = formFactory.form().bindFromRequest(request);
+    String tempString = dynamicForm.get("temperature");
+    int index = Integer.parseInt(dynamicForm.get("index"));
+    Zone zone = shh.getZones().get(index);
+    if (zone == null) {
+      logger.log("That Zone does not exist.", Logger.MessageType.warning);
+      return redirect(routes.HomeController.main(tab));
+    }
+    int temp;
+    try {
+      temp = parseTemperature(tempString);
+      if (zone.getDefaultTemperature().getTemperature() != temp) {
+        zone.getDefaultTemperature().setTemperature(temp);
+        shh.changePeriod(0);
+        logger.log("Zone " + index + " will now default to " + tempString + " °C.", Logger.MessageType.success);
+      }
+    } catch (NumberFormatException e) {
+      logger.log("Attempted to change temperature to an invalid value.", Logger.MessageType.warning);
+      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));
+    }
+    return redirect(routes.HomeController.main(tab));
+  }
+  public Result createZone(Http.Request request, String tab) {
+    Zone newZone = new Zone();
+    Map<Integer,Zone> zones = shh.getZones();
+    zones.put(zones.size(), newZone);
+    return redirect(routes.HomeController.main(tab));
+  }
+  public Result togglePeriodStatus(Http.Request request, int period) {
+    switch (period) {
+      case 1:
+        shh.togglePeriod1();
+        logger.log("Period 1 is now " + shh.isPeriod1Active() + ".", Logger.MessageType.warning);
+        return redirect(routes.HomeController.main("SHH20"));
+      case 2:
+        shh.togglePeriod1();
+        logger.log("Period 2 is now " + shh.isPeriod2Active() + ".", Logger.MessageType.warning);
+        return redirect(routes.HomeController.main("SHH21"));
+      case 3:
+        shh.togglePeriod3();
+        logger.log("Period 3 is now " + shh.isPeriod3Active() + ".", Logger.MessageType.warning);
+        return redirect(routes.HomeController.main("SHH22"));
+      default:
+        logger.log("That Period does not exist.", Logger.MessageType.warning);
+        return redirect(routes.HomeController.main("SHH20"));
+    }
+  }
+  public Result togglePeriodStatusHelper(){
+    return ok();
+  }
+
+  public Result editLocation(Http.Request request, String tab, String locationName) {
+    DynamicForm dynamicForm = formFactory.form().bindFromRequest(request);
+    int index = Integer.parseInt(dynamicForm.get("index"));
+    Zone zone = shh.getZones().get(index);
+    if (zone == null) {
+      logger.log("That Zone does not exist.", Logger.MessageType.warning);
+      return redirect(routes.HomeController.main(tab));
+    }
+    Location location = shs.getHome().get(locationName);
+    if (location == null) {
+      logger.log("That Room does not exist.", Logger.MessageType.warning);
+      return redirect(routes.HomeController.main(tab));
+    }
+    TemperatureControl temperatureControl = (TemperatureControl) location.getDeviceMap().get("Heat Pump");
+    if (zone != temperatureControl.getZone()) {
+      temperatureControl.setZone(zone);
+      logger.log("Location " + locationName + " is now in Zone " + index + ".", Logger.MessageType.success);
+      return redirect(routes.HomeController.main(tab));
+    }
+
+
+    String tempString = dynamicForm.get("temperature");
+    int temp;
+    try {
+      temp = parseTemperature(tempString);
+      if (zone.getTargetTemperature().getTemperature() != temp) {
+        temperatureControl.setOnManualMode(true);
+        temperatureControl.getTargetTemperature().setTemperature(temp);
+        logger.log("Location " + locationName + " is now overridden to " + tempString + " °C.", Logger.MessageType.success);
+      } else {
+        temperatureControl.setOnManualMode(false);
+        temperatureControl.getTargetTemperature().setTemperature(temp);
+        logger.log("Location " + locationName + " is now back to zone defaults.", Logger.MessageType.success);
+
+      }
+    } catch (NumberFormatException e) {
+      logger.log("Attempted to change temperature to an invalid value.", Logger.MessageType.warning);
+      return badRequest(views.html.index.render(tab, shs, formFactory.form(), request));
+    }
+    return redirect(routes.HomeController.main(tab));
+  }
+
   public Result loadSideBar(Http.Request request, String name) {
     DynamicForm dynamicForm = formFactory.form();
     switch (name) {
@@ -1066,8 +1160,14 @@ public class HomeController extends Controller {
         return ok(views.html.SHHSidebar.render(0, shs, dynamicForm, request));
       case "SHH1":
         return ok(views.html.SHHSidebar.render(1, shs, dynamicForm, request));
-      case "SHH2":
-        return ok(views.html.SHHSidebar.render(2, shs, dynamicForm, request));
+      case "SHH20":
+        return ok(views.html.SHHSidebar.render(20, shs, dynamicForm, request));
+      case "SHH21":
+        return ok(views.html.SHHSidebar.render(21, shs, dynamicForm, request));
+      case "SHH22":
+        return ok(views.html.SHHSidebar.render(22, shs, dynamicForm, request));
+      case "SHH23":
+        return ok(views.html.SHHSidebar.render(23, shs, dynamicForm, request));
     }
     return ok();
   }

@@ -72,7 +72,13 @@
 											  break;
 										  case "SHH1": expansion.load('@routes.HomeController.loadSideBar("SHH1")');
 											  break;
-										  case "SHH2": expansion.load('@routes.HomeController.loadSideBar("SHH2")');
+										  case "SHH20": expansion.load('@routes.HomeController.loadSideBar("SHH20")');
+											  break;
+										  case "SHH21": expansion.load('@routes.HomeController.loadSideBar("SHH21")');
+											  break;
+										  case "SHH22": expansion.load('@routes.HomeController.loadSideBar("SHH22")');
+											  break;
+										  case "SHH23": expansion.load('@routes.HomeController.loadSideBar("SHH23")');
 											  break;
 					          }
 					          e.attr("style", "fill: #fff");
@@ -123,6 +129,14 @@
 			          document.getElementById("room_" + locationName + "Temp").disabled = !document.getElementById("room_" + locationName + "Temp").disabled;
 			          document.getElementById("room_" + locationName + "Zone").disabled = !document.getElementById("room_" + locationName + "Zone").disabled;
 			          document.getElementById("room_" + locationName + "SubmitInfo").classList.toggle('hidden');
+		          }
+
+		          function toggleZoneSettings(zoneName) {
+			          document.getElementById("zone_" + zoneName + "Temp").disabled = !document.getElementById("zone_" + zoneName + "Temp").disabled;
+			          document.getElementById("zone_" + zoneName + "SubmitInfo").classList.toggle('hidden');
+		          }
+		          function togglePeriodStatus(index) {
+		          	window.location.href = '@routes.HomeController.togglePeriodStatusHelper()' + index;
 		          }
 
 		          function toggleLightControl(location, name, status) {
