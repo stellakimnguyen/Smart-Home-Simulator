@@ -31,7 +31,7 @@
   transition: 250ms;
 }
 
-.sidebar > svg, .sidebar > div {
+.sidebar > svg, .sidebar > div, .paddingBottomButton {
   margin-bottom: 15px;
   cursor: pointer;
   transition: 200ms;
@@ -223,6 +223,11 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   right: 0;
 }
 
+.paramSeasonPeriod {
+  width: 100px;
+  margin-left: 10px;
+}
+
 .paramSeasonContainer {
   display: flex;
   align-items: center;
@@ -241,6 +246,25 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   display: flex;
   flex-direction: row;
   align-items: center;
+}
+
+.periodContainer {
+  padding: 15px;
+}
+
+.heatingZone {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5em 1em;
+  background: white;
+  border-radius: 5px;
+}
+
+.targetTemp {
+  width: 100px;
+  margin-bottom: 0 !important;
 }
 
 .metricsTemperature {
