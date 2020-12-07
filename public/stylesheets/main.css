@@ -263,6 +263,12 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   border-radius: 5px;
 }
 
+.zoneInlineCenter {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
 .targetTemp {
   width: 100px;
   margin-bottom: 0 !important;
@@ -412,6 +418,22 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
   float: right;
   margin: 0 15px 15px 0;
+}
+
+.deleteZoneBtn {
+  border-radius: 100px;
+  background: #FF432E;
+  padding: 5px;
+  height: 22px;
+  width: 22px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 250ms;
+  cursor: pointer;
+  margin-left: calc(100% - 22px);
+  margin-top: 10px;
 }
 
 .deleteExpanded {

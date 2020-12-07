@@ -1,1 +1,30 @@
 @()
+
+<form class="form-group" id='newZoneForm' method="post" action=''>
+    <div class="formGroupBackground periodContainer" id="zoneBackground">
+        <div class="userTitle form-inline">
+            <div>Name:</div>
+            <input name="name" type="text" class="form-control form-control-sm" id='' placeholder="Zone 1" value='' readonly>
+        </div>
+
+        <div class="input-group zoneInlineCenter">
+            <div class="userTitle">Default Temperature:</div>
+            <input name="temperature" id="newZoneTemp" type="text" class="form-control" aria-label="New Zone Temperature" aria-describedby="temperatureLabel" style="margin: 0 0 0 18px;" value=''>
+            <div class="input-group-append">
+                <span class="input-group-text" id="temperatureLabel">°C</span>
+            </div>
+        </div>
+
+        <div class="userTitle form-inline">
+            <div>Number of Rooms:</div>
+            <input name="name" type="text" class="form-control form-control-sm" id='nbRoomsInZone' placeholder="0" value='' readonly>
+        </div>
+
+        <div id='@("zone_" + /*zone.getId + */ "DeleteButton")' onclick='' class="deleteZoneBtn"> @* onclick='confirmDelete(_,_) *@
+            <div id='@("zone_" + /*zone.getId + */ "deleteTitle")' class="deleteTitle hidden">delete</div>
+            <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash-fill" fill="white" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5a.5.5 0 0 0-1 0v7a.5.5 0 0 0 1 0v-7z"/>
+            </svg>
+        </div>
+    </div>
+</form>
